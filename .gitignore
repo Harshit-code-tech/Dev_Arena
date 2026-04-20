@@ -1,5 +1,7 @@
 # Virtual environment
 .venv/
+node_modules/
+npm-debug.log*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
