@@ -1,0 +1,54 @@
+# Virtual environment
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+docs/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Pyre type checker
+.pyre/
+
+# MyPy
+.mypy_cache/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.*
+
+# Database
+*.sqlite3
+
+# Logs
+.log
+
+# macOS
+.DS_Store
+
+# Ruff cache
+.ruff_cache/
