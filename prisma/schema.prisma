@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -28,6 +29,7 @@ model User {
 }
 
 model DSALog {
+  checker Int @default(0)
   id              String   @id @default(uuid())
   userId          String   @map("user_id")
   problemName     String   @map("problem_name")
