@@ -54,3 +54,4 @@ htmlcov/
 
 # Ruff cache
 .ruff_cache/
+/src/generated/prisma

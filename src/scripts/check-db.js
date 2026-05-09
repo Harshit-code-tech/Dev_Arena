@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { pool, testDatabaseConnection } = require("../db");
+const { prisma, testDatabaseConnection } = require("../db");
 
 async function run() {
     try {
@@ -11,7 +11,7 @@ async function run() {
         console.error("Database connection failed:", error.message);
         process.exitCode = 1;
     } finally {
-        await pool.end();
+        await prisma.$disconnect();
     }
 }
 
