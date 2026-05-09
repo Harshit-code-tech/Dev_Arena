@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(uuid())
+  name             String
+  email            String            @unique
+  passwordHash     String            @map("password_hash")
+  createdAt        DateTime          @default(now()) @map("created_at")
+
+  dsaLogs          DSALog[]
+  fullstackLogs    FullstackLog[]
+  projects         Project[]
+  projectLogs      ProjectLog[]
+  practiceLogs     PracticeLog[]
+  weeklyScores     WeeklyScore[]
+  challengeResults ChallengeResult[]
+  activities       Activity[]
+  notifications    Notification[]
+  userAchievements UserAchievement[]
+
+  @@map("users")
+}
+
+model DSALog {
+  checker Int @default(0)
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  problemName     String   @map("problem_name")
+  url             String?
+  difficulty      String   // "Easy", "Medium", "Hard"
+  timeTaken       Int      @map("time_taken") // in minutes
+  timeComplexity  String?  @map("time_complexity")
+  spaceComplexity String?  @map("space_complexity")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dsa_logs")
+}
+
+model FullstackLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  type        String   // "Learning", "Building"
+  description String?
+  timeSpent   Int      @map("time_spent") // in minutes
+  proofLink   String?  @map("proof_link")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fullstack_logs")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  domain      String   // "Fullstack", "App", "AI", "Other"
+  status      String   // "In Progress", "Completed"
+  startDate   DateTime @map("start_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs       ProjectLog[]
+  milestones Milestone[]
+
+  @@map("projects")
+}
+
+model ProjectLog {
+  id          String   @id @default(uuid())
+  projectId   String   @map("project_id")
+  userId      String   @map("user_id")
+  description String
+  timeSpent   Int      @map("time_spent") // in minutes
+  proofLink   String?  @map("proof_link")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("project_logs")
+}
+
+model Milestone {
+  id          String   @id @default(uuid())
+  projectId   String   @map("project_id")
+  title       String
+  description String?
+  status      String   // "Pending", "Completed"
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("milestones")
+}
+
+model PracticeLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // "DSA revision", "Concept explanation"
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("practice_logs")
+}
+
+model WeeklyScore {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  weekStart       DateTime @map("week_start")
+  dsaPoints       Int      @default(0) @map("dsa_points")
+  fullstackPoints Int      @default(0) @map("fullstack_points")
+  projectPoints   Int      @default(0) @map("project_points")
+  practicePoints  Int      @default(0) @map("practice_points")
+  challengePoints Int      @default(0) @map("challenge_points")
+  totalScore      Int      @default(0) @map("total_score")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@map("weekly_scores")
+}
+
+model ChallengeResult {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  weekStart      DateTime @map("week_start")
+  score          Int      @default(0)
+  problemsSolved Int      @default(0) @map("problems_solved")
+  completionTime Int?     @map("completion_time") // in minutes
+  rank           Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@map("challenge_results")
+}
+
+model Activity {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  date     DateTime
+  isActive Boolean  @default(true) @map("is_active")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("activity")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  message   String
+  type      String   // "reminder", "summary", "challenge", "system"
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Achievement {
+  id             String   @id @default(uuid())
+  title          String
+  category       String   // "DSA", "Fullstack", "Project", "Consistency"
+  conditionType  String   @map("condition_type")
+  conditionValue Int      @map("condition_value")
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  achievementId String   @map("achievement_id")
+  unlockedAt    DateTime @default(now()) @map("unlocked_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
