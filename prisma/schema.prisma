@@ -7,12 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS — enforced at the database level, not just application level
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Difficulty {
+  Easy
+  Medium
+  Hard
+}
+
+enum FullstackType {
+  Learning
+  Building
+}
+
+enum PracticeType {
+  DSA_Revision
+  Concept_Explanation
+}
+
+enum ProjectDomain {
+  Fullstack
+  App
+  AI
+  Other
+}
+
+enum ProjectStatus {
+  In_Progress
+  Completed
+}
+
+enum MilestoneStatus {
+  Pending
+  Completed
+}
+
+enum NotificationType {
+  reminder
+  summary
+  challenge
+  system
+}
+
+enum AchievementCategory {
+  DSA
+  Fullstack
+  Project
+  Consistency
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────────────────────────────────────
+
 model User {
-  id               String            @id @default(uuid())
-  name             String
-  email            String            @unique
-  passwordHash     String            @map("password_hash")
-  createdAt        DateTime          @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // ── Profile ───────────────────────────────────────────────
+  avatarUrl    String?  @map("avatar_url")
+  githubUrl    String?  @map("github_url")
+  linkedinUrl  String?  @map("linkedin_url")
+  portfolioUrl String?  @map("portfolio_url")
+
+  // ── Auth ──────────────────────────────────────────────────
+  isEmailVerified        Boolean   @default(false) @map("is_email_verified")
+  emailOtp               String?   @map("email_otp")
+  emailOtpExpiresAt      DateTime? @map("email_otp_expires_at")
+  passwordResetToken     String?   @map("password_reset_token")
+  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
 
   dsaLogs          DSALog[]
   fullstackLogs    FullstackLog[]
@@ -29,52 +97,60 @@ model User {
 }
 
 model DSALog {
-  checker Int @default(0)
-  id              String   @id @default(uuid())
-  userId          String   @map("user_id")
-  problemName     String   @map("problem_name")
+  id              String     @id @default(uuid())
+  userId          String     @map("user_id")
+  problemName     String     @map("problem_name")
   url             String?
-  difficulty      String   // "Easy", "Medium", "Hard"
-  timeTaken       Int      @map("time_taken") // in minutes
-  timeComplexity  String?  @map("time_complexity")
-  spaceComplexity String?  @map("space_complexity")
+  difficulty      Difficulty
+  timeTaken       Int        @map("time_taken") // in minutes
+  timeComplexity  String?    @map("time_complexity")
+  spaceComplexity String?    @map("space_complexity")
   notes           String?
-  createdAt       DateTime @default(now()) @map("created_at")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at") // needed for 24-hour edit rule
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Enforce: one URL per user (prevents duplicate problem entries)
+  // NULLs are exempt — PostgreSQL treats each NULL as distinct
+  @@unique([userId, url])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("dsa_logs")
 }
 
 model FullstackLog {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
+  id          String        @id @default(uuid())
+  userId      String        @map("user_id")
   title       String
-  type        String   // "Learning", "Building"
+  type        FullstackType
   description String?
-  timeSpent   Int      @map("time_spent") // in minutes
-  proofLink   String?  @map("proof_link")
-  createdAt   DateTime @default(now()) @map("created_at")
+  timeSpent   Int           @map("time_spent") // in minutes
+  proofLink   String?       @map("proof_link")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at") // needed for 24-hour edit rule
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt(sort: Desc)])
   @@map("fullstack_logs")
 }
 
 model Project {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
+  id          String        @id @default(uuid())
+  userId      String        @map("user_id")
   title       String
   description String?
-  domain      String   // "Fullstack", "App", "AI", "Other"
-  status      String   // "In Progress", "Completed"
-  startDate   DateTime @map("start_date")
-  createdAt   DateTime @default(now()) @map("created_at")
+  domain      ProjectDomain
+  status      ProjectStatus @default(In_Progress)
+  startDate   DateTime      @map("start_date")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs       ProjectLog[]
   milestones Milestone[]
 
+  @@index([userId, status])
   @@map("projects")
 }
 
@@ -86,101 +162,119 @@ model ProjectLog {
   timeSpent   Int      @map("time_spent") // in minutes
   proofLink   String?  @map("proof_link")
   createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at") // needed for 24-hour edit rule
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([projectId, createdAt(sort: Desc)])
   @@map("project_logs")
 }
 
 model Milestone {
-  id          String   @id @default(uuid())
-  projectId   String   @map("project_id")
+  id          String          @id @default(uuid())
+  projectId   String          @map("project_id")
   title       String
   description String?
-  status      String   // "Pending", "Completed"
-  createdAt   DateTime @default(now()) @map("created_at")
+  status      MilestoneStatus @default(Pending)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@index([projectId, status])
   @@map("milestones")
 }
 
 model PracticeLog {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  type      String   // "DSA revision", "Concept explanation"
+  id        String       @id @default(uuid())
+  userId    String       @map("user_id")
+  type      PracticeType
   notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at") // needed for 24-hour edit rule
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt(sort: Desc)])
   @@map("practice_logs")
 }
 
 model WeeklyScore {
   id              String   @id @default(uuid())
   userId          String   @map("user_id")
-  weekStart       DateTime @map("week_start")
+  weekStart       DateTime @map("week_start") @db.Date // Monday 00:00 IST
   dsaPoints       Int      @default(0) @map("dsa_points")
   fullstackPoints Int      @default(0) @map("fullstack_points")
   projectPoints   Int      @default(0) @map("project_points")
   practicePoints  Int      @default(0) @map("practice_points")
   challengePoints Int      @default(0) @map("challenge_points")
   totalScore      Int      @default(0) @map("total_score")
+  // Denormalized for fast leaderboard tie-breaking (avoids COUNT join on activity table)
+  activeDays      Int      @default(0) @map("active_days")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekStart])
+  // Index: leaderboard queries by week, sorted by score then active days
+  @@index([weekStart, totalScore(sort: Desc), activeDays(sort: Desc)])
   @@map("weekly_scores")
 }
 
 model ChallengeResult {
   id             String   @id @default(uuid())
   userId         String   @map("user_id")
-  weekStart      DateTime @map("week_start")
+  weekStart      DateTime @map("week_start") @db.Date
   score          Int      @default(0)
   problemsSolved Int      @default(0) @map("problems_solved")
   completionTime Int?     @map("completion_time") // in minutes
   rank           Int?
+  submissionLink String?  @map("submission_link") // GitHub link or upload proof
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekStart])
+  @@index([weekStart, score(sort: Desc)])
   @@map("challenge_results")
 }
 
 model Activity {
   id       String   @id @default(uuid())
   userId   String   @map("user_id")
-  date     DateTime
+  date     DateTime @db.Date // date only — no time component
   isActive Boolean  @default(true) @map("is_active")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+  // Index: heatmap queries a user's activity over a date range
+  @@index([userId, date(sort: Desc)])
   @@map("activity")
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
   message   String
-  type      String   // "reminder", "summary", "challenge", "system"
-  isRead    Boolean  @default(false) @map("is_read")
-  createdAt DateTime @default(now()) @map("created_at")
+  type      NotificationType
+  isRead    Boolean          @default(false) @map("is_read")
+  link      String?          // redirect URL when notification is clicked
+  createdAt DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Index: notification bell always loads unread first, newest first
+  @@index([userId, isRead, createdAt(sort: Desc)])
   @@map("notifications")
 }
 
 model Achievement {
-  id             String   @id @default(uuid())
-  title          String
-  category       String   // "DSA", "Fullstack", "Project", "Consistency"
-  conditionType  String   @map("condition_type")
-  conditionValue Int      @map("condition_value")
+  id             String              @id @default(uuid())
+  title          String              @unique
+  category       AchievementCategory
+  conditionType  String              @map("condition_type")
+  conditionValue Int                 @map("condition_value")
 
   userAchievements UserAchievement[]
 
@@ -197,5 +291,6 @@ model UserAchievement {
   achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
+  @@index([userId, unlockedAt(sort: Desc)])
   @@map("user_achievements")
 }
