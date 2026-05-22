@@ -69,6 +69,19 @@ model User {
   passwordHash String   @map("password_hash")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  // ── Profile ───────────────────────────────────────────────
+  avatarUrl    String?  @map("avatar_url")
+  githubUrl    String?  @map("github_url")
+  linkedinUrl  String?  @map("linkedin_url")
+  portfolioUrl String?  @map("portfolio_url")
+
+  // ── Auth ──────────────────────────────────────────────────
+  isEmailVerified        Boolean   @default(false) @map("is_email_verified")
+  emailOtp               String?   @map("email_otp")
+  emailOtpExpiresAt      DateTime? @map("email_otp_expires_at")
+  passwordResetToken     String?   @map("password_reset_token")
+  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+
   dsaLogs          DSALog[]
   fullstackLogs    FullstackLog[]
   projects         Project[]
@@ -98,7 +111,9 @@ model DSALog {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Index: fetching a user's logs sorted by date is the most common query
+  // Enforce: one URL per user (prevents duplicate problem entries)
+  // NULLs are exempt — PostgreSQL treats each NULL as distinct
+  @@unique([userId, url])
   @@index([userId, createdAt(sort: Desc)])
   @@map("dsa_logs")
 }
@@ -195,13 +210,15 @@ model WeeklyScore {
   practicePoints  Int      @default(0) @map("practice_points")
   challengePoints Int      @default(0) @map("challenge_points")
   totalScore      Int      @default(0) @map("total_score")
+  // Denormalized for fast leaderboard tie-breaking (avoids COUNT join on activity table)
+  activeDays      Int      @default(0) @map("active_days")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekStart])
-  // Index: leaderboard always queries by week, sorted by total score
-  @@index([weekStart, totalScore(sort: Desc)])
+  // Index: leaderboard queries by week, sorted by score then active days
+  @@index([weekStart, totalScore(sort: Desc), activeDays(sort: Desc)])
   @@map("weekly_scores")
 }
 
@@ -213,6 +230,7 @@ model ChallengeResult {
   problemsSolved Int      @default(0) @map("problems_solved")
   completionTime Int?     @map("completion_time") // in minutes
   rank           Int?
+  submissionLink String?  @map("submission_link") // GitHub link or upload proof
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -241,6 +259,7 @@ model Notification {
   message   String
   type      NotificationType
   isRead    Boolean          @default(false) @map("is_read")
+  link      String?          // redirect URL when notification is clicked
   createdAt DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
