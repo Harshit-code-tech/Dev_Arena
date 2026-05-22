@@ -1,4 +1,3 @@
-// TODO: implement by backend team
 // Scoring: Revision = 2pt, Concept explanation = 3pt
 // Rules: edit/delete only within 24 hours of creation
 

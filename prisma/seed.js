@@ -99,9 +99,6 @@ async function main() {
     for (const achievement of achievements) {
         const record = await prisma.achievement.upsert({
             where: {
-                // We need a unique field to upsert on.
-                // title is the natural unique identifier here.
-                // See schema note below.
                 title: achievement.title,
             },
             update: {

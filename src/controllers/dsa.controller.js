@@ -1,4 +1,3 @@
-// TODO: implement by backend team
 // Scoring: Easy = 1pt, Medium = 3pt, Hard = 5pt
 // Rules: edit/delete only within 24 hours of creation
 

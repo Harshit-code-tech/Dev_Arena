@@ -1,4 +1,3 @@
-// TODO: implement by backend team
 // Scoring: Work session = 3pt, Milestone completed = 8pt, Project completed = 20pt
 // Rules: edit/delete logs only within 24 hours of creation
 

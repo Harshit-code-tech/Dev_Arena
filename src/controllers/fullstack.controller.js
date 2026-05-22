@@ -1,4 +1,3 @@
-// TODO: implement by backend team
 // Scoring: Learning = 2pt, Building = 4pt
 // Rules: edit/delete only within 24 hours of creation
 

@@ -1,4 +1,3 @@
-// TODO: implement by backend team
 // Weekly challenge: conducted once per week (recommended: Sunday)
 // Ranking: 1) Problems solved  2) Completion time  3) Code correctness
 

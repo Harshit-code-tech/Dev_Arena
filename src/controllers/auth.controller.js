@@ -1,4 +1,3 @@
-// TODO: implement by auth team
 // Required: POST /register, POST /login, POST /forgot-password
 
 exports.register = async (req, res) => {
