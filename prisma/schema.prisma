@@ -29,7 +29,6 @@ model User {
 }
 
 model DSALog {
-  checker Int @default(0)
   id              String   @id @default(uuid())
   userId          String   @map("user_id")
   problemName     String   @map("problem_name")
@@ -177,7 +176,7 @@ model Notification {
 
 model Achievement {
   id             String   @id @default(uuid())
-  title          String
+  title          String   @unique
   category       String   // "DSA", "Fullstack", "Project", "Consistency"
   conditionType  String   @map("condition_type")
   conditionValue Int      @map("condition_value")
