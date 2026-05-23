@@ -25,18 +25,15 @@ function Home() {
 
         <div className="hero-actions">
           <button
-            className={
-              location.pathname === "/signup" ? "cta-btn active-cta" : "cta-btn"
-            }
+            className="cta-btn"
             type="button"
             onClick={() => navigate("/signup")}
           >
             Start building
           </button>
 
-          <button className={
-              location.pathname === "/signup" ? "cta-btn secondary active-cta" : "cta-btn secondary"
-            }
+          <button
+            className="cta-btn secondary"
             type="button"
             onClick={() => navigate("/about")}
           >
