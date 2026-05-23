@@ -6,8 +6,8 @@ const router = Router();
 
 router.use(protect);
 
-// GET /api/leaderboard          → current week's leaderboard
-// GET /api/leaderboard/history  → past week scores (future feature)
+// GET /api/leaderboard         -> Get current week's leaderboard
+// GET /api/leaderboard/history  -> Get past week scores (future feature)
 router.get("/", leaderboardController.getWeeklyLeaderboard);
 router.get("/history", leaderboardController.getHistory);
 

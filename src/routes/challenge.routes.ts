@@ -6,8 +6,8 @@ const router = Router();
 
 router.use(protect);
 
-// GET  /api/challenge          → get current week's challenge results
-// POST /api/challenge/submit   → submit challenge result
+// GET  /api/challenge         -> Get current week's challenge results
+// POST /api/challenge/submit  -> Submit challenge result
 router.get("/", challengeController.getResults);
 router.post("/submit", challengeController.submitResult);
 
