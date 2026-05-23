@@ -6,6 +6,8 @@
   font-family: "Segoe UI", system-ui, sans-serif;
   color: #f5f7fb;
   background: #070912;
+  --text-color: #f5f7fb;
+  --bg-color: #070912;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
