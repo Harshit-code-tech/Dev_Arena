@@ -30,19 +30,26 @@ function Header() {
       </button>
 
       {/* Mobile Menu Icon */}
-      <div
+      <button
+        type="button"
         className={`bx bx-menu ${menuOpen ? "bx-x" : ""}`}
         id="menu-icon"
         onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={menuOpen}
+        aria-controls="primary-navigation"
       >
         <span
           className="animate"
           style={{ "--i": 2 } as React.CSSProperties}
         ></span>
-      </div>
+      </button>
 
       {/* Navigation */}
-      <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
+      <nav
+        id="primary-navigation"
+        className={`nav-links ${menuOpen ? "active" : ""}`}
+      >
         {navLinks.map((link) => (
           <button
             key={link.path}
