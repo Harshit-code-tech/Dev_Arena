@@ -1,10 +1,16 @@
+import type { Request, Response, NextFunction } from "express";
+
+interface HttpError extends Error {
+    statusCode?: number;
+}
+
 /**
  * Global error handler middleware.
- * Must be registered LAST in server.js using: app.use(errorHandler)
+ * Must be registered LAST in server.ts using: app.use(errorHandler)
  *
  * Catches any error passed via next(err) from route handlers.
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err: HttpError, req: Request, res: Response, _next: NextFunction): void => {
     console.error(`[ERROR] ${req.method} ${req.url} →`, err.message);
 
     const statusCode = err.statusCode || 500;
@@ -17,4 +23,4 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 
-module.exports = errorHandler;
+export default errorHandler;

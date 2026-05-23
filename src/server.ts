@@ -1,23 +1,22 @@
-require("dotenv").config();
+import "dotenv/config";
+import cors from "cors";
+import express, { Request, Response } from "express";
+import helmet from "helmet";
+import morgan from "morgan";
 
-const cors = require("cors");
-const express = require("express");
-const helmet = require("helmet");
-const morgan = require("morgan");
-
-const { testDatabaseConnection } = require("./db");
-const errorHandler = require("./middleware/errorHandler");
+import { testDatabaseConnection } from "./db";
+import errorHandler from "./middleware/errorHandler";
 
 // ── Routes ────────────────────────────────────────────────────
-const authRoutes        = require("./routes/auth.routes");
-const dsaRoutes         = require("./routes/dsa.routes");
-const fullstackRoutes   = require("./routes/fullstack.routes");
-const projectRoutes     = require("./routes/project.routes");
-const practiceRoutes    = require("./routes/practice.routes");
-const leaderboardRoutes = require("./routes/leaderboard.routes");
-const challengeRoutes   = require("./routes/challenge.routes");
+import authRoutes from "./routes/auth.routes";
+import dsaRoutes from "./routes/dsa.routes";
+import fullstackRoutes from "./routes/fullstack.routes";
+import projectRoutes from "./routes/project.routes";
+import practiceRoutes from "./routes/practice.routes";
+import leaderboardRoutes from "./routes/leaderboard.routes";
+import challengeRoutes from "./routes/challenge.routes";
 
-const app  = express();
+const app = express();
 const port = Number(process.env.PORT) || 4000;
 
 // ── Global middleware ─────────────────────────────────────────
@@ -27,21 +26,21 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // ── Health check ──────────────────────────────────────────────
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok", service: "dev-arena-backend" });
 });
 
 // ── API routes ────────────────────────────────────────────────
-app.use("/api/auth",        authRoutes);
-app.use("/api/dsa",         dsaRoutes);
-app.use("/api/fullstack",   fullstackRoutes);
-app.use("/api/projects",    projectRoutes);
-app.use("/api/practice",    practiceRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/dsa", dsaRoutes);
+app.use("/api/fullstack", fullstackRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/practice", practiceRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/challenge",   challengeRoutes);
+app.use("/api/challenge", challengeRoutes);
 
 // ── 404 fallback ──────────────────────────────────────────────
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
     res.status(404).json({ message: "Route not found" });
 });
 
@@ -49,7 +48,7 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // ── Start ─────────────────────────────────────────────────────
-async function startServer() {
+async function startServer(): Promise<void> {
     try {
         const currentTime = await testDatabaseConnection();
         console.log("Database connected:", currentTime);
@@ -57,11 +56,11 @@ async function startServer() {
         app.listen(port, () => {
             console.log(`API server listening on http://localhost:${port}`);
         });
-    } catch (error) {
-        console.error("Failed to start server:", error.message);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Failed to start server:", message);
         process.exit(1);
     }
 }
 
 startServer();
-

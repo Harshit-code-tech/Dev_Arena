@@ -2,15 +2,15 @@
   "name": "dev_arena",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "src/server.ts",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "db:check": "node src/scripts/check-db.js",
-    "db:seed": "node prisma/seed.js",
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "db:check": "tsx src/scripts/check-db.ts",
+    "db:seed": "tsx prisma/seed.js",
     "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate",
     "db:studio": "npx prisma studio",
@@ -37,13 +37,18 @@
     "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^25.9.1",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
     "nodemon": "^3.1.14",
     "prisma": "^6.19.3",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"
   }
