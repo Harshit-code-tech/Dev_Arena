@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const fullstackController = require("../controllers/fullstack.controller");
-const { protect } = require("../middleware/auth.middleware");
+import { Router } from "express";
+import * as fullstackController from "../controllers/fullstack.controller";
+import { protect } from "../middleware/auth.middleware";
+
+const router = Router();
 
 router.use(protect);
 
@@ -14,4 +15,4 @@ router.post("/", fullstackController.createLog);
 router.put("/:id", fullstackController.updateLog);
 router.delete("/:id", fullstackController.deleteLog);
 
-module.exports = router;
+export default router;

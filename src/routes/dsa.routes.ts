@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const dsaController = require("../controllers/dsa.controller");
-const { protect } = require("../middleware/auth.middleware");
+import { Router } from "express";
+import * as dsaController from "../controllers/dsa.controller";
+import { protect } from "../middleware/auth.middleware";
+
+const router = Router();
 
 // All routes below require the user to be logged in
 router.use(protect);
@@ -15,4 +16,4 @@ router.post("/", dsaController.createLog);
 router.put("/:id", dsaController.updateLog);
 router.delete("/:id", dsaController.deleteLog);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const challengeController = require("../controllers/challenge.controller");
-const { protect } = require("../middleware/auth.middleware");
+import { Router } from "express";
+import * as challengeController from "../controllers/challenge.controller";
+import { protect } from "../middleware/auth.middleware";
+
+const router = Router();
 
 router.use(protect);
 
@@ -10,4 +11,4 @@ router.use(protect);
 router.get("/", challengeController.getResults);
 router.post("/submit", challengeController.submitResult);
 
-module.exports = router;
+export default router;

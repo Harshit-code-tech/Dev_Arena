@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const leaderboardController = require("../controllers/leaderboard.controller");
-const { protect } = require("../middleware/auth.middleware");
+import { Router } from "express";
+import * as leaderboardController from "../controllers/leaderboard.controller";
+import { protect } from "../middleware/auth.middleware";
+
+const router = Router();
 
 router.use(protect);
 
@@ -10,4 +11,4 @@ router.use(protect);
 router.get("/", leaderboardController.getWeeklyLeaderboard);
 router.get("/history", leaderboardController.getHistory);
 
-module.exports = router;
+export default router;

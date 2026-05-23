@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const practiceController = require("../controllers/practice.controller");
-const { protect } = require("../middleware/auth.middleware");
+import { Router } from "express";
+import * as practiceController from "../controllers/practice.controller";
+import { protect } from "../middleware/auth.middleware";
+
+const router = Router();
 
 router.use(protect);
 
@@ -14,4 +15,4 @@ router.post("/", practiceController.createLog);
 router.put("/:id", practiceController.updateLog);
 router.delete("/:id", practiceController.deleteLog);
 
-module.exports = router;
+export default router;
