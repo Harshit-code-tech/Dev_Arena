@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/about.css";
 
-function about() {
+function About() {
   const navigate = useNavigate();
   return (
     <main className="about-page">
@@ -89,4 +89,4 @@ function about() {
     </main>
   );
 }
-export default about;
+export default About;
