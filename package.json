@@ -9,9 +9,17 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "db:init": "npx neonctl@latest init",
     "db:check": "node src/scripts/check-db.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:seed": "node prisma/seed.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run client:build",
+    "preview": "npm run client:preview",
+    "client:dev": "vite",
+    "client:build": "vite build",
+    "client:preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -23,11 +31,20 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
     "nodemon": "^3.1.14",
-    "prisma": "^6.19.3"
+    "prisma": "^6.19.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14"
   }
 }
