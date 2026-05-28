@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/about.css";
+import "../styles/About.css";
 
-function About() {
+function about() {
   const navigate = useNavigate();
   return (
     <main className="about-page">
@@ -10,33 +10,14 @@ function About() {
             <h1>
               Building the future of
               <br />
-              developer collaboration
+              developer collaboration.
             </h1>
             <p>
-              DevArena is an AI-powered social media management platform built
-              for developers, creators, and teams who want to grow their online
-              presence without the manual grind. We combine smart scheduling,
-              analytics, and community tools — all in one clean interface.
+              DevArena is a community-driven platform where developers practice skills, showcase projects, write technical content, and grow through real-world learning. Unlike traditional coding platforms, DevArena combines collaboration, visibility, and progress tracking to help developers build stronger portfolios, improve consistently, and stand out in the tech community.
             </p>
           </div>
 
           <div className="about-grid">
-            <div className="about-feature">
-              <div className="icon">⚡</div>
-              <h3>AI-powered scheduling</h3>
-              <p>
-                Our AI picks the perfect time to post based on your audience's
-                activity patterns.
-              </p>
-            </div>
-            <div className="about-feature">
-              <div className="icon">📊</div>
-              <h3>Deep analytics</h3>
-              <p>
-                Understand what's working with post-level performance breakdowns
-                across all platforms.
-              </p>
-            </div>
             <div className="about-feature">
               <div className="icon">🤝</div>
               <h3>Community first</h3>
@@ -77,11 +58,7 @@ function About() {
               Our support team is available 24/7. Browse our FAQs, send us a
               message, or chat live.
             </p>
-            <button
-              type="button"
-              className="support-btn"
-              onClick={() => navigate('/support')}
-            >
+            <button className="support-btn" onClick={() => navigate('/support')}>
               Go to support →
             </button>
           </div>
@@ -89,4 +66,4 @@ function About() {
     </main>
   );
 }
-export default About;
+export default about;
