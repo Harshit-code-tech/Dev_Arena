@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "../styles/header.css";
+import "../styles/Header.css";
 
 // Defining Nav links
 const navLinks = [
@@ -30,26 +30,19 @@ function Header() {
       </button>
 
       {/* Mobile Menu Icon */}
-      <button
-        type="button"
+      <div
         className={`bx bx-menu ${menuOpen ? "bx-x" : ""}`}
         id="menu-icon"
         onClick={() => setMenuOpen(!menuOpen)}
-        aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-        aria-expanded={menuOpen}
-        aria-controls="primary-navigation"
       >
         <span
           className="animate"
           style={{ "--i": 2 } as React.CSSProperties}
         ></span>
-      </button>
+      </div>
 
       {/* Navigation */}
-      <nav
-        id="primary-navigation"
-        className={`nav-links ${menuOpen ? "active" : ""}`}
-      >
+      <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
         {navLinks.map((link) => (
           <button
             key={link.path}
