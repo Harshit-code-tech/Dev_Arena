@@ -11,7 +11,7 @@
   background: rgba(10, 14, 28, 0.62);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
 }
 
 .logo {
@@ -53,19 +53,7 @@
   animation-delay: calc(0.3s * var(--i));
 }
 
-@keyframes showRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@media (max-width: 830px) {
+@media (max-width: 850px) {
   .header {
     position: sticky;
     top: 16px;
@@ -79,7 +67,7 @@
     background: rgba(10, 14, 28, 0.62);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
   }
 
   #menu-icon {
@@ -149,7 +137,7 @@
 
   .nav-links.active button {
     transform: translateX(0);
-    transition-delay: 0.25s;
+    transition-delay: 0s;
   }
 }
 
@@ -167,7 +155,7 @@
     background: rgba(10, 14, 28, 0.62);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
   }
 
   .logo {
@@ -257,6 +245,14 @@
   }
 }
 
+@media (min-width: 832px) and (max-width: 10000px) {
+  .nav-links {
+    margin-left: 70px;
+    display: flex;
+    gap: 4px;
+  }
+}
+
 .nav-links {
   display: flex;
   gap: 4px;
@@ -307,7 +303,7 @@
 }
 
 .auth-btn.active-auth:hover {
-  background: #bae6fd;
+  background: #ddf3ff;
   color: #07111f;
 }
 

@@ -1,7 +1,12 @@
 import Header from './components/Header'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import About from './pages/about'
+import About from './pages/About'
+import MobileLogin from './Auth/mobileAuth/MobileLogin'
+import DesktopLogin from './Auth/desktopAuth/DesktopLogin'
+import MobileSignup from './Auth/mobileAuth/MobileSignup'
+import DesktopSignup from './Auth/desktopAuth/DesktopSignup'
+import { Toaster } from "react-hot-toast";
 
 function Placeholder({ name }: { name: string }) {
   return (
@@ -12,6 +17,8 @@ function Placeholder({ name }: { name: string }) {
   )
 }
 
+// const isMobile = window.innerWidth < 768;
+
 function App() {
   return (
     <div className='app'>
@@ -21,10 +28,19 @@ function App() {
         <Route path="/templates" element={<Placeholder name="Templates" />} />
         <Route path="/blog" element={<Placeholder name="Blog" />} />
         <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Placeholder name="Login" />} />
-        <Route path="/signup" element={<Placeholder name="Sign Up" />} />
+        <Route path="/login" element={(() => {
+          const isMobile = window.innerWidth < 830;
+          return isMobile ? <MobileLogin /> : <DesktopLogin />;
+        })()} />
+        <Route path="/signup" element={(() => {
+          const isMobile = window.innerWidth < 830;
+          return isMobile ? <MobileSignup /> : <DesktopSignup />;
+        })()} />
         <Route path="/support" element={<Placeholder name="Support" />} />
       </Routes>
+
+      <Toaster position="bottom-right" />
+
     </div>
 
   )

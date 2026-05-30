@@ -3,7 +3,7 @@
 }
 
 .hero {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 5px auto 0;
   text-align: center;
 }
@@ -60,7 +60,7 @@
 }
 
 .cta-btn:hover {
-  background: #bae6fd;
+  background: #ddf3ff;
   transform: translateY(-2px);
 }
 
@@ -77,7 +77,7 @@
 .cards {
   display: flex;
   justify-content: center;
-  gap: 90px;
+  gap: 75px;
   margin-top: 65px;
   flex-wrap: wrap;
 }
@@ -90,20 +90,6 @@
     line-height: 1.03;
     font-weight: 800;
   }
-
-  .cards {
-    display: none;
-  }
-}
-
-.card {
-  width: 300px;
-  padding: 20px;
-  border-radius: 20px;
-  background: rgba(15, 23, 42, 0.58);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
 }
 
 .card h3 {
@@ -113,6 +99,350 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+/* =========================
+   CONSISTENCY CARD
+========================= */
+
+.consistency-card {
+  width: 340px;
+  height: 260px;
+  padding: 1.5rem;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(14, 14, 20, 0.96),
+      rgba(28, 28, 38, 0.94)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.consistency-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(92, 92, 246, 0.35);
+}
+
+.consistency-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.consistency-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.streak {
+  font-size: 0.75rem;
+  color: #8d8bfa;
+  background: rgba(97, 92, 246, 0.12);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+}
+
+/* =========================
+   HEATMAP
+========================= */
+
+.heatmap {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.heatmap-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.heat-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.heat-cell:hover {
+  transform: scale(1.5);
+  box-shadow: 0 0 12px rgba(92, 92, 246, 0.65);
+}
+
+/* =========================
+   INTENSITY LEVELS
+========================= */
+
+.empty {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.low {
+  background: rgba(92, 95, 246, 0.28);
+}
+
+.medium {
+  background: rgba(100, 92, 246, 0.5);
+}
+
+.high {
+  background: rgba(97, 92, 246, 0.75);
+}
+
+.max {
+  background: #665cf6;
+
+  box-shadow: 0 0 10px rgba(95, 92, 246, 0.75);
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.heatmap-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.legend {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.legend-box {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .heat-cell {
+    width: 14px;
+    height: 14px;
+  }
+
+  .heatmap {
+    gap: 0.35rem;
+  }
+
+  .heatmap-column {
+    gap: 0.35rem;
+  }
+}
+
+/* =========================
+   MOTIVATION CARD
+========================= */
+
+.motivation-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 340px;
+  height: 260px;
+  padding: 1.5rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18, 18, 28, 0.95),
+      rgba(28, 28, 40, 0.92)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.motivation-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(92, 92, 246, 0.35);
+}
+
+/* =========================
+   TOP
+========================= */
+
+.motivation-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.motivation-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #615cf6;
+  box-shadow: 0 0 10px rgba(95, 92, 246, 0.8);
+}
+
+.motivation-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* =========================
+   QUOTE
+========================= */
+
+.motivation-quote {
+  margin: 1.5rem 0;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  font-weight: 500;
+  color: #f8fafc;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.motivation-footer {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.8rem;
+  color: #8b8bfa;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .motivation-card {
+    min-height: 180px;
+    padding: 1.2rem;
+  }
+
+  .motivation-quote {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+
+/* =========================
+   PULSE CARD
+========================= */
+
+.pulse-card {
+  width: 340px;
+  height: 260px;
+  padding: 1.5rem;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(14, 14, 20, 0.96),
+      rgba(28, 28, 38, 0.94)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.pulse-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(92, 92, 246, 0.35);
+}
+
+/* =========================
+   TOP
+========================= */
+
+.pulse-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pulse-label {
+  font-size: 0.78rem;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: #94a3b8;
+}
+
+.pulse-live {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  font-size: 0.78rem;
+
+  color: #8f8bfa;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #665cf6;
+  animation: pulseGlow 1.8s infinite;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.pulse-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pulse-stat h2 {
+  font-size: 1.4rem;
+  color: #f8fafc;
+}
+
+.pulse-stat span {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.pulse-footer {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
 
 .inner {
   min-height: 112px;
@@ -124,8 +454,8 @@
 
 .inner p {
   margin: 0 0 4px;
-  color: rgba(226, 232, 240, 0.7);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
 }
 
 .inner h2 {
