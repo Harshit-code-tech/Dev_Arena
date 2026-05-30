@@ -6,6 +6,7 @@ import "../styles/Header.css";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "About us", path: "/about" },
+  { name: "Updates", path: "/updates" },
   { name: "Blog", path: "/blog" },
   { name: "Support", path: "/support" },
 ];
