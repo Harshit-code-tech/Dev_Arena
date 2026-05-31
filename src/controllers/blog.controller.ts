@@ -9,8 +9,10 @@ import { prisma } from "../db";
  */
 export const getPublishedPosts = async (req: Request, res: Response): Promise<void> => {
     try {
-        const page = Math.max(1, Number(req.query.page) || 1);
-        const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+        const pageParam = Number(req.query.page);
+        const limitParam = Number(req.query.limit);
+        const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+        const limit = Number.isInteger(limitParam) && limitParam > 0 ? Math.min(50, limitParam) : 10;
         const skip = (page - 1) * limit;
 
         const [posts, total] = await Promise.all([
