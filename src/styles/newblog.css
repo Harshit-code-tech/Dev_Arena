@@ -1,0 +1,138 @@
+.blog-page {
+  min-height: calc(100vh - 110px);
+  padding: 54px 0 90px;
+}
+
+.blog-wrap {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.blog-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.blog-top h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.blog-editor {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.blog-editor input,
+.blog-editor textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.56);
+  color: #f8fafc;
+  padding: 13px 15px;
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.blog-editor textarea {
+  min-height: 300px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.blog-editor input::placeholder,
+.blog-editor textarea::placeholder {
+  color: rgba(226, 232, 240, 0.45);
+}
+
+.blog-editor input:focus,
+.blog-editor textarea:focus {
+  border-color: rgba(125, 211, 252, 0.5);
+  background: rgba(2, 6, 23, 0.72);
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.08);
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.publish-btn,
+.cancel-btn {
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.publish-btn {
+  border: 0;
+  background: #f8fafc;
+  color: #07111f;
+}
+
+.publish-btn:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+}
+
+.cancel-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .blog-page {
+    padding: 120px 0 70px;
+  }
+
+  .blog-top {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .blog-editor {
+    padding: 20px;
+  }
+
+  .editor-actions {
+    flex-direction: column;
+  }
+
+  .publish-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}

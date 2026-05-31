@@ -1,0 +1,228 @@
+.support-page {
+  min-height: calc(100vh - 110px);
+  padding: 54px 0 90px;
+}
+
+.support-wrap {
+  width: min(100%, 860px);
+  margin: 0 auto;
+}
+
+.support-header {
+  margin-bottom: 34px;
+  text-align: center;
+}
+
+.support-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.support-header p {
+  max-width: 640px;
+  margin: 14px auto 0;
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-item,
+.contact-box {
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.faq-item {
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.faq-item:hover {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.faq-item.open {
+  border-color: rgba(125, 211, 252, 0.24);
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  padding: 20px 24px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.faq-question:focus-visible {
+  outline: 3px solid rgba(125, 211, 252, 0.28);
+  outline-offset: -3px;
+}
+
+.faq-question span:first-child {
+  line-height: 1.4;
+}
+
+.faq-icon {
+  flex: 0 0 auto;
+  color: #bae6fd;
+  transition: transform 0.2s;
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  margin: -4px 24px 22px;
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.contact-box {
+  display: grid;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 28px;
+}
+
+.contact-box h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.contact-box p {
+  margin: 8px 0 0;
+  color: rgba(226, 232, 240, 0.76);
+  line-height: 1.6;
+}
+
+.contact-box input,
+.contact-box textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.56);
+  color: #f8fafc;
+  padding: 13px 15px;
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.contact-box textarea {
+  min-height: 170px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.contact-box input::placeholder,
+.contact-box textarea::placeholder {
+  color: rgba(226, 232, 240, 0.45);
+}
+
+.contact-box input:focus,
+.contact-box textarea:focus {
+  border-color: rgba(125, 211, 252, 0.5);
+  background: rgba(2, 6, 23, 0.72);
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.08);
+}
+
+.contact-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.contact-actions button {
+  border: 0;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #07111f;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.contact-actions button:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+}
+
+.contact-actions button:focus-visible {
+  outline: 3px solid rgba(125, 211, 252, 0.28);
+  outline-offset: 3px;
+}
+
+.contact-actions span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(125, 211, 252, 0.1);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  color: #bae6fd;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .support-page {
+    padding: 120px 0 70px;
+  }
+
+  .faq-question,
+  .contact-box {
+    padding: 20px;
+  }
+
+  .faq-answer {
+    margin: -2px 20px 20px;
+  }
+
+  .contact-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .contact-actions button,
+  .contact-actions span {
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+  }
+}

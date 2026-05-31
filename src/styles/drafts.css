@@ -1,0 +1,202 @@
+.drafts-page {
+  min-height: calc(100vh - 110px);
+  padding: 54px 0 90px;
+}
+
+.drafts-wrap {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.drafts-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.drafts-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.drafts-header p,
+.drafts-empty p,
+.draft-card p {
+  color: rgba(226, 232, 240, 0.76);
+  line-height: 1.7;
+}
+
+.drafts-header p {
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+
+.drafts-back-btn,
+.draft-edit-btn,
+.draft-delete-btn {
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.drafts-back-btn {
+  border: 0;
+  background: #f8fafc;
+  color: #07111f;
+}
+
+.drafts-back-btn:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+}
+
+.drafts-list {
+  display: grid;
+  gap: 18px;
+}
+
+.draft-card,
+.drafts-empty {
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.draft-card {
+  padding: 24px;
+}
+
+.draft-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.draft-card h2,
+.drafts-empty h2 {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.draft-card h2 {
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.draft-card-top span {
+  flex: 0 0 auto;
+  color: rgba(226, 232, 240, 0.58);
+  font-size: 13px;
+}
+
+.draft-card p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.draft-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.draft-card-footer span {
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(125, 211, 252, 0.1);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  color: #bae6fd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.draft-edit-btn {
+  border: 0;
+  background: #f8fafc;
+  color: #07111f;
+  padding: 9px 16px;
+}
+
+.draft-edit-btn:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+}
+
+.draft-delete-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  padding: 9px 16px;
+}
+
+.draft-delete-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.drafts-empty {
+  padding: 40px;
+  text-align: center;
+}
+
+.drafts-empty h2 {
+  font-size: 24px;
+}
+
+.drafts-empty p {
+  margin: 10px 0 0;
+}
+
+@media (max-width: 768px) {
+  .drafts-page {
+    padding: 120px 0 70px;
+  }
+
+  .drafts-header,
+  .draft-card-top,
+  .draft-card-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drafts-back-btn,
+  .draft-edit-btn,
+  .draft-delete-btn {
+    width: 100%;
+  }
+
+  .draft-card-footer span {
+    justify-content: center;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .draft-card,
+  .drafts-empty {
+    padding: 20px;
+  }
+}
