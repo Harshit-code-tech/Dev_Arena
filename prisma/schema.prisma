@@ -92,6 +92,7 @@ model User {
   activities       Activity[]
   notifications    Notification[]
   userAchievements UserAchievement[]
+  blogPosts        BlogPost[]
 
   @@map("users")
 }
@@ -293,4 +294,35 @@ model UserAchievement {
   @@unique([userId, achievementId])
   @@index([userId, unlockedAt(sort: Desc)])
   @@map("user_achievements")
+}
+
+model BlogPost {
+  id        String   @id @default(uuid())
+  authorId  String   @map("author_id")
+  title     String
+  content   String
+  isDraft   Boolean  @default(false) @map("is_draft")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId, createdAt(sort: Desc)])
+  @@index([isDraft, createdAt(sort: Desc)])
+  @@map("blog_posts")
+}
+
+model Release {
+  id             String   @id @default(uuid())
+  version        String
+  title          String
+  summary        String
+  releaseTag     String   @map("release_tag")
+  status         String   @default("Released")
+  changelogSpecs String[] @map("changelog_specs")
+  releasedAt     DateTime @default(now()) @map("released_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([releasedAt(sort: Desc)])
+  @@map("releases")
 }
