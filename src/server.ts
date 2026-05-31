@@ -15,6 +15,8 @@ import projectRoutes from "./routes/project.routes";
 import practiceRoutes from "./routes/practice.routes";
 import leaderboardRoutes from "./routes/leaderboard.routes";
 import challengeRoutes from "./routes/challenge.routes";
+import blogRoutes from "./routes/blog.routes";
+import releaseRoutes from "./routes/release.routes";
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
@@ -38,6 +40,8 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/practice", practiceRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/challenge", challengeRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/releases", releaseRoutes);
 
 // ── 404 fallback ──────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {
