@@ -3,10 +3,8 @@ import "../styles/newblog.css";
 import { useEffect, useState } from "react";
 import DraftModal from "../components/DraftModal";
 
-const currentUser = {
-    id: 123,
-    name: "DevArena User",
-};
+// The currentUser is now handled entirely by the backend via the auth token!
+// For development, auth.middleware is temporarily hardcoded to use the test user ID.
 
 function NewBlog() {
     const navigate = useNavigate();
@@ -21,86 +19,70 @@ function NewBlog() {
     useEffect(() => {
         if (!draftId) return;
 
-        const drafts = JSON.parse(localStorage.getItem("devarena_blog_drafts") || "[]");
-        const selectedDraft = drafts.find(
-            (draft: { id: number }) => draft.id === Number(draftId)
-        );
-
-        if (!selectedDraft) return;
-
-        setTitle(selectedDraft.title || "");
-        setContent(selectedDraft.content || "");
+        fetch("http://localhost:4000/api/blog/drafts")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const selectedDraft = data.data.find((d: any) => d.id === draftId);
+                    if (selectedDraft) {
+                        setTitle(selectedDraft.title || "");
+                        setContent(selectedDraft.content || "");
+                    }
+                }
+            })
+            .catch(console.error);
     }, [draftId]);
 
-    function saveDraft() {
-        const draft = {
-            id: Date.now(),
-            title,
-            authorId: currentUser.id,
-            authorName: currentUser.name,
-            content,
-            savedAt: new Date().toISOString(),
-        };
+    async function saveDraft() {
+        if (!title.trim() && !content.trim()) return navigate("/blog");
 
-        const existingDrafts = JSON.parse(
-            localStorage.getItem("devarena_blog_drafts") || "[]"
-        );
-        if (draftId) {
-            const updatedDrafts = existingDrafts.map((draft: any) =>
-                draft.id === Number(draftId) ? {
-                    ...draft,
-                    title,
-                    content,
-                    savedAt: new Date().toISOString(),
-                }
-                    : draft
-            )
-            localStorage.setItem(
-                "devarena_blog_drafts",
-                JSON.stringify(updatedDrafts)
-            );
-        } else {
-            localStorage.setItem(
-                "devarena_blog_drafts",
-                JSON.stringify([draft, ...existingDrafts])
-            );
+        const payload = { title, content, isDraft: true };
+        try {
+            if (draftId) {
+                await fetch(`http://localhost:4000/api/blog/${draftId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            } else {
+                await fetch("http://localhost:4000/api/blog", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            }
+        } catch (error) {
+            console.error(error);
         }
-        navigate("/blog");
+        navigate("/blog/drafts");
     }
 
-    function publishPost() {
+    async function publishPost() {
         if (title.trim() === "" || content.trim() === "") {
             return;
         }
 
-        const post = {
-            id: Date.now(),
-            title,
-            authorId: currentUser.id,
-            authorName: currentUser.name,
-            content,
-            date: new Date().toISOString(),
-        };
-
-        const existingPosts = JSON.parse(
-            localStorage.getItem("devarena_blog_posts") || "[]"
-        );
-
-        localStorage.setItem(
-            "devarena_blog_posts",
-            JSON.stringify([post, ...existingPosts])
-        );
-
-        if (draftId) {
-            const drafts = JSON.parse(
-                localStorage.getItem("devarena_blog_drafts") || "[]"
-            );
-
-            const remainingDrafts = drafts.filter(
-                (draft: { id: number }) => draft.id !== Number(draftId)
-            );
-
-            localStorage.setItem("devarena_blog_drafts", JSON.stringify(remainingDrafts));
+        const payload = { title, content, isDraft: false };
+        try {
+            if (draftId) {
+                // Update first, then publish
+                await fetch(`http://localhost:4000/api/blog/${draftId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                await fetch(`http://localhost:4000/api/blog/${draftId}/publish`, {
+                    method: "PUT",
+                });
+            } else {
+                await fetch("http://localhost:4000/api/blog", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            }
+        } catch (error) {
+            console.error(error);
         }
         navigate("/blog");
     }
