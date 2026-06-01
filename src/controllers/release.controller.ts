@@ -158,3 +158,46 @@ export const deleteRelease = async (req: Request, res: Response): Promise<void> 
         res.status(500).json({ success: false, message: "Failed to delete release" });
     }
 };
+
+/**
+ * POST /api/releases/automate
+ * Creates a new release entry via automated scripts.
+ * Protected by AUTOMATION_SECRET environment variable instead of user auth.
+ */
+export const automateRelease = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const secret = req.headers.authorization;
+        if (!process.env.AUTOMATION_SECRET || secret !== `Bearer ${process.env.AUTOMATION_SECRET}`) {
+            res.status(401).json({ success: false, message: "Unauthorized automation attempt" });
+            return;
+        }
+
+        const { version, title, summary, releaseTag, status, changelogSpecs, releasedAt } = req.body;
+
+        if (!version || !title || !summary || !releaseTag) {
+            res.status(400).json({
+                success: false,
+                message: "version, title, summary, and releaseTag are required",
+            });
+            return;
+        }
+
+        const release = await prisma.release.create({
+            data: {
+                version,
+                title,
+                summary,
+                releaseTag,
+                status: status || "Released",
+                changelogSpecs: changelogSpecs || [],
+                ...(releasedAt && { releasedAt: new Date(releasedAt) }),
+            },
+        });
+
+        res.status(201).json({ success: true, data: release });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("automateRelease error:", message);
+        res.status(500).json({ success: false, message: "Failed to automate release" });
+    }
+};
