@@ -19,7 +19,7 @@ import blogRoutes from "./routes/blog.routes";
 import releaseRoutes from "./routes/release.routes";
 
 const app = express();
-const port = Number(process.env.PORT) || 4000;
+const port = Number(process.env.PORT);
 
 // ── Global middleware ─────────────────────────────────────────
 app.use(helmet());

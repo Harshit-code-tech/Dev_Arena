@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/drafts.css";
 
 type DraftPost = {
-    id: number;
+    id: string;
     title: string;
     author?: string;
     authorId?: string;
@@ -11,8 +11,6 @@ type DraftPost = {
     content: string;
     savedAt: string;
 };
-
-const draftsStorageKey = "devarena_blog_drafts";
 
 function formatSavedDate(savedAt: string) {
     return new Date(savedAt).toLocaleDateString("en-GB", {
@@ -27,17 +25,33 @@ function Drafts() {
     const [drafts, setDrafts] = useState<DraftPost[]>([]);
 
     useEffect(() => {
-        const savedDrafts = JSON.parse(
-            localStorage.getItem(draftsStorageKey) || "[]"
-        ) as DraftPost[];
-
-        setDrafts(savedDrafts);
+        fetch("/api/blog/drafts")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const mappedDrafts = data.data.map((draft: any) => ({
+                        id: draft.id,
+                        title: draft.title,
+                        content: draft.content,
+                        savedAt: draft.updatedAt,
+                        authorName: draft.author?.name || "DevArena User",
+                    }));
+                    setDrafts(mappedDrafts);
+                }
+            })
+            .catch(console.error);
     }, []);
 
-    function deleteDraft(id: number) {
-        const updatedDrafts = drafts.filter((draft) => draft.id !== id);
-        setDrafts(updatedDrafts);
-        localStorage.setItem(draftsStorageKey, JSON.stringify(updatedDrafts));
+    async function deleteDraft(id: string) {
+        try {
+            const res = await fetch(`/api/blog/${id}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) throw new Error("Failed to delete draft");
+            setDrafts((prev) => prev.filter((draft) => draft.id !== id));
+        } catch (error) {
+            console.error("Failed to delete draft:", error);
+        }
     }
 
     return (

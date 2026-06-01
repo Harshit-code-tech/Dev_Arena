@@ -3,32 +3,13 @@ import "../styles/blog.css";
 import { useNavigate } from "react-router-dom";
 
 type BlogPost = {
-    id: number;
+    id: string;
     title: string;
     content: string;
     authorName: string;
     date: string;
 }
-const postsStorageKey = "devarena_blog_posts";
 
-const initialPosts: BlogPost[] = [
-    {
-        id: 1,
-        title: "Why I switched from Redux to Zustand",
-        authorName: "Priya Sharma",
-        content:
-            "After 3 years of Redux boilerplate, I finally made the move to Zustand. The mental overhead reduction alone was worth it.",
-        date: "12 Apr 2025",
-    },
-    {
-        id: 2,
-        title: "Building a real-time dashboard with WebSockets",
-        authorName: "Marcus Chen",
-        content:
-            "A step-by-step breakdown of how I built a live analytics dashboard using Node.js and WebSockets.",
-        date: "10 Apr 2025",
-    },
-];
 
 function formatPostDate(date: string) {
     return new Date(date).toLocaleDateString("en-GB", {
@@ -43,11 +24,21 @@ function Blog() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        const savedPosts = JSON.parse(
-            localStorage.getItem(postsStorageKey) || "[]"
-        ) as BlogPost[];
-
-        setPosts([...savedPosts, ...initialPosts]);
+        fetch("/api/blog?limit=50")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    const mappedPosts = data.data.map((post: any) => ({
+                        id: post.id,
+                        title: post.title,
+                        content: post.content,
+                        authorName: post.author?.name || "DevArena User",
+                        date: post.createdAt,
+                    }));
+                    setPosts(mappedPosts);
+                }
+            })
+            .catch((err) => console.error("Failed to fetch blog posts:", err));
     }, []);
 
     return (

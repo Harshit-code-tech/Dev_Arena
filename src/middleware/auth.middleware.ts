@@ -19,6 +19,6 @@ declare global {
 export const protect = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     // Placeholder - let all requests through until auth is implemented
     // REMOVE this and implement JWT verification before production
-    req.user = { id: "placeholder", email: "placeholder@dev.com", name: "Dev" };
+    req.user = { id: "2fd0345b-50e0-4c1b-beb2-2cf152feb23c", email: "test@devarena.dev", name: "Harshit Ghosh" };
     next();
 };
