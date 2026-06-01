@@ -24,7 +24,7 @@ function Blog() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:4000/api/blog?limit=50")
+        fetch("/api/blog?limit=50")
             .then((res) => res.json())
             .then((data) => {
                 if (data.success) {

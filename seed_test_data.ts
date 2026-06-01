@@ -41,6 +41,13 @@ async function seed() {
   });
 
   console.log('Seed complete!');
-  await prisma.$disconnect();
+  // await prisma.$disconnect();
 }
-seed().catch(console.error);
+seed()
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

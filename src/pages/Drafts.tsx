@@ -25,7 +25,7 @@ function Drafts() {
     const [drafts, setDrafts] = useState<DraftPost[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:4000/api/blog/drafts")
+        fetch("/api/blog/drafts")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -44,10 +44,11 @@ function Drafts() {
 
     async function deleteDraft(id: string) {
         try {
-            await fetch(`http://localhost:4000/api/blog/${id}`, {
+            const res = await fetch(`/api/blog/${id}`, {
                 method: "DELETE"
             });
-            setDrafts(drafts.filter((draft) => draft.id !== id));
+            if (!res.ok) throw new Error("Failed to delete draft");
+            setDrafts((prev) => prev.filter((draft) => draft.id !== id));
         } catch (error) {
             console.error("Failed to delete draft:", error);
         }

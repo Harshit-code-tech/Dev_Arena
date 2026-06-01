@@ -3,8 +3,8 @@ import "../styles/newblog.css";
 import { useEffect, useState } from "react";
 import DraftModal from "../components/DraftModal";
 
-// The currentUser is now handled entirely by the backend via the auth token!
-// For development, auth.middleware is temporarily hardcoded to use the test user ID.
+// The current user will be handled by the backend once auth is implemented.
+// For development, auth.middleware is temporarily hardcoded to use a test user.
 
 function NewBlog() {
     const navigate = useNavigate();
@@ -19,7 +19,7 @@ function NewBlog() {
     useEffect(() => {
         if (!draftId) return;
 
-        fetch("http://localhost:4000/api/blog/drafts")
+        fetch("/api/blog/drafts")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -39,13 +39,13 @@ function NewBlog() {
         const payload = { title, content, isDraft: true };
         try {
             if (draftId) {
-                await fetch(`http://localhost:4000/api/blog/${draftId}`, {
+                await fetch(`/api/blog/${draftId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
             } else {
-                await fetch("http://localhost:4000/api/blog", {
+                await fetch("/api/blog", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
@@ -66,16 +66,16 @@ function NewBlog() {
         try {
             if (draftId) {
                 // Update first, then publish
-                await fetch(`http://localhost:4000/api/blog/${draftId}`, {
+                await fetch(`/api/blog/${draftId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                await fetch(`http://localhost:4000/api/blog/${draftId}/publish`, {
+                await fetch(`/api/blog/${draftId}/publish`, {
                     method: "PUT",
                 });
             } else {
-                await fetch("http://localhost:4000/api/blog", {
+                await fetch("/api/blog", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),

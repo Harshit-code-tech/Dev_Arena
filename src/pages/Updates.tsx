@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import UpdatesTimeline, { type UpdateEntry } from "../components/UpdatesTimeline";
 import Pagination from "../components/Pagination";
 import "../styles/updates.css";
@@ -11,7 +11,7 @@ function Updates() {
   const [pageEntries, setPageEntries] = useState<UpdateEntry[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/api/releases?page=${page}&limit=${PER_PAGE}`)
+    fetch(`/api/releases?page=${page}&limit=${PER_PAGE}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
