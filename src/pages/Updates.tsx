@@ -11,6 +11,9 @@ function Updates() {
   const [pageEntries, setPageEntries] = useState<UpdateEntry[]>([]);
 
   useEffect(() => {
+    // OPTION 2: If deploying frontend and backend to separate servers (e.g. Vercel + Render),
+    // change this fetch to: fetch(`${import.meta.env.VITE_API_URL}/api/releases?page=${page}&limit=${PER_PAGE}`)
+    // and set VITE_API_URL in your frontend .env file.
     fetch(`/api/releases?page=${page}&limit=${PER_PAGE}`)
       .then((res) => res.json())
       .then((data) => {
