@@ -182,6 +182,23 @@ export const automateRelease = async (req: Request, res: Response): Promise<void
             return;
         }
 
+        if (changelogSpecs !== undefined && (!Array.isArray(changelogSpecs) || !changelogSpecs.every((item: unknown) => typeof item === "string"))) {
+            res.status(400).json({
+                success: false,
+                message: "changelogSpecs must be an array of strings",
+            });
+            return;
+        }
+
+        const parsedReleasedAt = releasedAt !== undefined ? new Date(releasedAt) : undefined;
+        if (parsedReleasedAt && Number.isNaN(parsedReleasedAt.getTime())) {
+            res.status(400).json({
+                success: false,
+                message: "releasedAt must be a valid date",
+            });
+            return;
+        }
+
         const release = await prisma.release.create({
             data: {
                 version,
@@ -190,7 +207,7 @@ export const automateRelease = async (req: Request, res: Response): Promise<void
                 releaseTag,
                 status: status || "Released",
                 changelogSpecs: changelogSpecs || [],
-                ...(releasedAt && { releasedAt: new Date(releasedAt) }),
+                ...(parsedReleasedAt && { releasedAt: parsedReleasedAt }),
             },
         });
 

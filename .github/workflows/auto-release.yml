@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Send update to API
         env:
@@ -47,7 +47,7 @@ jobs:
           echo "$JSON_PAYLOAD"
 
           # Send POST request to your backend
-          curl -X POST "$API_URL/api/releases/automate" \
+          curl --fail-with-body --show-error --silent -X POST "$API_URL/api/releases/automate" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $AUTOMATION_SECRET" \
             -d "$JSON_PAYLOAD"
