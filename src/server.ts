@@ -19,7 +19,7 @@ import blogRoutes from "./routes/blog.routes";
 import releaseRoutes from "./routes/release.routes";
 
 const app = express();
-const port = Number(process.env.PORT);
+const port = Number(process.env.PORT ?? 4000);
 
 // ── Global middleware ─────────────────────────────────────────
 app.use(helmet());
@@ -28,6 +28,15 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // ── Health check ──────────────────────────────────────────────
+app.get("/", (_req: Request, res: Response) => {
+    res.status(200).json({
+        status: "ok",
+        service: "dev-arena-backend",
+        frontendPort: 5173,
+        backendPort: port,
+    });
+});
+
 app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok", service: "dev-arena-backend" });
 });

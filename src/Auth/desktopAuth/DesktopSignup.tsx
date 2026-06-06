@@ -1,6 +1,16 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import "../../styles/authDPages.css";
+import { signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  auth,
+  googleProvider,
+  githubProvider,
+} from "../../config/fireBase";
+import { saveUser } from "../../components/saveUser";
+
 
 /* =========================================================
    PASSWORD STRENGTH
@@ -54,15 +64,81 @@ function Signup() {
 
   const [loading, setLoading] = useState(false);
 
-  const strength = useMemo(() => getStrength(password), [password]);
+  const googleSignup = async () => {
+    try {
+      setLoading(true);
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
+      const result = await signInWithPopup(auth, googleProvider);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+      console.log(result.user);
 
+      toast.success("Welcome to DevArena!");
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error(error);
+
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          toast.error("Google signup was cancelled.");
+          break;
+
+        case "auth/popup-blocked":
+          toast.error("Popup blocked. Please allow popups.");
+          break;
+
+        case "auth/network-request-failed":
+          toast.error("No internet connection.");
+          break;
+
+        default:
+          toast.error("Google signup failed.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const githubSignup = async () => {
+    try {
+      setLoading(true);
+
+      const result = await signInWithPopup(auth, githubProvider);
+
+      console.log(result.user);
+
+      toast.success("Welcome to DevArena!");
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error(error);
+
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          toast.error("GitHub sign-in was cancelled.");
+          break;
+
+        case "auth/popup-blocked":
+          toast.error("Popup blocked. Please allow popups.");
+          break;
+
+        case "auth/network-request-failed":
+          toast.error("No internet connection detected.");
+          break;
+
+        case "auth/account-exists-with-different-credential":
+          toast.error("Account already exists with another login method.");
+          break;
+
+        default:
+          toast.error("GitHub Signup failed.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async () => {
     setError("");
 
     // ===============================
@@ -76,6 +152,7 @@ function Signup() {
       !password.trim()
     ) {
       setError("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
 
@@ -83,16 +160,22 @@ function Signup() {
 
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
     if (password.length < 8) {
       setError("Password must contain at least 8 characters.");
+      toast.error("Password must contain at least 8 characters.");
       return;
     }
 
     if (strength.score < 2) {
       setError(
+        "Password is too weak. Use uppercase letters, numbers, and symbols.",
+      );
+
+      toast.error(
         "Password is too weak. Use uppercase letters, numbers, and symbols.",
       );
 
@@ -102,62 +185,80 @@ function Signup() {
     if (!agreeTerms) {
       setError("You must agree to the Terms and Privacy Policy.");
 
+      toast.error("You must agree to the Terms and Privacy Policy.");
+
       return;
     }
 
-    // ===============================
-    // API
-    // ===============================
-
-    setLoading(true);
-
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
+      setLoading(true);
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
 
-        body: JSON.stringify({
-          name: `${firstName.trim()} ${lastName.trim()}`,
-
-          email: email.trim(),
-
-          password,
-        }),
+      // Save user's full name in Firebase Auth
+      await updateProfile(userCredential.user, {
+        displayName: `${firstName.trim()} ${lastName.trim()}`,
       });
+      
+      await saveUser(userCredential.user, "email");
 
-      const data = await res.json();
+      console.log(userCredential.user);
 
-      if (!res.ok) {
-        setError(data.message || "Registration failed. Please try again.");
+      toast.success(`Welcome to DevArena, ${firstName}!`);
 
-        return;
+      navigate("/Dashboard");
+    } catch (error: any) {
+      console.log(error);
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          setError("An account with this email already exists.");
+          toast.error("An account with this email already exists.");
+          break;
+
+        case "auth/invalid-email":
+          setError("Please enter a valid email address.");
+          toast.error("Please enter a valid email address.");
+          break;
+
+        case "auth/weak-password":
+          setError("Password must be at least 6 characters.");
+          toast.error("Password must be at least 6 characters.");
+          break;
+
+        case "auth/network-request-failed":
+          setError("Network error. Check your internet connection.");
+          toast.error("Network error. Check your internet connection.");
+          break;
+
+        case "auth/too-many-requests":
+          setError("Too many attempts. Please try again later.");
+          toast.error("Too many attempts. Please try again later.");
+          break;
+
+        default:
+          setError("Something went wrong. Please try again.");
+          toast.error("Something went wrong. Please try again.");
       }
-
-      // ===============================
-      // Optional token storage
-      // ===============================
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      console.log("Register success:", data);
-
-      // ===============================
-      // Redirect
-      // ===============================
-
-      navigate("/login");
-    } catch (err) {
-      console.error(err);
-
-      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const strength = useMemo(() => getStrength(password), [password]);
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    await signup();
   };
 
   return (
@@ -187,16 +288,6 @@ function Signup() {
                 fill="rgba(15, 23, 42, 0.88)"
                 stroke="rgba(125, 211, 252, 0.35)"
                 strokeWidth="1.5"
-              />
-
-              {/* Nose */}
-
-              <path
-                d="M28 62 L50 10 L72 62"
-                fill="rgba(125, 211, 252, 0.12)"
-                stroke="#7dd3fc"
-                strokeWidth="1.2"
-                strokeLinejoin="round"
               />
 
               {/* Window */}
@@ -502,7 +593,17 @@ function Signup() {
 
             {/* Submit */}
 
-            <button type="submit" className="auth-submit" disabled={loading}>
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={
+                loading ||
+                !firstName.trim() ||
+                !lastName.trim() ||
+                !email.trim() ||
+                !password.trim()
+              }
+            >
               {loading ? (
                 <span className="btn-loader"></span>
               ) : (
@@ -520,12 +621,12 @@ function Signup() {
           {/* Social */}
 
           <div className="social-buttons">
-            <button type="button" className="social-btn">
+            <button type="button" className="social-btn" onClick={githubSignup}>
               <i className="bx bxl-github"></i>
               GitHub
             </button>
 
-            <button type="button" className="social-btn">
+            <button type="button" className="social-btn" onClick={googleSignup}>
               <i className="bx bxl-google"></i>
               Google
             </button>

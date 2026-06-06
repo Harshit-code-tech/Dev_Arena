@@ -2,6 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/authDPages.css";
 
+import { signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  auth,
+  googleProvider,
+  githubProvider,
+} from "../../config/fireBase";
+import toast from "react-hot-toast";
+import { saveUser } from "../../components/saveUser";
+
 function Login() {
   const navigate = useNavigate();
 
@@ -14,79 +24,149 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setError("");
-
-    // ===============================
-    // Validation
-    // ===============================
-
-    if (!email.trim() || !password.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
-    // ===============================
-    // API Request
-    // ===============================
-
-    setLoading(true);
-
+  const googleLogin = async () => {
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
+      setLoading(true);
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const result = await signInWithPopup(auth, googleProvider);
 
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          remember,
-        }),
-      });
+      console.log(result.user);
 
-      const data = await res.json();
+      await saveUser(result.user, "google");
 
-      if (!res.ok) {
-        setError(data.message || "Login failed. Please try again.");
-        return;
-      }
-
-      // ===============================
-      // Save token
-      // ===============================
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      console.log("Login success:", data);
-
-      // ===============================
-      // Redirect
-      // ===============================
+      toast.success("Welcome to DevArena!");
 
       navigate("/dashboard");
-    } catch (err) {
-      console.error(err);
+    } catch (error: any) {
+      console.error(error);
 
-      setError("Network error. Please check your connection.");
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          toast.error("Google sign-in was cancelled.");
+          break;
+
+        case "auth/popup-blocked":
+          toast.error("Popup blocked. Please allow popups.");
+          break;
+
+        case "auth/network-request-failed":
+          toast.error("No internet connection detected.");
+          break;
+
+        default:
+          toast.error("Google login failed.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const githubLogin = async () => {
+    try {
+      setLoading(true);
+
+      const result = await signInWithPopup(auth, githubProvider);
+
+      await saveUser(result.user, "github");
+
+      toast.success("Welcome to DevArena!");
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error(error);
+
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          toast.error("GitHub sign-in was cancelled.");
+          break;
+
+        case "auth/popup-blocked":
+          toast.error("Popup blocked. Please allow popups.");
+          break;
+
+        case "auth/network-request-failed":
+          toast.error("No internet connection detected.");
+          break;
+
+        case "auth/account-exists-with-different-credential":
+          toast.error("Account already exists with another login method.");
+          break;
+
+        default:
+          toast.error("GitHub login failed.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setError("");
+
+    if (!email.trim()) {
+      setError("Email is required.");
+      toast.error("Email is required.");
+      setLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Password is required.");
+      toast.error("Password is required.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
+
+      console.log(userCredential.user);
+
+      await saveUser(userCredential.user, "email");
+
+      toast.success("Login successful!");
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.log(error);
+
+      switch (error.code) {
+        case "auth/invalid-email":
+          setError("Please enter a valid email address.");
+          toast.error("Please enter a valid email address.");
+          break;
+
+        case "auth/invalid-credential":
+          setError("Incorrect email or password.");
+          toast.error("Incorrect email or password.");
+          break;
+
+        case "auth/user-disabled":
+          setError("This account has been disabled.");
+          toast.error("This account has been disabled.");
+          break;
+
+        case "auth/too-many-requests":
+          setError("Too many failed attempts. Please try again later.");
+          toast.error("Too many failed attempts. Please try again later.");
+          break;
+
+        case "auth/network-request-failed":
+          setError("Network error. Check your internet connection.");
+          toast.error("Network error. Check your internet connection.");
+          break;
+
+        default:
+          setError("Something went wrong. Please try again.");
+          toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -239,14 +319,7 @@ function Login() {
 
             {/* Cursor */}
 
-            <rect
-              x="106"
-              y="122"
-              width="2"
-              height="8"
-              rx="1"
-              fill="#7dd3fc"
-            >
+            <rect x="106" y="122" width="2" height="8" rx="1" fill="#7dd3fc">
               <animate
                 attributeName="opacity"
                 values="1;0.1;1"
@@ -278,12 +351,7 @@ function Login() {
             {/* Shield */}
 
             <g transform="translate(190, 90)">
-              <circle
-                cx="22"
-                cy="22"
-                r="22"
-                fill="rgba(125, 211, 252, 0.12)"
-              />
+              <circle cx="22" cy="22" r="22" fill="rgba(125, 211, 252, 0.12)" />
 
               <circle
                 cx="22"
@@ -348,8 +416,8 @@ function Login() {
           <h2>Welcome back, developer</h2>
 
           <p>
-            Pick up where you left off — your streak, projects,
-            challenges, and developer journey are waiting for you.
+            Pick up where you left off — your streak, projects, challenges, and
+            developer journey are waiting for you.
           </p>
         </div>
 
@@ -382,8 +450,10 @@ function Login() {
 
           <form
             className="auth-form"
-            onSubmit={handleSubmit}
             noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
           >
             {/* Email */}
 
@@ -424,9 +494,7 @@ function Login() {
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -440,9 +508,7 @@ function Login() {
                 <input
                   type="checkbox"
                   checked={remember}
-                  onChange={(e) =>
-                    setRemember(e.target.checked)
-                  }
+                  onChange={(e) => setRemember(e.target.checked)}
                 />
 
                 <span>Remember me</span>
@@ -451,9 +517,7 @@ function Login() {
               <button
                 type="button"
                 className="forgot-link"
-                onClick={() =>
-                  navigate("/forgot-password")
-                }
+                onClick={() => navigate("/forgot-password")}
               >
                 Forgot password?
               </button>
@@ -463,14 +527,11 @@ function Login() {
 
             <button
               type="submit"
+              onClick={login}
               className="auth-submit"
-              disabled={loading}
+              disabled={loading || !email.trim() || !password.trim()}
             >
-              {loading ? (
-                <span className="btn-loader"></span>
-              ) : (
-                "Sign in"
-              )}
+              {loading ? <span className="btn-loader"></span> : "Sign in"}
             </button>
           </form>
 
@@ -483,21 +544,13 @@ function Login() {
           {/* Social */}
 
           <div className="social-buttons">
-            <button
-              type="button"
-              className="social-btn"
-            >
+            <button type="button" className="social-btn" onClick={githubLogin}>
               <i className="bx bxl-github"></i>
-
               GitHub
             </button>
 
-            <button
-              type="button"
-              className="social-btn"
-            >
+            <button type="button" className="social-btn" onClick={googleLogin}>
               <i className="bx bxl-google"></i>
-
               Google
             </button>
           </div>
@@ -506,11 +559,7 @@ function Login() {
 
           <div className="auth-footer">
             Don&apos;t have an account?
-
-            <button
-              type="button"
-              onClick={() => navigate("/signup")}
-            >
+            <button type="button" onClick={() => navigate("/signup")}>
               Sign up
             </button>
           </div>

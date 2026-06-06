@@ -155,7 +155,7 @@
   }
 
   .auth-form {
-    gap: 5px;
+    gap: 2px;
     display: flex;
     flex-direction: column;
   }
@@ -533,7 +533,9 @@
     font-size: 14px;
     font-weight: 500;
 
-    padding: 10px;
+    padding: 5px;
+
+    margin-bottom: 5px;
 
     transition:
       color 0.25s ease,

@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/About.css";
 
+import Cards from "../components/Cards";
+
 function about() {
   const navigate = useNavigate();
   return (
@@ -18,38 +20,7 @@ function about() {
           </div>
 
           <div className="about-grid">
-            <div className="about-feature">
-              <div className="icon">🤝</div>
-              <h3>Community first</h3>
-              <p>
-                Connect with other developers, share your journey, and grow
-                together as a community.
-              </p>
-            </div>
-            <div className="about-feature">
-              <div className="icon">🔒</div>
-              <h3>Privacy focused</h3>
-              <p>
-                Your data stays yours. We never sell your information to third
-                parties. Ever.
-              </p>
-            </div>
-            <div className="about-feature">
-              <div className="icon">🌍</div>
-              <h3>Built for everyone</h3>
-              <p>
-                From solo indie hackers to large engineering teams — DevArena
-                scales with you.
-              </p>
-            </div>
-            <div className="about-feature">
-              <div className="icon">🚀</div>
-              <h3>Rapid development</h3>
-              <p>
-                We ship new features every week based directly on community
-                feedback and requests.
-              </p>
-            </div>
+            <Cards /> 
           </div>
 
           <div className="support-banner">
@@ -58,7 +29,7 @@ function about() {
               Our support team is available 24/7. Browse our FAQs, send us a
               message, or chat live.
             </p>
-            <button className="support-btn" onClick={() => navigate('/support')}>
+            <button className="support-btn" onClick={() => navigate('/Support')}>
               Go to support →
             </button>
           </div>
