@@ -1,18 +1,21 @@
 import Header from './components/Header';
 import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
 import NewBlog from './pages/NewBlog';
-import Drafts from './pages/Drafts';
-import Support from './pages/Support'
-import Updates from "./pages/Updates";
 import Blog from './pages/Blog';
-import MobileLogin from './Auth/mobileAuth/MobileLogin';
-import DesktopLogin from './Auth/desktopAuth/DesktopLogin';
-import MobileSignup from './Auth/mobileAuth/MobileSignup';
-import DesktopSignup from './Auth/desktopAuth/DesktopSignup';
 import { Toaster } from "react-hot-toast";
+import PageLoader from "./components/Skeletons/PageLoader";
+import { lazy, Suspense } from "react";
 
+const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/About"));
+const MobileLogin = lazy(() => import("./Auth/mobileAuth/MobileLogin"));
+const DesktopLogin = lazy(() => import("./Auth/desktopAuth/DesktopLogin"));
+const MobileSignup = lazy(() => import("./Auth/mobileAuth/MobileSignup"));
+const DesktopSignup = lazy(() => import("./Auth/desktopAuth/DesktopSignup"));
+const Drafts = lazy(() => import("./pages/Drafts"));
+const Support = lazy(() => import("./pages/Support"));
+const Updates = lazy(() => import("./pages/Updates"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 function Placeholder({ name }: { name: string }) {
   return (
@@ -26,33 +29,36 @@ function Placeholder({ name }: { name: string }) {
 // const isMobile = window.innerWidth < 768;
 
 function App() {
+  const isMobile = window.innerWidth < 830;
   return (
-    <div className='app'>
+    <div className="app">
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/templates" element={<Placeholder name="Templates" />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={(() => {
-          const isMobile = window.innerWidth < 830;
-          return isMobile ? <MobileLogin /> : <DesktopLogin />;
-        })()} />
-        <Route path="/signup" element={(() => {
-          const isMobile = window.innerWidth < 830;
-          return isMobile ? <MobileSignup /> : <DesktopSignup />;
-        })()} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/updates" element={<Updates />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/new" element={<NewBlog />} />
-        <Route path="/blog/drafts" element={<Drafts />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/templates" element={<Placeholder name="Templates" />} />
+          {/* <Route path="/blog" element={<Blog />} />
+        
+        <Route path="/newblog" element={<NewBlog />} /> */}
+          <Route path="/about" element={<About />} />
+          <Route path="/drafts" element={<Drafts />} />
+          <Route path="/updates" element={<Updates />} />
+          <Route
+            path="/login"
+            element={isMobile ? <MobileLogin /> : <DesktopLogin />}
+          />
 
+          <Route
+            path="/signup"
+            element={isMobile ? <MobileSignup /> : <DesktopSignup />}
+          />
+          <Route path="/support" element={<Support />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </Suspense>
       <Toaster position="bottom-right" />
-
     </div>
-
-  )
+  );
 }
 
-export default App
+export default App;
