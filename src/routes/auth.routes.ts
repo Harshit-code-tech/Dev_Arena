@@ -12,4 +12,7 @@ router.post("/login", authController.login);
 // POST /api/auth/forgot-password
 router.post("/forgot-password", authController.forgotPassword);
 
+// POST /api/auth/sync-firebase
+router.post("/sync-firebase", authController.syncFirebase);
+
 export default router;
