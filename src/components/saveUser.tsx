@@ -1,5 +1,30 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../config/fireBase";
+import { serverTimestamp } from "firebase/firestore";
+
+export const saveUser = async (user: any, provider: string) => {
+  // Sync with Backend (Neon Database)
+  try {
+    const res = await fetch("/api/auth/sync-firebase", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        provider,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to sync user with Neon backend", await res.text());
+    }
+  } catch (error) {
+    console.error("Error syncing user with backend:", error);
+  }
 
 export const saveUser = async (
   user: any,
@@ -74,54 +99,72 @@ export const saveUser = async (
       // SOCIAL
       // =====================
 
-      followers: 0,
+  const existingUser = await getDoc(userRef);
 
-      following: 0,
+  if (existingUser.exists()) {
+    await setDoc(
+      userRef,
+      {
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || "",
+        email: user.email || "",
+        provider,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
 
-      // =====================
-      // CHALLENGES
-      // =====================
+    return;
+  }
 
-      dailyChallengeCompleted: false,
+  await setDoc(userRef, {
+    uid: user.uid,
 
-      completedChallenges: [],
+    displayName: user.displayName || "",
 
-      solvedProblems: [],
+    username: user.email?.split("@")[0] || user.uid.slice(0, 8),
 
-      projects: [],
+    email: user.email || "",
 
-      badges: [],
+    photoURL: user.photoURL || "",
 
-      // =====================
-      // PROFILE
-      // =====================
+    provider,
 
-      bio: "",
+    role: "user",
 
-      location: "",
+    xp: 0,
+    level: 1,
+    streak: 0,
+    rank: "Unranked",
+    arenaScore: 0,
+    activityCount: 0,
+    unreadNotifications: 0,
+    contestRating: 0,
 
-      website: "",
+    followers: 0,
+    following: 0,
 
-      github: "",
+    dailyChallengeCompleted: false,
 
-      profileCompleted: false,
+    completedChallenges: [],
+    solvedProblems: [],
+    projects: [],
+    badges: [],
 
-      selectedAvatar: "",
+    bio: "",
+    location: "",
+    website: "",
+    github: "",
 
-      theme: "dark",
+    profileCompleted: false,
 
-      isVerified: false,
+    selectedAvatar: "",
 
-      // =====================
-      // TIMESTAMPS
-      // =====================
+    theme: "dark",
 
-      createdAt: new Date(),
+    isVerified: false,
 
-      updatedAt: new Date(),
-    },
-    {
-      merge: true,
-    }
-  );
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 };
