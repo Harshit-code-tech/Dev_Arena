@@ -15,9 +15,11 @@ import projectRoutes from "./routes/project.routes";
 import practiceRoutes from "./routes/practice.routes";
 import leaderboardRoutes from "./routes/leaderboard.routes";
 import challengeRoutes from "./routes/challenge.routes";
+import blogRoutes from "./routes/blog.routes";
+import releaseRoutes from "./routes/release.routes";
 
 const app = express();
-const port = Number(process.env.PORT) || 4000;
+const port = Number(process.env.PORT ?? 4000);
 
 // ── Global middleware ─────────────────────────────────────────
 app.use(helmet());
@@ -26,6 +28,15 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // ── Health check ──────────────────────────────────────────────
+app.get("/", (_req: Request, res: Response) => {
+    res.status(200).json({
+        status: "ok",
+        service: "dev-arena-backend",
+        frontendPort: 5173,
+        backendPort: port,
+    });
+});
+
 app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok", service: "dev-arena-backend" });
 });
@@ -38,6 +49,8 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/practice", practiceRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/challenge", challengeRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/releases", releaseRoutes);
 
 // ── 404 fallback ──────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

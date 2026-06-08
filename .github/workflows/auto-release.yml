@@ -1,0 +1,53 @@
+name: Auto Release to Updates Page
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Send update to API
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          AUTOMATION_SECRET: ${{ secrets.AUTOMATION_SECRET }}
+        run: |
+          # Extract the latest commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          
+          # We'll use the first line of the commit message as the title
+          TITLE=$(echo "$COMMIT_MSG" | head -n 1 | tr -d '"')
+          
+          # We'll create a summary using the commit hash
+          SUMMARY="Automated deployment from commit $SHORT_HASH. Update pushed to main branch."
+          
+          # Escape characters for JSON
+          JSON_PAYLOAD=$(jq -n \
+            --arg version "$SHORT_HASH" \
+            --arg title "$TITLE" \
+            --arg summary "$SUMMARY" \
+            --arg releaseTag "Auto" \
+            --arg spec1 "Triggered by push to main branch" \
+            --arg spec2 "$TITLE" \
+            '{
+              version: $version,
+              title: $title,
+              summary: $summary,
+              releaseTag: $releaseTag,
+              changelogSpecs: [$spec1, $spec2]
+            }')
+
+          echo "Sending payload:"
+          echo "$JSON_PAYLOAD"
+
+          # Send POST request to your backend
+          curl --fail-with-body --show-error --silent -X POST "$API_URL/api/releases/automate" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $AUTOMATION_SECRET" \
+            -d "$JSON_PAYLOAD"

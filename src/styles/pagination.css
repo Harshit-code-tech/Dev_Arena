@@ -1,0 +1,149 @@
+/* ============================================================
+   pagination.css — Pagination navigation styles
+   ============================================================ */
+
+:root {
+  --pag-bg: rgba(255, 255, 255, 0.05);
+  --pag-bg-hover: rgba(255, 255, 255, 0.09);
+  --pag-bg-active: rgba(125, 211, 252, 0.16);
+  --pag-border: rgba(255, 255, 255, 0.1);
+  --pag-border-active: rgba(125, 211, 252, 0.32);
+  --pag-text: rgba(226, 232, 240, 0.75);
+  --pag-text-active: #bae6fd;
+  --pag-disabled: rgba(255, 255, 255, 0.03);
+  --pag-disabled-text: rgba(226, 232, 240, 0.3);
+  --pag-radius: 999px;
+  --pag-transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  padding: 0 4px;
+}
+
+/* Nav buttons (Prev / Next) */
+.pagination-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--pag-radius);
+  border: 1px solid var(--pag-border);
+  background: var(--pag-bg);
+  color: var(--pag-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--pag-transition),
+    border-color var(--pag-transition),
+    color var(--pag-transition),
+    transform var(--pag-transition);
+  will-change: transform;
+}
+
+.pagination-nav:not(:disabled):hover {
+  background: var(--pag-bg-hover);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.pagination-nav:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.pagination-nav:disabled {
+  background: var(--pag-disabled);
+  color: var(--pag-disabled-text);
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.pagination-nav:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+/* Pages container */
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Individual page buttons */
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 4px;
+  border-radius: var(--pag-radius);
+  border: 1px solid var(--pag-border);
+  background: var(--pag-bg);
+  color: var(--pag-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background var(--pag-transition),
+    border-color var(--pag-transition),
+    color var(--pag-transition),
+    transform var(--pag-transition);
+  will-change: transform;
+}
+
+.page-btn:not(.active):hover {
+  background: var(--pag-bg-hover);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.page-btn:not(.active):active {
+  transform: translateY(0);
+}
+
+.page-btn.active {
+  background: var(--pag-bg-active);
+  border-color: var(--pag-border-active);
+  color: var(--pag-text-active);
+  box-shadow: 0 0 12px rgba(125, 211, 252, 0.12);
+  cursor: default;
+  font-weight: 600;
+}
+
+.page-btn:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+/* Ellipsis */
+.pagination-ellipsis {
+  color: var(--pag-disabled-text);
+  padding: 0 6px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .pagination-nav span {
+    display: none;
+  }
+
+  .pagination-nav {
+    padding: 8px 12px;
+  }
+}
