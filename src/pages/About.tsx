@@ -15,7 +15,7 @@ function about() {
               developer collaboration.
             </h1>
             <p>
-              DevArena is a community-driven platform where developers practice skills, showcase projects, write technical content, and grow through real-world learning. Unlike traditional coding platforms, DevArena combines collaboration, visibility, and progress tracking to help developers build stronger portfolios, improve consistently, and stand out in the tech community.
+              DevArena    axaxaxaxaxa is a community-driven platform where developers practice skills, showcase projects, write technical content, and grow through real-world learning. Unlike traditional coding platforms, DevArena combines collaboration, visibility, and progress tracking to help developers build stronger portfolios, improve consistently, and stand out in the tech community.
             </p>
           </div>
 
