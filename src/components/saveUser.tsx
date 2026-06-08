@@ -5,6 +5,30 @@ export const saveUser = async (
   user: any,
   provider: string
 ) => {
+  // Sync with Backend (Neon Database)
+  try {
+    const res = await fetch("/api/auth/sync-firebase", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        provider,
+      }),
+    });
+    
+    if (!res.ok) {
+      console.error("Failed to sync user with Neon backend", await res.text());
+    }
+  } catch (error) {
+    console.error("Error syncing user with backend:", error);
+  }
+
+  // Save to Firebase Firestore
   await setDoc(
     doc(db, "users", user.uid),
     {
