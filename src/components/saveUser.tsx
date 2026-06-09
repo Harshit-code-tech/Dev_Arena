@@ -26,13 +26,82 @@ export const saveUser = async (user: any, provider: string) => {
     console.error("Error syncing user with backend:", error);
   }
 
-  //sync to firebase
-  export const saveUser = async (user: any, provider: string) => {
-    const userRef = doc(db, "users", user.uid);
+  export const saveUser = async (
+    user: any,
+    provider: string
+  ) => {
+    // Sync with Backend (Neon Database)
+    try {
+      const res = await fetch("/api/auth/sync-firebase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          provider,
+        }),
+      });
 
-    const existingUser = await getDoc(userRef);
+      if (!res.ok) {
+        console.error("Failed to sync user with Neon backend", await res.text());
+      }
+    } catch (error) {
+      console.error("Error syncing user with backend:", error);
+    }
 
-    if (existingUser.exists()) {
+    // Save to Firebase Firestore
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        // =====================
+        // BASIC INFO
+        // =====================
+
+        uid: user.uid,
+
+        displayName:
+          user.displayName || "",
+
+        username:
+          user.email?.split("@")[0] ||
+          user.uid.slice(0, 8),
+
+        email: user.email || "",
+
+        photoURL:
+          user.photoURL || "",
+
+        provider,
+
+        role: "user",
+
+        // =====================
+        // DEVARNA GAMIFICATION
+        // =====================
+
+        xp: 0,
+
+        level: 1,
+
+        streak: 0,
+
+        rank: "Unranked",
+
+        arenaScore: 0,
+
+        contestRating: 0,
+
+        // =====================
+        // SOCIAL
+        // =====================
+
+        const existingUser = await getDoc(userRef);
+
+        if(existingUser.exists()) {
       await setDoc(
         userRef,
         {
@@ -99,4 +168,3 @@ export const saveUser = async (user: any, provider: string) => {
       updatedAt: serverTimestamp(),
     });
   };
-};
