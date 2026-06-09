@@ -26,145 +26,74 @@ export const saveUser = async (user: any, provider: string) => {
     console.error("Error syncing user with backend:", error);
   }
 
-  export const saveUser = async (
-    user: any,
-    provider: string
-  ) => {
-    // Sync with Backend (Neon Database)
-    try {
-      const res = await fetch("/api/auth/sync-firebase", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          provider,
-        }),
-      });
+  // Save to Firebase Firestore
+  const userRef = doc(db, "users", user.uid);
+  const existingUser = await getDoc(userRef);
 
-      if (!res.ok) {
-        console.error("Failed to sync user with Neon backend", await res.text());
-      }
-    } catch (error) {
-      console.error("Error syncing user with backend:", error);
-    }
-
-    // Save to Firebase Firestore
+  if (existingUser.exists()) {
     await setDoc(
-      doc(db, "users", user.uid),
+      userRef,
       {
-        // =====================
-        // BASIC INFO
-        // =====================
-
-        uid: user.uid,
-
-        displayName:
-          user.displayName || "",
-
-        username:
-          user.email?.split("@")[0] ||
-          user.uid.slice(0, 8),
-
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || "",
         email: user.email || "",
-
-        photoURL:
-          user.photoURL || "",
-
         provider,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
 
-        role: "user",
+    return;
+  }
 
-        // =====================
-        // DEVARNA GAMIFICATION
-        // =====================
+  await setDoc(userRef, {
+    uid: user.uid,
 
-        xp: 0,
+    displayName: user.displayName || "",
 
-        level: 1,
+    username: user.email?.split("@")[0] || user.uid.slice(0, 8),
 
-        streak: 0,
+    email: user.email || "",
 
-        rank: "Unranked",
+    photoURL: user.photoURL || "",
 
-        arenaScore: 0,
+    provider,
 
-        contestRating: 0,
+    role: "user",
 
-        // =====================
-        // SOCIAL
-        // =====================
+    xp: 0,
+    level: 1,
+    streak: 0,
+    rank: "Unranked",
+    arenaScore: 0,
+    activityCount: 0,
+    unreadNotifications: 0,
+    contestRating: 0,
 
-        const existingUser = await getDoc(userRef);
+    followers: 0,
+    following: 0,
 
-        if(existingUser.exists()) {
-      await setDoc(
-        userRef,
-        {
-          displayName: user.displayName || "",
-          photoURL: user.photoURL || "",
-          email: user.email || "",
-          provider,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
+    dailyChallengeCompleted: false,
 
-      return;
-    }
+    completedChallenges: [],
+    solvedProblems: [],
+    projects: [],
+    badges: [],
 
-    await setDoc(userRef, {
-      uid: user.uid,
+    bio: "",
+    location: "",
+    website: "",
+    github: "",
 
-      displayName: user.displayName || "",
+    profileCompleted: false,
 
-      username: user.email?.split("@")[0] || user.uid.slice(0, 8),
+    selectedAvatar: "",
 
-      email: user.email || "",
+    theme: "dark",
 
-      photoURL: user.photoURL || "",
+    isVerified: false,
 
-      provider,
-
-      role: "user",
-
-      xp: 0,
-      level: 1,
-      streak: 0,
-      rank: "Unranked",
-      arenaScore: 0,
-      activityCount: 0,
-      unreadNotifications: 0,
-      contestRating: 0,
-
-      followers: 0,
-      following: 0,
-
-      dailyChallengeCompleted: false,
-
-      completedChallenges: [],
-      solvedProblems: [],
-      projects: [],
-      badges: [],
-
-      bio: "",
-      location: "",
-      website: "",
-      github: "",
-
-      profileCompleted: false,
-
-      selectedAvatar: "",
-
-      theme: "dark",
-
-      isVerified: false,
-
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-  };
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+};
