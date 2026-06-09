@@ -26,145 +26,77 @@ export const saveUser = async (user: any, provider: string) => {
     console.error("Error syncing user with backend:", error);
   }
 
-export const saveUser = async (
-  user: any,
-  provider: string
-) => {
-  // Sync with Backend (Neon Database)
-  try {
-    const res = await fetch("/api/auth/sync-firebase", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        provider,
-      }),
-    });
-    
-    if (!res.ok) {
-      console.error("Failed to sync user with Neon backend", await res.text());
+  //sync to firebase
+  export const saveUser = async (user: any, provider: string) => {
+    const userRef = doc(db, "users", user.uid);
+
+    const existingUser = await getDoc(userRef);
+
+    if (existingUser.exists()) {
+      await setDoc(
+        userRef,
+        {
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || "",
+          email: user.email || "",
+          provider,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+      return;
     }
-  } catch (error) {
-    console.error("Error syncing user with backend:", error);
-  }
 
-  // Save to Firebase Firestore
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      // =====================
-      // BASIC INFO
-      // =====================
-
+    await setDoc(userRef, {
       uid: user.uid,
 
-      displayName:
-        user.displayName || "",
+      displayName: user.displayName || "",
 
-      username:
-        user.email?.split("@")[0] ||
-        user.uid.slice(0, 8),
+      username: user.email?.split("@")[0] || user.uid.slice(0, 8),
 
       email: user.email || "",
 
-      photoURL:
-        user.photoURL || "",
+      photoURL: user.photoURL || "",
 
       provider,
 
       role: "user",
 
-      // =====================
-      // DEVARNA GAMIFICATION
-      // =====================
-
       xp: 0,
-
       level: 1,
-
       streak: 0,
-
       rank: "Unranked",
-
       arenaScore: 0,
-
+      activityCount: 0,
+      unreadNotifications: 0,
       contestRating: 0,
 
-      // =====================
-      // SOCIAL
-      // =====================
+      followers: 0,
+      following: 0,
 
-  const existingUser = await getDoc(userRef);
+      dailyChallengeCompleted: false,
 
-  if (existingUser.exists()) {
-    await setDoc(
-      userRef,
-      {
-        displayName: user.displayName || "",
-        photoURL: user.photoURL || "",
-        email: user.email || "",
-        provider,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+      completedChallenges: [],
+      solvedProblems: [],
+      projects: [],
+      badges: [],
 
-    return;
-  }
+      bio: "",
+      location: "",
+      website: "",
+      github: "",
 
-  await setDoc(userRef, {
-    uid: user.uid,
+      profileCompleted: false,
 
-    displayName: user.displayName || "",
+      selectedAvatar: "",
 
-    username: user.email?.split("@")[0] || user.uid.slice(0, 8),
+      theme: "dark",
 
-    email: user.email || "",
+      isVerified: false,
 
-    photoURL: user.photoURL || "",
-
-    provider,
-
-    role: "user",
-
-    xp: 0,
-    level: 1,
-    streak: 0,
-    rank: "Unranked",
-    arenaScore: 0,
-    activityCount: 0,
-    unreadNotifications: 0,
-    contestRating: 0,
-
-    followers: 0,
-    following: 0,
-
-    dailyChallengeCompleted: false,
-
-    completedChallenges: [],
-    solvedProblems: [],
-    projects: [],
-    badges: [],
-
-    bio: "",
-    location: "",
-    website: "",
-    github: "",
-
-    profileCompleted: false,
-
-    selectedAvatar: "",
-
-    theme: "dark",
-
-    isVerified: false,
-
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  };
 };
