@@ -303,3 +303,39 @@
 
   margin-bottom: 25px;
 }
+
+.month-row {
+  display: grid;
+
+  grid-auto-flow: column;
+
+  grid-auto-columns: 22px;
+
+  margin-bottom: 8px;
+
+  color: #8b949e;
+
+  font-size: 12px;
+
+  width: max-content;
+}
+
+.month-row span {
+  white-space: nowrap;
+}
+
+.heatmap-title-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 12px;
+}
+
+.heatmap-title-row span {
+  color: #8b949e;
+
+  font-size: 13px;
+}
