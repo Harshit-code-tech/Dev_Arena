@@ -9,7 +9,7 @@ import {
   doc,
 } from "firebase/firestore";
 
-import { db, auth } from "../config/fireBase";
+import { db } from "../config/fireBase";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -25,15 +25,15 @@ function Dashboard() {
   interface HeatmapCell {
     date: string;
     count: number;
+    month: number;
+    day: number;
+    weekIndex: number;
   }
 
   const [heatmap, setHeatmap] = useState<HeatmapCell[]>([]);
 
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
   const [logs, setLogs] = useState<any[]>([]);
 
-  const [streak] = useState(0);
 
   const [arenaScore, setArenaScore] = useState<number | null>(null);
 
@@ -44,8 +44,6 @@ function Dashboard() {
   const [dashboardReady, setDashboardReady] = useState(false);
 
   const [mostActiveDay, setMostActiveDay] = useState("");
-
-  const currentYear = new Date().getFullYear();
 
   const formatDateKey = (date: Date) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -92,25 +90,38 @@ function Dashboard() {
       const data = snapshot.data();
 
       setArenaScore(data?.arenaScore ?? 0);
+
       setUserLoaded(true);
     });
 
     return unsubscribe;
   }, [user]);
 
-  const generateYearDays = (year: number): HeatmapCell[] => {
+  const generateRollingDays = (): HeatmapCell[] => {
     const days: HeatmapCell[] = [];
 
-    const startDate = new Date(year, 0, 1);
+    const today = new Date();
 
-    const endDate = new Date(year, 11, 31);
+    const startDate = new Date(today);
+
+    // 53 weeks × 7 days = 371 cells
+    const dayOfWeek = today.getDay();
+
+    startDate.setDate(today.getDate() - (52 * 7 + dayOfWeek));
 
     const current = new Date(startDate);
 
-    while (current <= endDate) {
+    while (current <= today) {
+      const weekIndex = Math.floor(
+        (current.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
+      );
+
       days.push({
         date: formatDateKey(current),
         count: 0,
+        month: current.getMonth(),
+        day: current.getDate(),
+        weekIndex,
       });
 
       current.setDate(current.getDate() + 1);
@@ -118,9 +129,8 @@ function Dashboard() {
 
     return days;
   };
-
   useEffect(() => {
-    const yearDays = generateYearDays(selectedYear);
+    const yearDays = generateRollingDays();
 
     const activityMap = new Map<string, number>();
 
@@ -155,7 +165,7 @@ function Dashboard() {
     setMostActiveDay(highestDate);
 
     setHeatmap(populated);
-  }, [logs, selectedYear]);
+  }, [logs]);
 
   useEffect(() => {
     console.log("HEATMAP STATE:", heatmap);
@@ -170,6 +180,25 @@ function Dashboard() {
   if (!dashboardReady) {
     return <PageLoader />;
   }
+
+  // dynamic months labels based on selected year
+
+  const monthLabels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const monthStarts = heatmap.filter((cell) => cell.day === 1);
 
   return (
     <main className="dashboard">
@@ -244,17 +273,23 @@ function Dashboard() {
         {/* Heatmap Grid */}
 
         <div className="dev-heatmap-wrapper">
-          <div className="year-selector">
-            <button onClick={() => setSelectedYear(selectedYear - 1)}>◀</button>
+          <div className="heatmap-title-row">
+            <h3>Contribution Activity</h3>
 
-            <span>{selectedYear}</span>
+            <span>Last 53 Weeks</span>
+          </div>
 
-            <button
-              disabled={selectedYear >= currentYear}
-              onClick={() => setSelectedYear(selectedYear + 1)}
-            >
-              ▶
-            </button>
+          <div className="month-row">
+            {monthStarts.map((cell) => (
+              <span
+                key={cell.date}
+                style={{
+                  gridColumnStart: cell.weekIndex + 1,
+                }}
+              >
+                {monthLabels[cell.month]}
+              </span>
+            ))}
           </div>
 
           <div className="heatmap-dashboard-inside">
@@ -272,7 +307,7 @@ function Dashboard() {
                   title={
                     cell.count === 0
                       ? `No activity on ${cell.date}`
-                      : `${cell.count} activities on ${cell.date}`
+                      : `${cell.count} activities pushed to the Arena on ${cell.date}`
                   }
                   className={`heat-cell-dashboard ${level}`}
                 />
@@ -349,7 +384,7 @@ function Dashboard() {
             </div>
             <div className="leaderboard-row">
               <span>#5</span>
-              <span>Sanskriti</span>
+              <span>Priya</span>
               <span>1490</span>
             </div>
           </div>
