@@ -64,7 +64,24 @@ export const saveUser = async (user: any, provider: string) => {
     xp: 0,
     level: 1,
     streak: 0,
+
+    activeDays: 0,
+
+    lastActiveDate: "",
+
+    seasonPoints: 0,
+
+    weeklyBonusClaimed: false,
+    seasonBonusClaimed: false,
+
+    seasonNumber: 1,
+
+    seasonStartDate: serverTimestamp(),
+
+    seasonEndDate: null,
+
     rank: "Unranked",
+
     arenaScore: 0,
     activityCount: 0,
     unreadNotifications: 0,

@@ -7,6 +7,7 @@ import {
   orderBy,
   onSnapshot,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 
 import { db } from "../config/fireBase";
@@ -16,6 +17,13 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 
 import PageLoader from "../components/Skeletons/PageLoader";
+import {
+  getRankFromPoints,
+  getRankProgress,
+  getNextRank,
+} from "../utils/rankSystem";
+
+import { serverTimestamp } from "firebase/firestore";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -34,7 +42,6 @@ function Dashboard() {
 
   const [logs, setLogs] = useState<any[]>([]);
 
-
   const [arenaScore, setArenaScore] = useState<number | null>(null);
 
   const [logsLoaded, setLogsLoaded] = useState(false);
@@ -44,6 +51,26 @@ function Dashboard() {
   const [dashboardReady, setDashboardReady] = useState(false);
 
   const [mostActiveDay, setMostActiveDay] = useState("");
+
+  const [streak, setStreak] = useState(0);
+
+  const [activeDays, setActiveDays] = useState(0);
+
+  const [seasonPoints, setSeasonPoints] = useState(0);
+
+  const [seasonNumber, setSeasonNumber] = useState(1);
+
+  const [rankProgress, setRankProgress] = useState(0);
+
+  const [remainingPoints, setRemainingPoints] = useState(0);
+
+  const [nextRank, setNextRank] = useState("Mud");
+
+  const [rank, setRank] = useState("Unranked");
+
+  const [daysRemaining, setDaysRemaining] = useState(14);
+
+  const [currentRankMaxPoints, setCurrentRankMaxPoints] = useState(0);
 
   const formatDateKey = (date: Date) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -79,6 +106,8 @@ function Dashboard() {
     return unsubscribe;
   }, [user]);
 
+  // user Snapshot logic
+
   useEffect(() => {
     if (!user) return;
 
@@ -89,7 +118,57 @@ function Dashboard() {
 
       const data = snapshot.data();
 
+      const seasonStartDate = data.seasonStartDate?.toDate();
+
+      if (seasonStartDate) {
+        const today = new Date();
+
+        const seasonAge = Math.floor(
+          (today.getTime() - seasonStartDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        setDaysRemaining(Math.max(14 - seasonAge, 0));
+      }
+
+      if (seasonStartDate) {
+        const today = new Date();
+
+        const seasonAge = Math.floor(
+          (today.getTime() - seasonStartDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        if (seasonAge > 14) {
+          updateDoc(doc(db, "users", user.uid), {
+            activeDays: 0,
+
+            streak: 0,
+
+            seasonPoints: 0,
+
+            rank: "Unranked",
+
+            weeklyBonusClaimed: false,
+
+            seasonBonusClaimed: false,
+
+            seasonNumber: (data.seasonNumber || 1) + 1,
+
+            seasonStartDate: serverTimestamp(),
+          }).catch(console.error);
+        }
+      }
+
       setArenaScore(data?.arenaScore ?? 0);
+
+      setStreak(data?.streak ?? 0);
+
+      setActiveDays(data?.activeDays ?? 0);
+
+      setSeasonPoints(data?.seasonPoints ?? 0);
+
+      setSeasonNumber(data?.seasonNumber ?? 1);
+
+      setRank(data?.rank ?? "Unranked");
 
       setUserLoaded(true);
     });
@@ -129,6 +208,110 @@ function Dashboard() {
 
     return days;
   };
+
+  // streak calculation logic
+
+  useEffect(() => {
+    if (!user || logs.length === 0) return;
+
+    const dailyLogs = new Map<string, number>();
+
+    logs.forEach((log) => {
+      if (!log.createdAt) return;
+
+      const date = log.createdAt.toDate();
+
+      const key = formatDateKey(date);
+
+      dailyLogs.set(key, (dailyLogs.get(key) || 0) + 1);
+    });
+
+    const activeDayList = Array.from(dailyLogs.entries())
+      .filter(([_, count]) => count >= 2)
+      .map(([date]) => date)
+      .sort()
+      .reverse();
+
+    let currentStreak = 0;
+
+    let cursor = new Date();
+
+    cursor.setHours(0, 0, 0, 0);
+
+    while (true) {
+      const key = formatDateKey(cursor);
+
+      if (activeDayList.includes(key)) {
+        currentStreak++;
+
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    let calculatedSeasonPoints = 0;
+
+    activeDayList.forEach((date) => {
+      const logsOnDay = dailyLogs.get(date) || 0;
+
+      calculatedSeasonPoints += 10;
+
+      if (logsOnDay > 2) {
+        calculatedSeasonPoints += (logsOnDay - 2) * 5;
+      }
+    });
+
+    let weeklyBonusClaimed = false;
+
+    if (currentStreak >= 7) {
+      calculatedSeasonPoints += 50;
+      weeklyBonusClaimed = true;
+    }
+
+    let seasonBonusClaimed = false;
+
+    if (currentStreak >= 14) {
+      calculatedSeasonPoints += 150;
+      seasonBonusClaimed = true;
+    }
+
+    const totalActiveDays = activeDayList.length;
+
+    const rankData = getRankFromPoints(calculatedSeasonPoints);
+
+    const calculatedRank = rankData.name;
+
+    setStreak(currentStreak);
+
+    setActiveDays(totalActiveDays);
+
+    setSeasonPoints(calculatedSeasonPoints);
+
+    setRank(calculatedRank);
+
+    const needsUpdate =
+      streak !== currentStreak ||
+      activeDays !== totalActiveDays ||
+      seasonPoints !== calculatedSeasonPoints ||
+      rank !== calculatedRank;
+
+    if (needsUpdate) {
+      updateDoc(doc(db, "users", user.uid), {
+        streak: currentStreak,
+        activeDays: totalActiveDays,
+        seasonPoints: calculatedSeasonPoints,
+        rank: calculatedRank,
+        weeklyBonusClaimed,
+        seasonBonusClaimed,
+      });
+    }
+
+    console.log("Current Streak:", currentStreak);
+  }, [logs]);
+
+  // heatmap logic
+
   useEffect(() => {
     const yearDays = generateRollingDays();
 
@@ -177,6 +360,25 @@ function Dashboard() {
     }
   }, [user, logsLoaded, userLoaded]);
 
+  // progress calculator
+  useEffect(() => {
+    setRankProgress(getRankProgress(seasonPoints));
+
+    const next = getNextRank(seasonPoints);
+
+    setNextRank(next?.name ?? "Developer");
+
+    if (next) {
+      setRemainingPoints(Math.max(next.points - seasonPoints, 0));
+
+      setCurrentRankMaxPoints(next.points);
+    } else {
+      setRemainingPoints(0);
+
+      setCurrentRankMaxPoints(seasonPoints);
+    }
+  }, [seasonPoints]);
+
   if (!dashboardReady) {
     return <PageLoader />;
   }
@@ -199,6 +401,16 @@ function Dashboard() {
   ];
 
   const monthStarts = heatmap.filter((cell) => cell.day === 1);
+
+  const getCurrentRankMax = () => {
+    const next = getNextRank(seasonPoints);
+
+    if (!next) {
+      return seasonPoints;
+    }
+
+    return next.points;
+  };
 
   return (
     <main className="dashboard">
@@ -224,21 +436,53 @@ function Dashboard() {
         </div>
 
         <div className="stat-card">
-          <h3>Global Rank</h3>
-          <h2>#124</h2>
-          <p>↑ 18 places</p>
+          <h3>Season Points</h3>
+          <h2>{seasonPoints}</h2>
+          <p>{activeDays} Active Days</p>
+        </div>
+
+        <div className="stat-card rank-card">
+          <h3>Developer Rank</h3>
+
+          <h2>{rank}</h2>
+
+          <p>
+            {seasonPoints} SP • {remainingPoints} Remaining
+          </p>
+
+          <small className="next-rank-label">➜ {nextRank}</small>
+
+          <div className="rank-progress">
+            <div
+              className="rank-progress-fill"
+              style={{
+                width: `${rankProgress}%`,
+              }}
+            />
+          </div>
         </div>
 
         <div className="stat-card">
-          <h3>Contest Rating</h3>
-          <h2>1670</h2>
-          <p>Top 12%</p>
+          <h3>Season Status</h3>
+
+          <h2>Season #{seasonNumber}</h2>
+
+          <p>Ends in {daysRemaining} Days</p>
+
+          <div style={{ marginTop: "12px" }}>
+            <strong>{rank}</strong>
+          </div>
+
+          <div style={{ marginTop: "8px" }}>
+            {seasonPoints} / {currentRankMaxPoints} SP
+          </div>
         </div>
 
         <div className="stat-card">
           <h3>Current Streak</h3>
-          <h2>11 Days</h2>
-          <p>🔥 Consistent</p>
+          <h2>{streak} Days</h2>
+
+          <p>{streak === 0 ? "Start building 🚀" : "🔥 Consistent"}</p>
         </div>
       </section>
 

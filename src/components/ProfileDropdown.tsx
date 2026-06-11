@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/fireBase";
 import "../styles/ProfileDropdown.css";
+import { useAuth } from "../context/AuthContext";
 
 interface Props {
   open: boolean;
@@ -16,9 +17,15 @@ export default function ProfileDropdown({ open }: Props) {
     await signOut(auth);
     navigate("/");
   };
+  const { user } = useAuth();
 
   return (
     <div className="profile-dropdown">
+      <div className="profile-info">
+        <h3>{user?.displayName}</h3>
+        <p>{user?.email}</p>
+      </div>
+
       <button onClick={() => navigate("/profile")}>
         <i className="bx bx-user"></i>
 
