@@ -10,6 +10,7 @@ import {
 } from "../../config/fireBase";
 import { saveUser } from "../../components/saveUser";
 import { useAuth } from "../../context/AuthContext";
+import { Color2FA } from "../../components/Color2FA";
 
 
 /* =========================================================
@@ -64,6 +65,8 @@ function Signup() {
   const [error, setError] = useState("");
 
   const [loading, setLoading] = useState(false);
+
+  const [show2FASetup, setShow2FASetup] = useState(false);
 
   const googleSignup = async () => {
     try {
@@ -213,8 +216,8 @@ function Signup() {
       // Instead of relying purely on Firebase, we use our Custom JWT
       await loginWithToken(data.token);
 
-      toast.success(`Welcome to DevArena, ${firstName}!`);
-      navigate("/Dashboard");
+      toast.success(`Welcome to DevArena, ${firstName}! Let's setup your 2FA.`);
+      setShow2FASetup(true);
     } catch (error: any) {
       console.error(error);
       const errorMessage = error.message;
@@ -440,9 +443,19 @@ function Signup() {
             </div>
           )}
 
-          {/* Form */}
+          {/* Form or 2FA Setup */}
 
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          {show2FASetup ? (
+             <div style={{ margin: "20px 0" }}>
+                 <Color2FA 
+                    isSetup={true} 
+                    onSetupComplete={() => {
+                        navigate("/dashboard");
+                    }} 
+                 />
+             </div>
+          ) : (
+             <form className="auth-form" onSubmit={handleSubmit} noValidate>
             {/* Name Row */}
 
             <div className="name-row">
@@ -593,6 +606,7 @@ function Signup() {
               )}
             </button>
           </form>
+          )}
 
           {/* Divider */}
 

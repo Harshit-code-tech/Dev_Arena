@@ -28,6 +28,12 @@ router.post("/send-otp", authController.sendOTPController);
 // POST /api/auth/verify-otp
 router.post("/verify-otp", authController.verifyOTP);
 
+// POST /api/auth/forgot-password
+router.post("/forgot-password", authController.forgotPassword);
+
+// POST /api/auth/reset-password
+router.post("/reset-password", authController.resetPassword);
+
 // GET /api/auth/me (Protected route to get current user based on Custom JWT)
 router.get("/me", protect, authController.getCurrentUser);
 

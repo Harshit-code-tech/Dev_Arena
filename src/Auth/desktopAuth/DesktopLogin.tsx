@@ -11,7 +11,7 @@ import {
 import toast from "react-hot-toast";
 import { saveUser } from "../../components/saveUser";
 import { useAuth } from "../../context/AuthContext";
-import { Color2FADemo } from "../../components/Color2FADemo";
+import { Color2FA } from "../../components/Color2FA";
 
 function Login() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const { loginWithToken } = useAuth();
   const [pending2FAToken, setPending2FAToken] = useState<string | null>(null);
+  const [verifyGrid, setVerifyGrid] = useState<string[]>([]);
 
   const googleLogin = async () => {
     try {
@@ -127,7 +128,12 @@ function Login() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ 
+          email: email.trim(), 
+          password,
+          remember,
+          deviceToken: localStorage.getItem("deviceToken")
+        }),
       });
 
       const data = await res.json();
@@ -138,8 +144,13 @@ function Login() {
 
       if (data.requires2FA) {
         setPending2FAToken(data.tempToken);
+        setVerifyGrid(data.verifyGrid || []);
         toast("2FA Required", { icon: "🔒" });
         return; // Don't redirect yet
+      }
+
+      if (data.deviceToken) {
+          localStorage.setItem("deviceToken", data.deviceToken);
       }
 
       await loginWithToken(data.token);
@@ -439,9 +450,18 @@ function Login() {
 
           {pending2FAToken ? (
              <div style={{ margin: "20px 0" }}>
-                 <Color2FADemo />
-                 {/* Note: The UI developer will need to update Color2FADemo to accept the pending2FAToken, 
-                     make the /api/auth/verify-2fa request, and call loginWithToken upon success! */}
+                 <Color2FA 
+                    tempToken={pending2FAToken} 
+                    verifyGrid={verifyGrid} 
+                    onVerifySuccess={async (token, deviceToken) => {
+                        if (deviceToken) {
+                            localStorage.setItem("deviceToken", deviceToken);
+                        }
+                        await loginWithToken(token);
+                        toast.success("Login successful!");
+                        navigate("/dashboard");
+                    }} 
+                 />
              </div>
           ) : (
             <form
