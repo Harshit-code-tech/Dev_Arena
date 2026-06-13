@@ -81,6 +81,9 @@ model User {
   emailOtpExpiresAt      DateTime? @map("email_otp_expires_at")
   passwordResetToken     String?   @map("password_reset_token")
   passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+  
+  isTwoFactorEnabled     Boolean   @default(false) @map("is_two_factor_enabled")
+  twoFactorColorSequence String[]  @map("two_factor_color_sequence")
 
   dsaLogs          DSALog[]
   fullstackLogs    FullstackLog[]

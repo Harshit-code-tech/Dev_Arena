@@ -16,9 +16,32 @@ declare global {
 // This middleware verifies the JWT token on protected routes.
 // It should attach req.user = { id, email, name } on success.
 
-export const protect = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    // Placeholder - let all requests through until auth is implemented
-    // REMOVE this and implement JWT verification before production
-    req.user = { id: "2fd0345b-50e0-4c1b-beb2-2cf152feb23c", email: "test@devarena.dev", name: "Harshit Ghosh" };
-    next();
+import jwt from "jsonwebtoken";
+
+export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        let token;
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (!token) {
+            res.status(401).json({ message: "Not authorized, no token provided" });
+            return;
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret") as any;
+        
+        // Exclude temp tokens used for 2FA
+        if (decoded.is2FaPending) {
+            res.status(401).json({ message: "Not authorized, 2FA pending" });
+            return;
+        }
+
+        // Attach userId to request
+        req.user = { id: decoded.userId, email: "", name: "" }; // You can fetch full user from DB if needed
+        next();
+    } catch (error) {
+        res.status(401).json({ message: "Not authorized, invalid token" });
+    }
 };

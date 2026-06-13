@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/authDPages.css";
 
 import { signInWithPopup } from "firebase/auth";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import {
   auth,
   googleProvider,
@@ -11,6 +10,8 @@ import {
 } from "../../config/fireBase";
 import toast from "react-hot-toast";
 import { saveUser } from "../../components/saveUser";
+import { useAuth } from "../../context/AuthContext";
+import { Color2FADemo } from "../../components/Color2FADemo";
 
 function Login() {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { loginWithToken } = useAuth();
+  const [pending2FAToken, setPending2FAToken] = useState<string | null>(null);
 
   const googleLogin = async () => {
     try {
@@ -121,51 +124,37 @@ function Login() {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
 
-      console.log(userCredential.user);
+      const data = await res.json();
 
-      await saveUser(userCredential.user, "email");
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
+      if (data.requires2FA) {
+        setPending2FAToken(data.tempToken);
+        toast("2FA Required", { icon: "🔒" });
+        return; // Don't redirect yet
+      }
+
+      await loginWithToken(data.token);
       toast.success("Login successful!");
-
       navigate("/dashboard");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
+      const errorMessage = error.message;
 
-      switch (error.code) {
-        case "auth/invalid-email":
-          setError("Please enter a valid email address.");
-          toast.error("Please enter a valid email address.");
-          break;
-
-        case "auth/invalid-credential":
-          setError("Incorrect email or password.");
-          toast.error("Incorrect email or password.");
-          break;
-
-        case "auth/user-disabled":
-          setError("This account has been disabled.");
-          toast.error("This account has been disabled.");
-          break;
-
-        case "auth/too-many-requests":
-          setError("Too many failed attempts. Please try again later.");
-          toast.error("Too many failed attempts. Please try again later.");
-          break;
-
-        case "auth/network-request-failed":
-          setError("Network error. Check your internet connection.");
-          toast.error("Network error. Check your internet connection.");
-          break;
-
-        default:
-          setError("Something went wrong. Please try again.");
-          toast.error("Something went wrong. Please try again.");
+      if (errorMessage.toLowerCase().includes("invalid")) {
+        setError("Incorrect email or password.");
+        toast.error("Incorrect email or password.");
+      } else {
+        setError(errorMessage || "Something went wrong. Please try again.");
+        toast.error(errorMessage || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -446,15 +435,22 @@ function Login() {
             </div>
           )}
 
-          {/* Form */}
+          {/* Form or 2FA Grid */}
 
-          <form
-            className="auth-form"
-            noValidate
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-          >
+          {pending2FAToken ? (
+             <div style={{ margin: "20px 0" }}>
+                 <Color2FADemo />
+                 {/* Note: The UI developer will need to update Color2FADemo to accept the pending2FAToken, 
+                     make the /api/auth/verify-2fa request, and call loginWithToken upon success! */}
+             </div>
+          ) : (
+            <form
+              className="auth-form"
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+            >
             {/* Email */}
 
             <div className="input-group">
@@ -534,6 +530,7 @@ function Login() {
               {loading ? <span className="btn-loader"></span> : "Sign in"}
             </button>
           </form>
+          )}
 
           {/* Divider */}
 

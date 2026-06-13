@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import "../../styles/authDPages.css";
 import { signInWithPopup } from "firebase/auth";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {
   auth,
   googleProvider,
   githubProvider,
 } from "../../config/fireBase";
 import { saveUser } from "../../components/saveUser";
+import { useAuth } from "../../context/AuthContext";
 
 
 /* =========================================================
@@ -44,6 +44,7 @@ function getStrength(pw: string): {
 
 function Signup() {
   const navigate = useNavigate();
+  const { loginWithToken } = useAuth();
 
   /* =========================================================
      STATES
@@ -193,56 +194,37 @@ function Signup() {
     try {
       setLoading(true);
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
-
-      // Save user's full name in Firebase Auth
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName.trim()} ${lastName.trim()}`,
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: email.trim(),
+          password: password,
+        }),
       });
-      
-      await saveUser(userCredential.user, "email");
 
-      console.log(userCredential.user);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Instead of relying purely on Firebase, we use our Custom JWT
+      await loginWithToken(data.token);
 
       toast.success(`Welcome to DevArena, ${firstName}!`);
-
       navigate("/Dashboard");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
+      const errorMessage = error.message;
 
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          setError("An account with this email already exists.");
-          toast.error("An account with this email already exists.");
-          break;
-
-        case "auth/invalid-email":
-          setError("Please enter a valid email address.");
-          toast.error("Please enter a valid email address.");
-          break;
-
-        case "auth/weak-password":
-          setError("Password must be at least 6 characters.");
-          toast.error("Password must be at least 6 characters.");
-          break;
-
-        case "auth/network-request-failed":
-          setError("Network error. Check your internet connection.");
-          toast.error("Network error. Check your internet connection.");
-          break;
-
-        case "auth/too-many-requests":
-          setError("Too many attempts. Please try again later.");
-          toast.error("Too many attempts. Please try again later.");
-          break;
-
-        default:
-          setError("Something went wrong. Please try again.");
-          toast.error("Something went wrong. Please try again.");
+      if (errorMessage.includes("already exists")) {
+        setError("An account with this email already exists.");
+        toast.error("An account with this email already exists.");
+      } else {
+        setError(errorMessage || "Something went wrong. Please try again.");
+        toast.error(errorMessage || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);

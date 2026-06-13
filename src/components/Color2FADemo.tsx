@@ -36,6 +36,7 @@ export const Color2FADemo: React.FC = () => {
   // Verify State
   const [verifyGridColors, setVerifyGridColors] = useState<string[]>([]);
   const [currentAttempt, setCurrentAttempt] = useState<string[]>([]);
+  const [failedAttempts, setFailedAttempts] = useState<number>(0);
   const [statusMessage, setStatusMessage] = useState<string>('Select your 3 colors in order.');
 
   // Initialize the verification grid
@@ -77,7 +78,16 @@ export const Color2FADemo: React.FC = () => {
     const currentIndex = newAttempt.length - 1;
     if (setupSequence[currentIndex] !== color) {
       // Failed attempt
-      setStatusMessage('Incorrect sequence! Try again.');
+      const newFails = failedAttempts + 1;
+      setFailedAttempts(newFails);
+      
+      if (newFails >= 3) {
+        setStatusMessage('Max attempts reached. Falling back to Email OTP...');
+        // Here you would trigger the backend to send an OTP
+        return;
+      }
+
+      setStatusMessage(`Incorrect sequence! Try again. (${newFails}/3 failed attempts)`);
       setTimeout(() => {
         setStatusMessage('Click your 3 colors in the exact order.');
         initializeVerifyGrid(setupSequence); // Reshuffle grid on failure
@@ -168,12 +178,14 @@ export const Color2FADemo: React.FC = () => {
           </div>
           
           <div style={{ marginTop: '30px', textAlign: 'center' }}>
-             <p>Attempt: {currentAttempt.length} / {requiredLength}</p>
+             <p>Progress: {currentAttempt.length} / {requiredLength}</p>
+             <p style={{ color: '#ef4444', fontSize: '0.9em', marginTop: '5px' }}>Failed Attempts: {failedAttempts} / 3</p>
              <button 
                 onClick={() => {
                   setMode('setup');
                   setSetupSequence([]);
                   setCurrentAttempt([]);
+                  setFailedAttempts(0);
                   setStatusMessage('Select your 3 colors in order.');
                 }}
                 style={{ marginTop: '15px', padding: '8px 16px', background: '#3f3f46', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}

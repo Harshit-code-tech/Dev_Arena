@@ -21,6 +21,11 @@ export const saveUser = async (user: any, provider: string) => {
 
     if (!res.ok) {
       console.error("Failed to sync user with Neon backend", await res.text());
+    } else {
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
     }
   } catch (error) {
     console.error("Error syncing user with backend:", error);
