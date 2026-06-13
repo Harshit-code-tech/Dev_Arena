@@ -16,7 +16,7 @@ const generateToken = (userId: string) => {
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password, name } = req.body;
-        
+
         // 1. Missing fields check
         if (!email || !password || !name) {
             res.status(400).json({ message: "Name, email, and password are required" });
@@ -64,7 +64,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password, deviceToken } = req.body;
-        
+
         // 1. Missing fields check
         if (!email || !password) {
             res.status(400).json({ message: "Email and password are required" });
@@ -106,23 +106,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         // 5. If 2FA is enabled and device is not trusted, require second factor
         if (user.isTwoFactorEnabled && !isTrustedDevice) {
             const tempToken = jwt.sign(
-                { userId: user.id, is2FaPending: true, rememberDevice: req.body.remember === true }, 
-                JWT_SECRET, 
+                { userId: user.id, is2FaPending: true, rememberDevice: req.body.remember === true },
+                JWT_SECRET,
                 { expiresIn: "10m" }
             );
-            
+
             // Generate the secure 9-color grid for the frontend
             const MASTER_COLOR_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#ec4899'];
             const secretColors = user.twoFactorColorSequence || [];
             const remainingColors = MASTER_COLOR_PALETTE.filter(c => !secretColors.includes(c));
-            
+
             // Shuffle remaining and pick enough to make 9 total
             for (let i = remainingColors.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [remainingColors[i], remainingColors[j]] = [remainingColors[j], remainingColors[i]];
             }
             const fillers = remainingColors.slice(0, 9 - secretColors.length);
-            
+
             const gridPool = [...secretColors, ...fillers];
             // Shuffle the final 9-grid
             for (let i = gridPool.length - 1; i > 0; i--) {
@@ -130,11 +130,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
                 [gridPool[i], gridPool[j]] = [gridPool[j], gridPool[i]];
             }
 
-            res.status(200).json({ 
-                requires2FA: true, 
-                tempToken, 
+            res.status(200).json({
+                requires2FA: true,
+                tempToken,
                 verifyGrid: gridPool,
-                message: "2FA challenge required" 
+                message: "2FA challenge required"
             });
             return;
         }
@@ -175,7 +175,7 @@ export const setup2FA = async (req: Request, res: Response): Promise<void> => {
 export const verify2FA = async (req: Request, res: Response): Promise<void> => {
     try {
         const { tempToken, attemptSequence } = req.body;
-        
+
         // Decode temp token
         const decoded = jwt.verify(tempToken, JWT_SECRET) as any;
         if (!decoded.is2FaPending) {
@@ -198,7 +198,7 @@ export const verify2FA = async (req: Request, res: Response): Promise<void> => {
 
         // Generate real token
         const token = generateToken(user.id);
-        
+
         // Generate device token if they requested to remember the device
         let deviceToken = undefined;
         if (decoded.rememberDevice) {
@@ -215,14 +215,14 @@ export const verify2FA = async (req: Request, res: Response): Promise<void> => {
 export const sendOTPController = async (req: Request, res: Response): Promise<void> => {
     try {
         const { tempToken, confirmEmail } = req.body;
-        
+
         if (!confirmEmail) {
             res.status(400).json({ message: "Please provide your email address for verification" });
             return;
         }
 
         const decoded = jwt.verify(tempToken, JWT_SECRET) as any;
-        
+
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user) {
             res.status(404).json({ message: "User not found" });
@@ -260,7 +260,7 @@ export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
     try {
         const { tempToken, otp } = req.body;
         const decoded = jwt.verify(tempToken, JWT_SECRET) as any;
-        
+
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user || user.emailOtp !== otp || !user.emailOtpExpiresAt) {
             res.status(400).json({ message: "Invalid OTP" });
@@ -280,7 +280,7 @@ export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
 
         // Generate real token
         const token = generateToken(user.id);
-        
+
         // Generate device token if they requested to remember the device
         let deviceToken = undefined;
         if (decoded.rememberDevice) {
@@ -306,9 +306,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         const user = await prisma.user.findUnique({ where: { email: trimmedEmail } });
 
         if (!user) {
-            // We return 200 anyway for security (prevent email enumeration), but for a small app 404 is fine
-            // We will stick to 404 so your frontend can show a clear error
-            res.status(404).json({ message: "User not found" });
+            res.status(404).json({ message: "Email is not registered with us" });
             return;
         }
 
@@ -359,7 +357,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             res.status(401).json({ message: "Invalid token for password reset" });
             return;
         }
-        
+
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user || user.emailOtp !== otp || !user.emailOtpExpiresAt) {
             res.status(400).json({ message: "Invalid OTP" });
@@ -377,12 +375,12 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         // Update password and clear OTP/2FA (since they might have forgotten 2FA)
         await prisma.user.update({
             where: { id: user.id },
-            data: { 
+            data: {
                 passwordHash,
-                emailOtp: null, 
+                emailOtp: null,
                 emailOtpExpiresAt: null,
                 isTwoFactorEnabled: false, // Optional: clear 2FA so they don't get locked out
-                twoFactorColorSequence: [] 
+                twoFactorColorSequence: []
             }
         });
 

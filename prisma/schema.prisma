@@ -85,6 +85,17 @@ model User {
   isTwoFactorEnabled     Boolean   @default(false) @map("is_two_factor_enabled")
   twoFactorColorSequence String[]  @map("two_factor_color_sequence")
 
+  // ── Stats ──────────────────────────────────────────────────
+  arenaScore         Int      @default(0) @map("arena_score")
+  streak             Int      @default(0)
+  activeDays         Int      @default(0) @map("active_days")
+  seasonPoints       Int      @default(0) @map("season_points")
+  seasonNumber       Int      @default(1) @map("season_number")
+  rank               String   @default("Unranked")
+  weeklyBonusClaimed Boolean  @default(false) @map("weekly_bonus_claimed")
+  seasonBonusClaimed Boolean  @default(false) @map("season_bonus_claimed")
+  seasonStartDate    DateTime @default(now()) @map("season_start_date")
+
   dsaLogs          DSALog[]
   fullstackLogs    FullstackLog[]
   projects         Project[]

@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { saveUser } from "../../components/saveUser";
 import { useAuth } from "../../context/AuthContext";
 import { Color2FA } from "../../components/Color2FA";
+import { ForgotPasswordModal } from "../../components/ForgotPasswordModal";
 
 function Login() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ function Login() {
   const { loginWithToken } = useAuth();
   const [pending2FAToken, setPending2FAToken] = useState<string | null>(null);
   const [verifyGrid, setVerifyGrid] = useState<string[]>([]);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const googleLogin = async () => {
     try {
@@ -436,6 +438,8 @@ function Login() {
             </p>
           </div>
 
+          {showForgotModal && <ForgotPasswordModal onClose={() => setShowForgotModal(false)} />}
+
           {/* Error */}
 
           {error && (
@@ -533,7 +537,7 @@ function Login() {
               <button
                 type="button"
                 className="forgot-link"
-                onClick={() => navigate("/forgot-password")}
+                onClick={() => setShowForgotModal(true)}
               >
                 Forgot password?
               </button>

@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/authMPage.css";
 
 import { signInWithPopup } from "firebase/auth";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider, githubProvider } from "../../config/fireBase";
 import toast from "react-hot-toast";
 import { saveUser } from "../../components/saveUser";
+import { useAuth } from "../../context/AuthContext";
+import { Color2FA } from "../../components/Color2FA";
+import { ForgotPasswordModal } from "../../components/ForgotPasswordModal";
 
 function Login() {
   const navigate = useNavigate();
@@ -18,6 +20,10 @@ function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { loginWithToken } = useAuth();
+  const [pending2FAToken, setPending2FAToken] = useState<string | null>(null);
+  const [verifyGrid, setVerifyGrid] = useState<string[]>([]);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const googleLogin = async () => {
     try {
@@ -116,51 +122,47 @@ function Login() {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: email.trim(), 
+          password,
+          // Mobile could also have 'remember' state, omitted for brevity here unless added later
+          deviceToken: localStorage.getItem("deviceToken")
+        }),
+      });
 
-      console.log(userCredential.user);
+      const data = await res.json();
 
-      await saveUser(userCredential.user, "email");
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
+      if (data.requires2FA) {
+        setPending2FAToken(data.tempToken);
+        setVerifyGrid(data.verifyGrid || []);
+        toast("2FA Required", { icon: "🔒" });
+        return; // Don't redirect yet
+      }
+
+      if (data.deviceToken) {
+          localStorage.setItem("deviceToken", data.deviceToken);
+      }
+
+      await loginWithToken(data.token);
       toast.success("Login successful!");
-
       navigate("/dashboard");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
+      const errorMessage = error.message;
 
-      switch (error.code) {
-        case "auth/invalid-email":
-          setError("Please enter a valid email address.");
-          toast.error("Please enter a valid email address.");
-          break;
-
-        case "auth/invalid-credential":
-          setError("Incorrect email or password.");
-          toast.error("Incorrect email or password.");
-          break;
-
-        case "auth/user-disabled":
-          setError("This account has been disabled.");
-          toast.error("This account has been disabled.");
-          break;
-
-        case "auth/too-many-requests":
-          setError("Too many failed attempts. Please try again later.");
-          toast.error("Too many failed attempts. Please try again later.");
-          break;
-
-        case "auth/network-request-failed":
-          setError("Network error. Check your internet connection.");
-          toast.error("Network error. Check your internet connection.");
-          break;
-
-        default:
-          setError("Something went wrong. Please try again.");
-          toast.error("Something went wrong. Please try again.");
+      if (errorMessage.toLowerCase().includes("invalid")) {
+        setError("Incorrect email or password.");
+        toast.error("Incorrect email or password.");
+      } else {
+        setError(errorMessage || "Something went wrong. Please try again.");
+        toast.error(errorMessage || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -214,7 +216,26 @@ function Login() {
           </div>
         )}
 
-        {/* FORM */}
+        {/* FORGOT MODAL */}
+        {showForgotModal && <ForgotPasswordModal onClose={() => setShowForgotModal(false)} />}
+
+        {/* FORM OR 2FA */}
+        {pending2FAToken ? (
+            <div style={{ margin: "20px 0" }}>
+                <Color2FA 
+                    tempToken={pending2FAToken} 
+                    verifyGrid={verifyGrid} 
+                    onVerifySuccess={async (token, deviceToken) => {
+                        if (deviceToken) {
+                            localStorage.setItem("deviceToken", deviceToken);
+                        }
+                        await loginWithToken(token);
+                        toast.success("Login successful!");
+                        navigate("/dashboard");
+                    }} 
+                />
+            </div>
+        ) : (
         <form
           noValidate
           onSubmit={(e) => {
@@ -261,7 +282,7 @@ function Login() {
 
           {/* FORGOT PASSWORD */}
           <div className="forgot-wrap">
-            <span onClick={() => toast("Forgot password feature soon!")}>
+            <span onClick={() => setShowForgotModal(true)}>
               Forgot Password?
             </span>
           </div>
@@ -276,6 +297,7 @@ function Login() {
             {loading ? <span className="btn-loader"></span> : "Sign in"}
           </button>
         </form>
+        )}
 
         {/* SWITCH */}
         <p className="auth-switch">

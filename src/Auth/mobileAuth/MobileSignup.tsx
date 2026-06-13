@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/authMPage.css";
 
 import { signInWithPopup } from "firebase/auth";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, googleProvider, githubProvider } from "../../config/fireBase";
 import { saveUser } from "../../components/saveUser";
+import { useAuth } from "../../context/AuthContext";
+import { Color2FA } from "../../components/Color2FA";
 
 function getStrength(pw: string): {
   score: number;
@@ -55,6 +56,8 @@ function Signup() {
   const [error, setError] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const { loginWithToken } = useAuth();
+  const [show2FASetup, setShow2FASetup] = useState(false);
 
   const googleSignup = async () => {
     try {
@@ -185,56 +188,36 @@ function Signup() {
     try {
       setLoading(true);
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
-
-      // Save user's full name in Firebase Auth
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName.trim()} ${lastName.trim()}`,
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: email.trim(),
+          password: password,
+        }),
       });
 
-      await saveUser(userCredential.user, "email");
+      const data = await res.json();
 
-      console.log(userCredential.user);
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
 
-      toast.success(`Welcome to DevArena, ${firstName}!`);
+      await loginWithToken(data.token);
 
-      navigate("/Dashboard");
+      toast.success(`Welcome to DevArena, ${firstName}! Let's setup your 2FA.`);
+      setShow2FASetup(true);
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
+      const errorMessage = error.message;
 
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          setError("An account with this email already exists.");
-          toast.error("An account with this email already exists.");
-          break;
-
-        case "auth/invalid-email":
-          setError("Please enter a valid email address.");
-          toast.error("Please enter a valid email address.");
-          break;
-
-        case "auth/weak-password":
-          setError("Password must be at least 6 characters.");
-          toast.error("Password must be at least 6 characters.");
-          break;
-
-        case "auth/network-request-failed":
-          setError("Network error. Check your internet connection.");
-          toast.error("Network error. Check your internet connection.");
-          break;
-
-        case "auth/too-many-requests":
-          setError("Too many attempts. Please try again later.");
-          toast.error("Too many attempts. Please try again later.");
-          break;
-
-        default:
-          setError("Something went wrong. Please try again.");
-          toast.error("Something went wrong. Please try again.");
+      if (errorMessage.includes("already exists")) {
+        setError("An account with this email already exists.");
+        toast.error("An account with this email already exists.");
+      } else {
+        setError(errorMessage || "Something went wrong. Please try again.");
+        toast.error(errorMessage || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -301,7 +284,17 @@ function Signup() {
           </div>
         )}
 
-        {/* FORM */}
+        {/* FORM OR 2FA SETUP */}
+        {show2FASetup ? (
+            <div style={{ margin: "20px 0" }}>
+                <Color2FA 
+                    isSetup={true} 
+                    onSetupComplete={() => {
+                        navigate("/dashboard");
+                    }} 
+                />
+            </div>
+        ) : (
         <form onSubmit={handleSubmit} noValidate>
           {/* FULL NAME */}
           <div className="name-row">
@@ -428,6 +421,7 @@ function Signup() {
             {loading ? <span className="btn-loader"></span> : "Create account"}
           </button>
         </form>
+        )}
 
         {/* LOGIN SWITCH */}
         <p className="auth-switch">

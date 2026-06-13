@@ -17,6 +17,7 @@ import leaderboardRoutes from "./routes/leaderboard.routes";
 import challengeRoutes from "./routes/challenge.routes";
 import blogRoutes from "./routes/blog.routes";
 import releaseRoutes from "./routes/release.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -43,6 +44,7 @@ app.get("/health", (_req: Request, res: Response) => {
 
 // ── API routes ────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/dsa", dsaRoutes);
 app.use("/api/fullstack", fullstackRoutes);
 app.use("/api/projects", projectRoutes);

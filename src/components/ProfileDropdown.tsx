@@ -10,14 +10,14 @@ interface Props {
 
 export default function ProfileDropdown({ open }: Props) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   if (!open) return null;
 
-  const logout = async () => {
-    await signOut(auth);
+  const handleLogout = async () => {
+    logout();
     navigate("/");
   };
-  const { user } = useAuth();
 
   return (
     <div className="profile-dropdown">
@@ -38,7 +38,7 @@ export default function ProfileDropdown({ open }: Props) {
         <span>Settings</span>
       </button>
 
-      <button className="logout-btn" onClick={logout}>
+      <button className="logout-btn" onClick={handleLogout}>
         <i className="bx bx-log-out"></i>
 
         <span>Logout</span>

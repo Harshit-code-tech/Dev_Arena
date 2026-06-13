@@ -1,17 +1,5 @@
 // import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-
-import { db } from "../config/fireBase";
-
 import { useAuth } from "../context/AuthContext";
 
 import { useState, useEffect } from "react";
@@ -22,8 +10,6 @@ import {
   getRankProgress,
   getNextRank,
 } from "../utils/rankSystem";
-
-import { serverTimestamp } from "firebase/firestore";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -83,98 +69,70 @@ function Dashboard() {
     return <PageLoader />;
   }
 
-  useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, "logs"),
-      where("uid", "==", user.uid),
-      orderBy("createdAt", "desc"),
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const activities = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setLogs(activities);
-
-      setLogsLoaded(true);
-    });
-
-    return unsubscribe;
-  }, [user]);
-
-  // user Snapshot logic
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !token) return;
 
-    const ref = doc(db, "users", user.uid);
+    const fetchDashboard = async () => {
+      try {
+        const res = await fetch("/api/dashboard/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch dashboard");
+        
+        const data = await res.json();
+        
+        // Map logs so createdAt is a Date object (simulating Firestore's toDate())
+        const parsedLogs = data.logs.map((log: any) => ({
+          ...log,
+          createdAt: { toDate: () => new Date(log.createdAt) }
+        }));
+        setLogs(parsedLogs);
+        setLogsLoaded(true);
 
-    const unsubscribe = onSnapshot(ref, (snapshot) => {
-      if (!snapshot.exists()) return;
+        const stats = data.stats;
+        let seasonStartDate = stats.seasonStartDate ? new Date(stats.seasonStartDate) : null;
+        let finalSeasonNumber = stats.seasonNumber;
 
-      const data = snapshot.data();
+        if (seasonStartDate) {
+          const today = new Date();
+          const seasonAge = Math.floor((today.getTime() - seasonStartDate.getTime()) / (1000 * 60 * 60 * 24));
+          setDaysRemaining(Math.max(14 - seasonAge, 0));
 
-      const seasonStartDate = data.seasonStartDate?.toDate();
-
-      if (seasonStartDate) {
-        const today = new Date();
-
-        const seasonAge = Math.floor(
-          (today.getTime() - seasonStartDate.getTime()) / (1000 * 60 * 60 * 24),
-        );
-
-        setDaysRemaining(Math.max(14 - seasonAge, 0));
-      }
-
-      if (seasonStartDate) {
-        const today = new Date();
-
-        const seasonAge = Math.floor(
-          (today.getTime() - seasonStartDate.getTime()) / (1000 * 60 * 60 * 24),
-        );
-
-        if (seasonAge > 14) {
-          updateDoc(doc(db, "users", user.uid), {
-            activeDays: 0,
-
-            streak: 0,
-
-            seasonPoints: 0,
-
-            rank: "Unranked",
-
-            weeklyBonusClaimed: false,
-
-            seasonBonusClaimed: false,
-
-            seasonNumber: (data.seasonNumber || 1) + 1,
-
-            seasonStartDate: serverTimestamp(),
-          }).catch(console.error);
+          if (seasonAge > 14) {
+            finalSeasonNumber = (stats.seasonNumber || 1) + 1;
+            fetch("/api/dashboard/me", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+              body: JSON.stringify({
+                activeDays: 0,
+                streak: 0,
+                seasonPoints: 0,
+                rank: "Unranked",
+                weeklyBonusClaimed: false,
+                seasonBonusClaimed: false,
+                seasonNumber: finalSeasonNumber,
+                resetSeason: true
+              })
+            }).catch(console.error);
+          }
         }
+
+        setArenaScore(stats.arenaScore ?? 0);
+        setStreak(stats.streak ?? 0);
+        setActiveDays(stats.activeDays ?? 0);
+        setSeasonPoints(stats.seasonPoints ?? 0);
+        setSeasonNumber(finalSeasonNumber ?? 1);
+        setRank(stats.rank ?? "Unranked");
+        setUserLoaded(true);
+      } catch (err) {
+        console.error(err);
       }
+    };
 
-      setArenaScore(data?.arenaScore ?? 0);
-
-      setStreak(data?.streak ?? 0);
-
-      setActiveDays(data?.activeDays ?? 0);
-
-      setSeasonPoints(data?.seasonPoints ?? 0);
-
-      setSeasonNumber(data?.seasonNumber ?? 1);
-
-      setRank(data?.rank ?? "Unranked");
-
-      setUserLoaded(true);
-    });
-
-    return unsubscribe;
-  }, [user]);
+    fetchDashboard();
+  }, [user, token]);
 
   const generateRollingDays = (): HeatmapCell[] => {
     const days: HeatmapCell[] = [];
@@ -297,14 +255,18 @@ function Dashboard() {
       rank !== calculatedRank;
 
     if (needsUpdate) {
-      updateDoc(doc(db, "users", user.uid), {
-        streak: currentStreak,
-        activeDays: totalActiveDays,
-        seasonPoints: calculatedSeasonPoints,
-        rank: calculatedRank,
-        weeklyBonusClaimed,
-        seasonBonusClaimed,
-      });
+      fetch("/api/dashboard/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          streak: currentStreak,
+          activeDays: totalActiveDays,
+          seasonPoints: calculatedSeasonPoints,
+          rank: calculatedRank,
+          weeklyBonusClaimed,
+          seasonBonusClaimed,
+        })
+      }).catch(console.error);
     }
 
     console.log("Current Streak:", currentStreak);
