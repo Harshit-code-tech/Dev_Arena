@@ -6,7 +6,6 @@ import PageLoader from "./components/Skeletons/PageLoader";
 import { useAuth } from "./context/AuthContext";
 import { lazy, Suspense } from "react";
 import AppLayout from "./layouts/AppLayout";
-import { Color2FADemo } from "./components/Color2FADemo";
 
 const About = lazy(() => import("./pages/About"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -45,8 +44,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           {/* <Route path="/blog" element={<Blog />} />
         
-        <Route path="/newblog" element={<NewBlog />} /> */}
-          <Route path="/colorsetup" element={<Color2FADemo />} />
+          {/* <Route path="/newblog" element={<NewBlog />} /> */}
           <Route path="/about" element={<About />} />
           <Route path="/drafts" element={<Drafts />} />
           <Route path="/updates" element={<Updates />} />
