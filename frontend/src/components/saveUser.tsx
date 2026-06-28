@@ -3,6 +3,8 @@ import { db } from "../config/fireBase";
 import { serverTimestamp } from "firebase/firestore";
 
 export const saveUser = async (user: any, provider: string) => {
+  let backendToken: string | undefined;
+
   // Sync with Backend (Neon Database)
   try {
     const res = await fetch("/api/auth/sync-firebase", {
@@ -24,6 +26,7 @@ export const saveUser = async (user: any, provider: string) => {
     } else {
       const data = await res.json();
       if (data.token) {
+        backendToken = data.token;
         localStorage.setItem("token", data.token);
       }
     }
@@ -48,7 +51,7 @@ export const saveUser = async (user: any, provider: string) => {
       { merge: true },
     );
 
-    return;
+    return backendToken;
   }
 
   await setDoc(userRef, {
@@ -118,4 +121,6 @@ export const saveUser = async (user: any, provider: string) => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  return backendToken;
 };

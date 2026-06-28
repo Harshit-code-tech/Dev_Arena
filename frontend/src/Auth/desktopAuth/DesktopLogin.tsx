@@ -38,7 +38,11 @@ function Login() {
 
       console.log(result.user);
 
-      await saveUser(result.user, "google");
+      const token = await saveUser(result.user, "google");
+
+      if (token) {
+        await loginWithToken(token);
+      }
 
       toast.success("Welcome to DevArena!");
 
@@ -73,7 +77,11 @@ function Login() {
 
       const result = await signInWithPopup(auth, githubProvider);
 
-      await saveUser(result.user, "github");
+      const token = await saveUser(result.user, "github");
+
+      if (token) {
+        await loginWithToken(token);
+      }
 
       toast.success("Welcome to DevArena!");
 
