@@ -15,12 +15,7 @@
     "sourceMap": true
   },
   "include": [
-    "src/server.ts",
-    "src/db.ts",
-    "src/routes/**/*.ts",
-    "src/controllers/**/*.ts",
-    "src/middleware/**/*.ts",
-    "src/scripts/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

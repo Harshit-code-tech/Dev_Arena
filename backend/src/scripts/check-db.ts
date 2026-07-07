@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { prisma, testDatabaseConnection } from "../db";
+import { prisma, testDatabaseConnection } from "../database/prisma";
 
 async function run(): Promise<void> {
     try {
