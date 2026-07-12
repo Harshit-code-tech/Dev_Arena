@@ -1,6 +1,6 @@
 # DevArena Project Structure and Feature Register
 
-Last reviewed: 2026-06-20
+Last reviewed: 2026-07-13
 
 This file is the living technical map for DevArena. Update it whenever a route,
 feature, data model, integration, or major directory changes.
@@ -23,7 +23,7 @@ authentication and some legacy Firestore data.
 | Authentication | Custom JWT for email auth; Firebase Auth for Google/GitHub |
 | Legacy/secondary data | Firebase Firestore (`users` and `logs`) |
 | Email | Nodemailer over configurable SMTP |
-| Styling | Plain CSS files grouped in `src/styles` |
+| Styling | Plain CSS in feature-owned `styles/` folders and `frontend/src/shared/styles` |
 
 ### Runtime flow
 
@@ -44,19 +44,34 @@ In development, Vite proxies `/api` to `http://localhost:4000` unless
 
 ```text
 Dev_Arena/
+|-- AGENTS.md                  Codex/project working instructions
+|-- FEATURE_DEVELOPMENT_GUIDE.md
+|                              How to add frontend, backend, and full-stack features
+|-- PROJECT_STRUCTURE.md       Current project map, feature register, and known gaps
+|-- README.md                  Project overview
 |-- frontend/
 |   |-- public/                Static images and SVG assets
 |   |-- src/
-|   |   |-- Auth/              Desktop and mobile auth screens
-|   |   |-- components/        Shared UI and feature components
+|   |   |-- app/               React app shell, providers, and router
 |   |   |-- config/            Firebase client configuration
-|   |   |-- context/           Global authentication state
-|   |   |-- layouts/           Authenticated application shell
-|   |   |-- pages/             Route-level React screens
-|   |   |-- styles/            Global and component/page CSS
-|   |   |-- utils/             Client utilities and rank calculations
-|   |   |-- App.tsx            Client route table and lazy-loaded pages
-|   |   `-- main.tsx           React entry point and providers
+|   |   |-- features/          Feature-owned frontend code
+|   |   |   |-- auth/           Auth pages, auth context, auth API helper, 2FA/password-reset UI
+|   |   |   |-- blog/           Blog, new-post, draft pages, draft modal, and blog CSS
+|   |   |   |-- dashboard/      Dashboard page, dashboard CSS, and rank utility
+|   |   |   |-- home/           Landing, home, about pages, home/about components, and CSS
+|   |   |   |-- profile/        Profile page and profile CSS
+|   |   |   |-- releases/      Updates page, release timeline component, and updates CSS
+|   |   |   `-- support/       Support page and support CSS
+|   |   |-- services/          Frontend view-model, mapping, and display computation services
+|   |   |-- shared/            Shared layouts, components, hooks, lib, types, and styles
+|   |   |   |-- components/     Reusable UI and app-shell components
+|   |   |   |-- hooks/
+|   |   |   |-- layouts/        Application layout shells
+|   |   |   |-- lib/
+|   |   |   |-- types/
+|   |   |   `-- styles/         Shared/global CSS, plus preserved legacy CSS
+|   |   |-- App.tsx            Removed; replaced by `src/app/App.tsx`
+|   |   `-- main.tsx           React entry point
 |   |-- index.html             Vite HTML entry point
 |   |-- package.json           Frontend dependencies and scripts
 |   `-- vite.config.ts         Vite client and API proxy config
@@ -66,13 +81,13 @@ Dev_Arena/
 |   |   |-- schema.prisma      Database models, enums, relations, and indexes
 |   |   `-- seed.js            Database seed data
 |   |-- src/
-|   |   |-- controllers/       Express request handlers and feature logic
+|   |   |-- database/          Shared database client and connection checks
 |   |   |-- middleware/        JWT protection and API error handling
-|   |   |-- routes/            Express API route definitions
+|   |   |-- modules/           Feature modules with routes/controllers/services
 |   |   |-- scripts/           Maintenance scripts such as DB checks
-|   |   |-- utils/             Server utilities such as email delivery
-|   |   |-- db.ts              Shared Prisma client and DB health check
-|   |   `-- server.ts          Express entry point and API registration
+|   |   |-- shared/            Shared backend types and utilities
+|   |   |-- app.ts             Express app, middleware, routes, and handlers
+|   |   `-- server.ts          Backend startup and port binding
 |   |-- package.json           Backend dependencies and scripts
 |   `-- prisma.config.ts       Prisma schema, migration, and datasource config
 |-- devarena-nav-guide.md      Older navigation-specific implementation guide
@@ -82,15 +97,75 @@ Dev_Arena/
 
 ### Directory responsibilities
 
-- `frontend/src/pages` contains full screens mounted by `App.tsx`.
-- `frontend/src/components` contains reusable UI or self-contained widgets.
-- `backend/src/routes` only maps HTTP methods and paths to middleware/controllers.
-- `backend/src/controllers` currently validates requests and performs feature or
-  database work; business logic will move into feature services in the next
-  refactoring phase.
+- `frontend/src/app` owns the React app shell, providers, and route table.
+- `FEATURE_DEVELOPMENT_GUIDE.md` explains the standard process for adding new
+  frontend, backend, and full-stack features.
+- `frontend/src/features/auth` owns auth screens, auth context, protected route,
+  auth API helper, color 2FA UI, password reset modal, and auth-specific styles.
+- `frontend/src/features/auth/api/AuthService.ts` is a small barrel export for
+  auth API modules.
+- `frontend/src/features/auth/api/AuthConstants.ts` owns auth endpoint paths,
+  storage keys, social provider labels, password-strength labels, email regex,
+  and color-2FA constants.
+- `frontend/src/features/auth/api/AuthTypes.ts` owns shared auth interfaces and
+  type aliases used by auth services, context, pages, and auth components.
+- `frontend/src/features/auth/api/AuthStorageService.ts` is the only frontend
+  module that should read or write auth token storage directly.
+- Auth behavior is split into focused files:
+  `AuthStorageService.ts`, `AuthSessionService.ts`, `AuthValidationService.ts`,
+  `EmailAuthService.ts`, `SocialAuthService.ts`, `FirebaseUserSyncService.ts`,
+  `FirestoreUserService.ts`, `TwoFactorAuthService.ts`,
+  `PasswordResetService.ts`, and `AuthResponseService.ts`.
+- `frontend/src/features/blog` owns blog listing, new-post editor, drafts page,
+  draft modal, and blog/draft-specific CSS.
+- `frontend/src/features/dashboard` owns the dashboard page, dashboard-specific
+  CSS, and rank calculation utility.
+- `frontend/src/features/home` owns the public landing/home/about pages,
+  home/about-specific components, and their CSS.
+- `frontend/src/features/releases` owns the Updates page, release timeline UI,
+  and release/update-specific CSS.
+- `frontend/src/features/profile` owns the Profile page and profile-specific CSS.
+- `frontend/src/features/support` owns the Support page and support-specific CSS.
+- `frontend/src/services` contains frontend service functions that convert API
+  responses or client-side data into UI-ready view models and keep reusable
+  display calculations out of route components.
+- `frontend/src/services/HeatmapService.ts` owns shared contribution heatmap
+  helpers used by dashboard and profile.
+- `frontend/src/services/DashboardService.ts` owns dashboard view-model
+  calculations and retrieves the dashboard bearer token through
+  `AuthStorageService.ts` instead of reading browser storage directly.
+- `frontend/src/services/ProfileService.ts` owns profile heatmap view-model
+  calculations.
+- `frontend/src/services/ReleaseService.ts` owns release response mapping and
+  date formatting for the updates page.
+- `frontend/src/services/BlogService.ts` owns blog/draft response mapping, date
+  formatting, and post/draft client operations.
+- `frontend/src/shared/layouts/AppLayout.tsx` owns the authenticated app shell.
+- `frontend/src/shared/layouts/DashboardLayout.tsx` is preserved as a legacy
+  dashboard shell component.
+- `frontend/src/shared/components` contains reusable UI and app-shell components
+  such as `Header`, `Sidebar`, `TopBar`, `QuickLogModal`, `Pagination`,
+  `NotificationPanel`, `ProfileDropdown`, and `PageLoader`.
+- `frontend/src/shared/styles/Global.css` contains global app CSS.
+- `frontend/src/shared/styles` also contains shared component CSS. The previously
+  unused `frontend/src/styles/index.css` was preserved at
+  `frontend/src/shared/styles/legacy/LegacyIndex.css`.
+- `backend/src/modules` contains backend features. Each module owns route
+  definitions, request/response controllers, service logic, module types, and
+  repositories where direct Prisma access is needed.
 - `backend/src/middleware` contains cross-cutting request behavior.
 - `backend/prisma/schema.prisma` is the source of truth for PostgreSQL data shape.
-- Each page/component stylesheet currently lives in `frontend/src/styles`.
+- `backend/src/database/prisma.ts` exports the shared Prisma client and database
+  health-check helper.
+- `backend/src/shared` contains reusable backend utilities and shared types.
+- `backend/src/app.ts` wires Express middleware, health checks, API routes, 404
+  handling, and the global error handler.
+- `backend/src/server.ts` loads environment variables, verifies the database
+  connection, and starts the HTTP listener.
+- Feature-specific styles live inside the owning feature. Shared/global styles
+  live in `frontend/src/shared/styles`.
+- `frontend/src/config/Firebase.ts` owns Firebase app/auth/db initialization.
+  Keep the PascalCase filename to match the frontend naming convention.
 
 ## 3. Client routes
 
@@ -103,7 +178,6 @@ Dev_Arena/
 | `/login` | Public | Responsive email/social login, 2FA, password reset | Implemented |
 | `/signup` | Public | Responsive email/social registration | Implemented |
 | `/drafts` | Public route | Blog draft list/edit/delete UI | Partial: API requires auth and requests do not attach JWT |
-| `/colorsetup` | Public | Color-sequence 2FA UI | Partial: route does not select setup mode |
 | `/dashboard` | Protected | Scores, season, rank, streak, heatmap, recent activity | Implemented; leaderboard preview is static |
 | `/profile` | Protected | Profile stats and contribution history | Partial: still reads Firestore |
 | `/dsa` | Protected | Placeholder screen | Planned |
@@ -112,9 +186,9 @@ Dev_Arena/
 | `/challenges` | Protected | Placeholder screen | Planned |
 | `/settings` | Protected | Placeholder screen | Planned |
 
-`Blog.tsx` and `NewBlog.tsx` exist, but their routes are currently commented out
-in `App.tsx`. Links inside those pages refer to `/blog`, `/blog/new`, and
-`/blog/drafts`, which are not registered client routes.
+`Blog.tsx` and `NewBlog.tsx` exist, but their routes are not currently
+registered in `frontend/src/app/Router.tsx`. Links inside those pages refer to
+`/blog`, `/blog/new`, and `/blog/drafts`, which are not registered client routes.
 
 ## 4. Feature register
 
@@ -124,8 +198,8 @@ in `App.tsx`. Links inside those pages refer to `/blog`, `/blog/new`, and
 - Email login issues a 15-day custom JWT.
 - Google and GitHub use Firebase popups, then synchronize the user to PostgreSQL
   and issue the same custom JWT used by protected API routes.
-- `AuthContext` restores a JWT session through `GET /api/auth/me` and falls back
-  to an existing Firebase session.
+- `frontend/src/features/auth/context/AuthContext.tsx` restores a JWT session
+  through `GET /api/auth/me` and falls back to an existing Firebase session.
 - Protected APIs accept `Authorization: Bearer <token>`.
 - Optional color-sequence 2FA uses three selected colors and a shuffled
   nine-color verification grid.
@@ -138,11 +212,19 @@ in `App.tsx`. Links inside those pages refer to `/blog`, `/blog/new`, and
 
 - Dashboard statistics are stored on the PostgreSQL `User` record.
 - Activity is assembled from DSA, full-stack, project, and practice logs.
-- The client calculates streaks, season points, active days, ranks, and a
-  rolling 53-week contribution heatmap.
+- `frontend/src/services/DashboardService.ts` converts dashboard API responses
+  into a UI-ready dashboard view model.
+- Dashboard API requests get the saved JWT through
+  `frontend/src/features/auth/api/AuthStorageService.ts`, keeping auth storage
+  access centralized.
+- The dashboard service calculates streaks, season points, active days, rank
+  display values, most active day, recent activity, and the rolling 53-week
+  contribution heatmap.
+- `frontend/src/features/dashboard/pages/Dashboard.tsx` renders the dashboard
+  view model and no longer owns those calculations directly.
 - A day counts toward a streak after at least two logs.
 - Season ranks progress from `Unranked` through `Developer`; thresholds are
-  defined in `frontend/src/utils/rankSystem.tsx`.
+  defined in `frontend/src/features/dashboard/utils/RankSystem.tsx`.
 - Seasons are treated as 14 days by the client, which requests a reset when the
   current season expires.
 
@@ -151,12 +233,19 @@ in `App.tsx`. Links inside those pages refer to `/blog`, `/blog/new`, and
 - The API supports public paginated published posts.
 - Authenticated users can list drafts, create posts/drafts, update their own
   posts, delete their own posts, and publish drafts.
-- Database CRUD is implemented, but the main blog client routes are not wired
-  into `App.tsx` and authenticated client requests need JWT headers.
+- `frontend/src/features/blog/pages/Blog.tsx`,
+  `frontend/src/features/blog/pages/NewBlog.tsx`, and
+  `frontend/src/features/blog/pages/Drafts.tsx` contain the current blog UI.
+- Database CRUD is implemented, but `/blog`, `/blog/new`, and `/blog/drafts`
+  are not wired into `frontend/src/app/Router.tsx`, and authenticated client
+  requests need JWT headers.
 
 ### Releases and updates
 
-- Public, paginated release listing powers the Updates page.
+- Public, paginated release listing powers
+  `frontend/src/features/releases/pages/Updates.tsx`.
+- `frontend/src/features/releases/components/UpdatesTimeline.tsx` renders the
+  release timeline cards.
 - Authenticated create/update/delete endpoints exist.
 - Automation can create a release using `AUTOMATION_SECRET` as a bearer token.
 
@@ -176,9 +265,9 @@ The intended scoring rules are recorded in the corresponding controller files.
 
 ### Profile and quick logging
 
-- `frontend/src/pages/Profile.tsx` reads the Firestore `users` and `logs`
+- `frontend/src/features/profile/pages/Profile.tsx` reads the Firestore `users` and `logs`
   collections.
-- `frontend/src/components/QuickLogModal.tsx` writes to Firestore and increments
+- `frontend/src/shared/components/QuickLogModal.tsx` writes to Firestore and increments
   Firestore user stats.
 - These paths have not yet been migrated to the PostgreSQL activity APIs.
 
@@ -189,16 +278,16 @@ Unless marked public, endpoints require the custom JWT bearer token.
 | Base path | Endpoints | Status |
 | --- | --- | --- |
 | `/` and `/health` | Service health checks | Implemented, public |
-| `/api/auth` | Register, login, social sync, current user, 2FA, OTP, password reset | Implemented; see known gaps |
-| `/api/dashboard` | `GET /me`, `PUT /me` | Implemented |
-| `/api/blog` | Published list plus authenticated post/draft CRUD | Implemented |
-| `/api/releases` | Public list, protected CRUD, secret-based automation | Implemented |
-| `/api/dsa` | User log CRUD | Scaffolded (`501`) |
-| `/api/fullstack` | User log CRUD | Scaffolded (`501`) |
-| `/api/practice` | User log CRUD | Scaffolded (`501`) |
-| `/api/projects` | Projects, logs, and milestones | Scaffolded (`501`) |
-| `/api/leaderboard` | Current leaderboard and history | Scaffolded (`501`) |
-| `/api/challenge` | Weekly results and submission | Scaffolded (`501`) |
+| `/api/auth` | Register, login, social sync, current user, 2FA, OTP, password reset | Implemented in `backend/src/modules/auth`; see known gaps |
+| `/api/dashboard` | `GET /me`, `PUT /me` | Implemented in `backend/src/modules/dashboard` |
+| `/api/blog` | Published list plus authenticated post/draft CRUD | Implemented in `backend/src/modules/blog` |
+| `/api/releases` | Public list, protected CRUD, secret-based automation | Implemented in `backend/src/modules/releases` |
+| `/api/dsa` | User log CRUD | Scaffolded (`501`) in `backend/src/modules/dsa` |
+| `/api/fullstack` | User log CRUD | Scaffolded (`501`) in `backend/src/modules/fullstack` |
+| `/api/practice` | User log CRUD | Scaffolded (`501`) in `backend/src/modules/practice` |
+| `/api/projects` | Projects, logs, and milestones | Scaffolded (`501`) in `backend/src/modules/projects` |
+| `/api/leaderboard` | Current leaderboard and history | Scaffolded (`501`) in `backend/src/modules/leaderboard` |
+| `/api/challenge` | Weekly results and submission | Scaffolded (`501`) in `backend/src/modules/challenges` |
 
 ## 6. Data model
 
@@ -272,23 +361,21 @@ There is currently no automated test suite.
 
 ## 9. Known gaps and current baseline
 
-1. The `/colorsetup` route renders `Color2FA` without the `isSetup` prop, so it
-   defaults to verification mode without a login challenge.
-2. `backend/src/routes/auth.routes.ts` registers `POST /forgot-password` twice; the first
-   unthrottled registration is matched before the rate-limited one.
-3. `setup-2fa` accepts a `userId` in the request body and is not protected by
+1. Standalone 2FA setup routing is not currently registered in
+   `frontend/src/app/Router.tsx`; 2FA setup is reached through signup flow.
+2. `setup-2fa` accepts a `userId` in the request body and is not protected by
    auth middleware. It should derive the user from a verified token.
-4. The code falls back to the literal JWT secret `fallback_secret` when
+3. The code falls back to the literal JWT secret `fallback_secret` when
    `JWT_SECRET` is absent. Production startup should reject a missing secret.
-5. Dashboard summary fields can be updated directly by the client; server-side
+4. Dashboard summary fields can be updated directly by the client; server-side
    validation/recalculation is needed before treating scores as authoritative.
-6. Profile/quick-log functionality still uses Firestore while the dashboard and
+5. Profile/quick-log functionality still uses Firestore while the dashboard and
    core schema use PostgreSQL, creating two activity sources.
-7. Blog page routes are commented out, draft/post API requests do not attach
+6. Blog page routes are not registered, draft/post API requests do not attach
    bearer tokens, and `/drafts` is exposed as a public client route.
-8. The support form only updates local UI state and does not send a message.
-9. Leaderboard preview values on the dashboard are hard-coded.
-10. No tests or CI validation are defined.
+7. The support form only updates local UI state and does not send a message.
+8. Leaderboard preview values on the dashboard are hard-coded.
+9. No tests or CI validation are defined.
 
 ## 10. Maintenance rules
 
@@ -300,7 +387,9 @@ When a feature changes, update this file in the same pull request:
 4. Record Prisma model or ownership changes in **Data model**.
 5. Add new environment variables and commands to their tables.
 6. Remove resolved items and add newly discovered blockers under **Known gaps**.
-7. Update the `Last reviewed` date after checking the implementation, not just
+7. Update `FEATURE_DEVELOPMENT_GUIDE.md` only when the feature-development
+   process changes.
+8. Update the `Last reviewed` date after checking the implementation, not just
    the route names.
 
 Use these status meanings consistently:
