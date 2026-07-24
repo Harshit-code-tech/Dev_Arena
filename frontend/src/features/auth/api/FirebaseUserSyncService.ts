@@ -2,17 +2,13 @@ import type { User as FirebaseUser } from "firebase/auth";
 
 import { AUTH_ENDPOINTS } from "./AuthConstants";
 import { storeAuthToken } from "./AuthStorageService";
-import { syncFirebaseUserWithFirestore } from "./FirestoreUserService";
 import type { SocialAuthProvider } from "./AuthTypes";
 
 export async function syncFirebaseUser(
   user: FirebaseUser,
   provider: SocialAuthProvider,
 ) {
-  const backendToken = await syncFirebaseUserWithBackend(user, provider);
-  await syncFirebaseUserWithFirestore(user, provider);
-
-  return backendToken;
+  return syncFirebaseUserWithBackend(user, provider);
 }
 
 async function syncFirebaseUserWithBackend(

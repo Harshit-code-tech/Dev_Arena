@@ -7,12 +7,8 @@ import {
   type HeatmapMonthMarker,
 } from "./HeatmapService";
 
-type FirestoreTimestampLike = {
-  toDate: () => Date;
-};
-
 type ProfileActivityLog = {
-  createdAt?: Date | FirestoreTimestampLike | string | null;
+  createdAt?: Date | string | null;
 };
 
 export type ProfileHeatmapViewModel = {
@@ -44,11 +40,7 @@ function getProfileLogDate(log: ProfileActivityLog) {
     return log.createdAt;
   }
 
-  if (typeof log.createdAt === "string") {
-    return new Date(log.createdAt);
-  }
-
-  return log.createdAt.toDate();
+  return new Date(log.createdAt);
 }
 
 function buildProfileHeatmapCellTitle(date: string, count: number) {

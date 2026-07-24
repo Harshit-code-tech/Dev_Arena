@@ -19,13 +19,12 @@ const otpLimiter = rateLimit({
 
 router.post("/register", authController.register);
 router.post("/login", loginLimiter, authController.login);
-router.post("/forgot-password", authController.forgotPassword);
+router.post("/forgot-password", otpLimiter, authController.forgotPassword);
 router.post("/sync-firebase", authController.syncFirebase);
-router.post("/setup-2fa", authController.setup2FA);
+router.post("/setup-2fa", protect, authController.setup2FA);
 router.post("/verify-2fa", authController.verify2FA);
 router.post("/send-otp", otpLimiter, authController.sendOTPController);
 router.post("/verify-otp", authController.verifyOTP);
-router.post("/forgot-password", otpLimiter, authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);
 router.get("/me", protect, authController.getCurrentUser);
 

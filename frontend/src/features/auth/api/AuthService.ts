@@ -6,7 +6,6 @@ export * from "./AuthSessionService";
 export * from "./AuthValidationService";
 export * from "./EmailAuthService";
 export * from "./FirebaseUserSyncService";
-export * from "./FirestoreUserService";
 export * from "./PasswordResetService";
 export * from "./SocialAuthService";
 export * from "./TwoFactorAuthService";

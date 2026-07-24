@@ -1,4 +1,4 @@
-import type { Prisma, User } from "@prisma/client";
+import type { Prisma, User, PracticeLog } from "@prisma/client";
 import { prisma } from "../../database/prisma";
 import type { DashboardUpdateData } from "./dashboard.types";
 
@@ -28,6 +28,7 @@ type DashboardUserWithLogs = Prisma.UserGetPayload<{
 type DashboardRepository = {
     findUserWithLogs(userId: string): Promise<DashboardUserWithLogs | null>;
     updateUserDashboard(userId: string, data: DashboardUpdateData): Promise<User>;
+    createQuickLog(userId: string, text: string, scoreIncrement: number): Promise<{ log: PracticeLog; user: User }>;
 };
 
 export const dashboardRepository: DashboardRepository = {
@@ -42,6 +43,25 @@ export const dashboardRepository: DashboardRepository = {
         return prisma.user.update({
             where: { id: userId },
             data,
+        });
+    },
+
+    async createQuickLog(userId: string, text: string, scoreIncrement: number) {
+        return prisma.$transaction(async (tx) => {
+            const log = await tx.practiceLog.create({
+                data: {
+                    userId,
+                    type: "DSA_Revision",
+                    notes: text,
+                },
+            });
+
+            const user = await tx.user.update({
+                where: { id: userId },
+                data: { arenaScore: { increment: scoreIncrement } },
+            });
+
+            return { log, user };
         });
     },
 };

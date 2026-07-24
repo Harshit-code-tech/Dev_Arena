@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/context/AuthContext";
-import { signOut } from "firebase/auth";
-import { auth } from "../../config/Firebase";
 
 import "../styles/Header.css";
 
@@ -18,7 +16,7 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenu, setProfileMenu] = useState(false);
@@ -53,14 +51,9 @@ function Header() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   return (

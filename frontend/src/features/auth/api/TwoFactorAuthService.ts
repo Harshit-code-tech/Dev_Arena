@@ -1,15 +1,20 @@
 import { AUTH_ENDPOINTS } from "./AuthConstants";
 import { parseJsonResponse } from "./AuthResponseService";
+import { getStoredAuthToken } from "./AuthStorageService";
 import type { TwoFactorVerificationResponse } from "./AuthTypes";
 
 export async function setupColor2FA(
-  userId: string,
   colorSequence: string[],
 ) {
+  const token = getStoredAuthToken();
+
   const response = await fetch(AUTH_ENDPOINTS.setup2FA, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, colorSequence }),
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ colorSequence }),
   });
 
   await parseJsonResponse(response, "Failed to setup 2FA");

@@ -6,11 +6,16 @@ import type {
     DashboardStats,
     DashboardUpdateData,
     DashboardUpdateInput,
+    ProfileResponse,
+    QuickLogInput,
+    QuickLogResponse,
 } from "./dashboard.types";
 
 type DashboardService = {
     getDashboard(userId: string): Promise<DashboardResponse | null>;
     updateDashboard(userId: string, input: DashboardUpdateInput): Promise<User>;
+    createQuickLog(userId: string, input: QuickLogInput): Promise<QuickLogResponse>;
+    getProfile(userId: string): Promise<ProfileResponse | null>;
 };
 
 export const dashboardService: DashboardService = {
@@ -78,5 +83,68 @@ export const dashboardService: DashboardService = {
         }
 
         return dashboardRepository.updateUserDashboard(userId, updateData);
+    },
+
+    async createQuickLog(userId: string, input: QuickLogInput): Promise<QuickLogResponse> {
+        const text = input.text?.trim();
+
+        if (!text) {
+            throw new Error("Activity text is required");
+        }
+
+        const QUICK_LOG_SCORE = 5;
+        const { log, user } = await dashboardRepository.createQuickLog(userId, text, QUICK_LOG_SCORE);
+
+        return {
+            log: {
+                id: log.id,
+                text: `Practice: ${log.notes || "Completed"}`,
+                createdAt: log.createdAt,
+            },
+            arenaScore: user.arenaScore,
+        };
+    },
+
+    async getProfile(userId: string): Promise<ProfileResponse | null> {
+        const user = await dashboardRepository.findUserWithLogs(userId);
+
+        if (!user) {
+            return null;
+        }
+
+        const logs: DashboardLogEntry[] = [
+            ...user.dsaLogs.map((log) => ({
+                id: log.id,
+                text: `DSA: ${log.problemName}`,
+                createdAt: log.createdAt,
+            })),
+            ...user.fullstackLogs.map((log) => ({
+                id: log.id,
+                text: `Fullstack: ${log.title}`,
+                createdAt: log.createdAt,
+            })),
+            ...user.projectLogs.map((log) => ({
+                id: log.id,
+                text: `Project: ${log.description}`,
+                createdAt: log.createdAt,
+            })),
+            ...user.practiceLogs.map((log) => ({
+                id: log.id,
+                text: `Practice: ${log.notes || "Completed"}`,
+                createdAt: log.createdAt,
+            })),
+        ];
+
+        logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        return {
+            stats: {
+                arenaScore: user.arenaScore,
+                streak: user.streak,
+                rank: user.rank,
+            },
+            logs,
+            createdAt: user.createdAt,
+        };
     },
 };

@@ -1,72 +1,85 @@
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 
 import "../styles/Profile.css";
-import { db } from "../../../config/Firebase";
 import { useAuth } from "../../auth/context/AuthContext";
+import { getStoredAuthToken } from "../../auth/api/AuthStorageService";
 import {
   buildProfileHeatmapViewModel,
   type ProfileHeatmapViewModel,
 } from "../../../services/ProfileService";
 
+type ProfileStats = {
+  arenaScore: number;
+  streak: number;
+  rank: string;
+};
+
+type ProfileLog = {
+  id: string;
+  text: string;
+  createdAt: string;
+};
+
+type ProfileApiResponse = {
+  stats: ProfileStats;
+  logs: ProfileLog[];
+  createdAt: string;
+};
+
 function Profile() {
   const { user } = useAuth();
   const currentYear = new Date().getFullYear();
 
-  const [profileData, setProfileData] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [profileStats, setProfileStats] = useState<ProfileStats | null>(null);
+  const [logs, setLogs] = useState<ProfileLog[]>([]);
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [accountYear, setAccountYear] = useState(currentYear);
   const [heatmapViewModel, setHeatmapViewModel] = useState<ProfileHeatmapViewModel>(() =>
     buildProfileHeatmapViewModel([], currentYear),
   );
 
-  // firestone listener for profile data.
+  // Fetch profile data from the Neon backend.
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (snapshot) => {
-      if (!snapshot.exists()) return;
+    const token = getStoredAuthToken();
+    if (!token) return;
 
-      const data = snapshot.data();
+    let isMounted = true;
 
-      setProfileData(data);
+    fetch("/api/dashboard/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        return res.json() as Promise<ProfileApiResponse>;
+      })
+      .then((data) => {
+        if (!isMounted) return;
 
-      if (data?.createdAt) {
-        const createdDate = data.createdAt.toDate();
+        setProfileStats(data.stats);
+        setLogs(data.logs);
 
-        setAccountYear(createdDate.getFullYear());
-      }
-    });
+        if (data.createdAt) {
+          const createdDate = new Date(data.createdAt);
+          setAccountYear(createdDate.getFullYear());
+        }
+      })
+      .catch(console.error);
 
-    return unsubscribe;
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
-  // firestone listener for user logs.
-
+  // Rebuild heatmap when logs or selected year change.
   useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, "logs"),
-      where("uid", "==", user.uid),
-      orderBy("createdAt", "desc"),
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const activities = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setLogs(activities);
-    });
-
-    return unsubscribe;
-  }, [user]);
-
-  useEffect(() => {
-    setHeatmapViewModel(buildProfileHeatmapViewModel(logs, selectedYear));
+    const mappedLogs = logs.map((log) => ({
+      createdAt: new Date(log.createdAt),
+    }));
+    setHeatmapViewModel(buildProfileHeatmapViewModel(mappedLogs, selectedYear));
   }, [logs, selectedYear]);
 
   const { heatmap, heatmapMonthMarkers } = heatmapViewModel;
@@ -88,17 +101,17 @@ function Profile() {
 
         <div className="profile-stats">
           <div className="profile-stat">
-            <h2>{profileData?.streak ?? 0}</h2>
+            <h2>{profileStats?.streak ?? 0}</h2>
             <p>Streak</p>
           </div>
 
           <div className="profile-stat">
-            <h2>{profileData?.arenaScore ?? 0}</h2>
+            <h2>{profileStats?.arenaScore ?? 0}</h2>
             <p>Arena Score</p>
           </div>
 
           <div className="profile-stat">
-            <h2>{profileData?.rank ?? "Mud"}</h2>
+            <h2>{profileStats?.rank ?? "Mud"}</h2>
             <p>Rank</p>
           </div>
         </div>

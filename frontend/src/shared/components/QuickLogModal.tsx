@@ -3,10 +3,7 @@ import { createPortal } from "react-dom";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-
-import { auth, db } from "../../config/Firebase";
-import { doc, updateDoc, increment } from "firebase/firestore";
+import { getStoredAuthToken } from "../../features/auth/api/AuthStorageService";
 
 interface Props {
   open: boolean;
@@ -25,20 +22,28 @@ export default function QuickLogModal({ open, onClose }: Props) {
       return;
     }
 
+    const token = getStoredAuthToken();
+    if (!token) {
+      toast.error("You must be logged in to log activity.");
+      return;
+    }
+
     try {
       setSaving(true);
 
-      await addDoc(collection(db, "logs"), {
-        uid: auth.currentUser?.uid,
-
-        text: activity,
-
-        createdAt: serverTimestamp(),
+      const res = await fetch("/api/dashboard/me/quick-log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text: activity }),
       });
 
-      await updateDoc(doc(db, "users", auth.currentUser!.uid), {
-        arenaScore: increment(5),
-      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to save activity.");
+      }
 
       toast.success("+5 Arena Score 🚀");
 

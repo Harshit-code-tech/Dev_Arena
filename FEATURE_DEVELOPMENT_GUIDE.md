@@ -1,6 +1,6 @@
 # DevArena Feature Development Guide
 
-Last updated: 2026-07-13
+Last updated: 2026-07-24
 
 This guide explains how to add a new feature to DevArena without breaking the
 current project structure. Use `PROJECT_STRUCTURE.md` to understand what already
@@ -152,7 +152,6 @@ Examples:
 - `SocialAuthService.ts`
 - `AuthSessionService.ts`
 - `FirebaseUserSyncService.ts`
-- `FirestoreUserService.ts`
 - `TwoFactorAuthService.ts`
 - `PasswordResetService.ts`
 

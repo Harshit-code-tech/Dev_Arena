@@ -18,7 +18,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const setup2FA = async (req: Request, res: Response): Promise<void> => {
-    await sendResult(res, () => authService.setup2FA(req.body));
+    await sendResult(res, () => authService.setup2FA({ ...req.body, userId: req.user?.id }));
 };
 
 export const verify2FA = async (req: Request, res: Response): Promise<void> => {

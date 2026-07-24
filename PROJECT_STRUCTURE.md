@@ -1,6 +1,6 @@
 # DevArena Project Structure and Feature Register
 
-Last reviewed: 2026-07-13
+Last reviewed: 2026-07-24
 
 This file is the living technical map for DevArena. Update it whenever a route,
 feature, data model, integration, or major directory changes.
@@ -11,7 +11,7 @@ DevArena is a developer activity and growth platform organized as an npm
 workspace. The `frontend` workspace contains the React/Vite single-page
 application; the `backend` workspace contains the Express API, PostgreSQL access
 through Prisma, and server integrations. Firebase provides social
-authentication and some legacy Firestore data.
+authentication via Google and GitHub popups.
 
 ### Main stack
 
@@ -21,7 +21,6 @@ authentication and some legacy Firestore data.
 | API | Express 5, TypeScript, `tsx` |
 | Primary database | PostgreSQL/Neon through Prisma |
 | Authentication | Custom JWT for email auth; Firebase Auth for Google/GitHub |
-| Legacy/secondary data | Firebase Firestore (`users` and `logs`) |
 | Email | Nodemailer over configurable SMTP |
 | Styling | Plain CSS in feature-owned `styles/` folders and `frontend/src/shared/styles` |
 
@@ -34,7 +33,6 @@ Browser (Vite :5173)
   |                                               +--> Prisma --> PostgreSQL/Neon
   |
   +-- Google/GitHub authentication ------------> Firebase Auth
-  +-- legacy profile/quick-log data -----------> Firestore
 ```
 
 In development, Vite proxies `/api` to `http://localhost:4000` unless
@@ -114,7 +112,7 @@ Dev_Arena/
 - Auth behavior is split into focused files:
   `AuthStorageService.ts`, `AuthSessionService.ts`, `AuthValidationService.ts`,
   `EmailAuthService.ts`, `SocialAuthService.ts`, `FirebaseUserSyncService.ts`,
-  `FirestoreUserService.ts`, `TwoFactorAuthService.ts`,
+  `TwoFactorAuthService.ts`,
   `PasswordResetService.ts`, and `AuthResponseService.ts`.
 - `frontend/src/features/blog` owns blog listing, new-post editor, drafts page,
   draft modal, and blog/draft-specific CSS.
@@ -164,7 +162,7 @@ Dev_Arena/
   connection, and starts the HTTP listener.
 - Feature-specific styles live inside the owning feature. Shared/global styles
   live in `frontend/src/shared/styles`.
-- `frontend/src/config/Firebase.ts` owns Firebase app/auth/db initialization.
+- `frontend/src/config/Firebase.ts` owns Firebase app and auth initialization.
   Keep the PascalCase filename to match the frontend naming convention.
 
 ## 3. Client routes
@@ -179,7 +177,7 @@ Dev_Arena/
 | `/signup` | Public | Responsive email/social registration | Implemented |
 | `/drafts` | Public route | Blog draft list/edit/delete UI | Partial: API requires auth and requests do not attach JWT |
 | `/dashboard` | Protected | Scores, season, rank, streak, heatmap, recent activity | Implemented; leaderboard preview is static |
-| `/profile` | Protected | Profile stats and contribution history | Partial: still reads Firestore |
+| `/profile` | Protected | Profile stats and contribution heatmap from PostgreSQL | Implemented |
 | `/dsa` | Protected | Placeholder screen | Planned |
 | `/projects` | Protected | Placeholder screen | Planned |
 | `/leaderboard` | Protected | Placeholder screen | Planned |
@@ -265,11 +263,12 @@ The intended scoring rules are recorded in the corresponding controller files.
 
 ### Profile and quick logging
 
-- `frontend/src/features/profile/pages/Profile.tsx` reads the Firestore `users` and `logs`
-  collections.
-- `frontend/src/shared/components/QuickLogModal.tsx` writes to Firestore and increments
-  Firestore user stats.
-- These paths have not yet been migrated to the PostgreSQL activity APIs.
+- `frontend/src/features/profile/pages/Profile.tsx` fetches user stats and logs
+  from the PostgreSQL backend via `GET /api/dashboard/profile`.
+- `frontend/src/shared/components/QuickLogModal.tsx` saves a practice log and
+  increments the arena score via `POST /api/dashboard/me/quick-log`.
+- Firestore has been fully removed from the frontend. Firebase is used solely for
+  Google/GitHub authentication popups (`firebase/auth`).
 
 ## 5. API map
 
@@ -278,8 +277,8 @@ Unless marked public, endpoints require the custom JWT bearer token.
 | Base path | Endpoints | Status |
 | --- | --- | --- |
 | `/` and `/health` | Service health checks | Implemented, public |
-| `/api/auth` | Register, login, social sync, current user, 2FA, OTP, password reset | Implemented in `backend/src/modules/auth`; see known gaps |
-| `/api/dashboard` | `GET /me`, `PUT /me` | Implemented in `backend/src/modules/dashboard` |
+| `/api/auth` | Register, login, social sync, current user, 2FA (protected), OTP, password reset | Implemented in `backend/src/modules/auth` |
+| `/api/dashboard` | `GET /me`, `PUT /me`, `POST /me/quick-log`, `GET /profile` | Implemented in `backend/src/modules/dashboard` |
 | `/api/blog` | Published list plus authenticated post/draft CRUD | Implemented in `backend/src/modules/blog` |
 | `/api/releases` | Public list, protected CRUD, secret-based automation | Implemented in `backend/src/modules/releases` |
 | `/api/dsa` | User log CRUD | Scaffolded (`501`) in `backend/src/modules/dsa` |
@@ -363,14 +362,16 @@ There is currently no automated test suite.
 
 1. Standalone 2FA setup routing is not currently registered in
    `frontend/src/app/Router.tsx`; 2FA setup is reached through signup flow.
-2. `setup-2fa` accepts a `userId` in the request body and is not protected by
-   auth middleware. It should derive the user from a verified token.
+2. ~~`setup-2fa` accepts a `userId` in the request body and is not protected by
+   auth middleware.~~ **Resolved:** endpoint is now protected and derives user
+   from the JWT.
 3. The code falls back to the literal JWT secret `fallback_secret` when
    `JWT_SECRET` is absent. Production startup should reject a missing secret.
 4. Dashboard summary fields can be updated directly by the client; server-side
    validation/recalculation is needed before treating scores as authoritative.
-5. Profile/quick-log functionality still uses Firestore while the dashboard and
-   core schema use PostgreSQL, creating two activity sources.
+5. ~~Profile/quick-log functionality still uses Firestore.~~ **Resolved:**
+   Profile reads from `GET /api/dashboard/profile` and QuickLogModal writes to
+   `POST /api/dashboard/me/quick-log`, both backed by PostgreSQL.
 6. Blog page routes are not registered, draft/post API requests do not attach
    bearer tokens, and `/drafts` is exposed as a public client route.
 7. The support form only updates local UI state and does not send a message.

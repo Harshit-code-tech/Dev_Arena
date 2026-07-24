@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
 import {
   sendTwoFactorOtp,
   setupColor2FA,
@@ -21,7 +20,6 @@ export const Color2FA: React.FC<Color2FAProps> = ({
   verifyGrid = [], 
   onVerifySuccess 
 }) => {
-  const { user } = useAuth();
   
   // State for Color Grid
   const [sequence, setSequence] = useState<string[]>([]);
@@ -52,13 +50,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
 
     if (isSetup) {
       try {
-        if (!user || !user.uid) {
-            toast.error("You must be logged in to setup 2FA");
-            setLoading(false);
-            return;
-        }
-
-        await setupColor2FA(user.uid, newSequence);
+        await setupColor2FA(newSequence);
         toast.success("2FA Setup Complete!");
         if (onSetupComplete) onSetupComplete();
       } catch (error) {

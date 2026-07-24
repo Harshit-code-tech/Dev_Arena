@@ -36,3 +36,22 @@ export type DashboardUpdateInput = {
 };
 
 export type DashboardUpdateData = Prisma.UserUpdateInput;
+
+export type QuickLogInput = {
+    text: string;
+};
+
+export type QuickLogResponse = {
+    log: DashboardLogEntry;
+    arenaScore: number;
+};
+
+export type ProfileResponse = {
+    stats: {
+        arenaScore: number;
+        streak: number;
+        rank: string;
+    };
+    logs: DashboardLogEntry[];
+    createdAt: Date;
+};
