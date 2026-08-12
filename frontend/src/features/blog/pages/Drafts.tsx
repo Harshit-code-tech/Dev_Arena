@@ -38,10 +38,10 @@ function Drafts() {
 
                     <button
                         type="button"
-                        className="drafts-back-btn"
+                        className="drafts-back-btn dev-back-button"
                         onClick={() => navigate("/blog")}
                     >
-                        Back to blog
+                        <span aria-hidden="true">←</span><span>Back</span>
                     </button>
                 </div>
 

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { dashboardService } from "./dashboard.service";
 import type { DashboardUpdateInput, QuickLogInput } from "./dashboard.types";
+import { sendTrackingError } from "../../shared/utils/tracking";
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : String(error);
@@ -52,51 +53,16 @@ export const updateDashboard = async (req: Request, res: Response): Promise<void
 
 export const createQuickLog = async (req: Request, res: Response): Promise<void> => {
     try {
-        if (!req.user || !req.user.id) {
-            res.status(401).json({ message: "Not authenticated" });
+        if (!req.user?.id) {
+            res.status(401).json({ success: false, message: "Not authenticated" });
             return;
         }
 
-        const result = await dashboardService.createQuickLog(
-            req.user.id,
-            req.body as QuickLogInput,
-        );
-
-        res.status(201).json(result);
+        const input = req.body as Partial<QuickLogInput>;
+        const log = await dashboardService.createQuickLog(req.user.id, input.activity);
+        res.status(201).json({ success: true, data: log });
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-
-        if (message === "Activity text is required") {
-            res.status(400).json({ message });
-            return;
-        }
-
-        res.status(500).json({
-            message: "Failed to save quick log",
-            error: getErrorMessage(error),
-        });
-    }
-};
-
-export const getProfile = async (req: Request, res: Response): Promise<void> => {
-    try {
-        if (!req.user || !req.user.id) {
-            res.status(401).json({ message: "Not authenticated" });
-            return;
-        }
-
-        const profile = await dashboardService.getProfile(req.user.id);
-
-        if (!profile) {
-            res.status(404).json({ message: "User not found" });
-            return;
-        }
-
-        res.status(200).json(profile);
-    } catch (error: unknown) {
-        res.status(500).json({
-            message: "Failed to fetch profile data",
-            error: getErrorMessage(error),
-        });
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
     }
 };

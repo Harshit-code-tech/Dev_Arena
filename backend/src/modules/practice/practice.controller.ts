@@ -1,21 +1,47 @@
 import type { Request, Response } from "express";
+import { sendTrackingError } from "../../shared/utils/tracking";
 import { practiceService } from "./practice.service";
+import type { PracticeLogInput } from "./practice.types";
 
-// Scoring: Revision = 2pt, Concept explanation = 3pt
-// Rules: edit/delete only within 24 hours of creation
+function userId(req: Request) {
+    return req.user?.id || "";
+}
 
-export const getLogs = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(practiceService.getLogs());
+export const getLogs = async (req: Request, res: Response): Promise<void> => {
+    try {
+        res.status(200).json({ success: true, data: await practiceService.getLogs(userId(req)) });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const createLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(practiceService.createLog());
+export const createLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const log = await practiceService.createLog(userId(req), req.body as Partial<PracticeLogInput>);
+        res.status(201).json({ success: true, data: log });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const updateLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(practiceService.updateLog());
+export const updateLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const log = await practiceService.updateLog(userId(req), req.params.id as string, req.body as Partial<PracticeLogInput>);
+        res.status(200).json({ success: true, data: log });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const deleteLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(practiceService.deleteLog());
+export const deleteLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        await practiceService.deleteLog(userId(req), req.params.id as string);
+        res.status(200).json({ success: true, message: "Practice entry deleted." });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };

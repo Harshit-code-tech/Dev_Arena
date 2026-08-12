@@ -460,3 +460,214 @@
   .timeline-card  { padding: 18px 16px; }
   .card-title     { font-size: 18px; }
 }
+
+/* ============================================================
+   DevArena changelog layout overrides
+   ============================================================ */
+body .updates-page .updates-layout {
+  display: grid !important;
+  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.38fr) !important;
+  align-items: start !important;
+  gap: clamp(48px, 6vw, 96px) !important;
+}
+
+body .updates-page .hero-updates {
+  position: static;
+  top: auto;
+  align-self: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+}
+
+body .updates-page .hero-updates h1 {
+  max-width: 540px;
+  background: none !important;
+  color: var(--da-on-primary) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+body .updates-page .hero-updates .eyebrow,
+body .updates-page .hero-updates p {
+  color: var(--da-on-primary) !important;
+}
+
+body .updates-page .updates-feed-panel {
+  min-width: 0;
+}
+
+/* Ten releases are loaded per page. The viewport exposes roughly three cards. */
+body .updates-page .updates-scroll-window {
+  height: clamp(570px, 68vh, 690px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 14px;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--da-on-primary-mute) transparent;
+  scrollbar-width: thin;
+}
+
+body .updates-page .updates-scroll-window::-webkit-scrollbar {
+  width: 6px;
+}
+
+body .updates-page .updates-scroll-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body .updates-page .updates-scroll-window::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--da-on-primary-mute);
+}
+
+body .updates-page .timeline-card {
+  min-height: 176px;
+}
+
+body .updates-page .pagination {
+  width: 100%;
+  justify-content: center;
+  gap: 18px !important;
+  margin-top: 24px !important;
+}
+
+body .updates-page .pagination .pagination-pages {
+  gap: 10px !important;
+  margin: 0 8px;
+}
+
+/* Keep page numbers compact while preserving the active circular marker. */
+body .updates-page .pagination .page-btn {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+/* Prev / Next use the same transparent underline interaction as auth actions. */
+body .updates-page .pagination .pagination-nav {
+  position: relative;
+  min-width: auto !important;
+  min-height: auto !important;
+  padding: 8px 0 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--da-on-primary) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .updates-page .pagination .pagination-nav::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+
+body .updates-page .pagination .pagination-nav:not(:disabled):hover,
+body .updates-page .pagination .pagination-nav:not(:disabled):focus-visible {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--da-on-primary) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .updates-page .pagination .pagination-nav:not(:disabled):hover::after,
+body .updates-page .pagination .pagination-nav:not(:disabled):focus-visible::after {
+  transform: scaleX(1);
+}
+
+body .updates-page .pagination .pagination-nav:disabled {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--da-on-primary-mute) !important;
+  opacity: 0.42;
+}
+
+@media (max-width: 900px) {
+  body .updates-page .updates-layout {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+  }
+
+  body .updates-page .hero-updates {
+    position: static;
+    padding-bottom: 40px !important;
+    border-bottom: 1px solid var(--da-hairline-dark) !important;
+  }
+
+  body .updates-page .updates-scroll-window {
+    height: 620px;
+  }
+}
+
+@media (max-width: 640px) {
+  body .updates-page .updates-scroll-window {
+    height: 570px;
+    padding-right: 8px;
+  }
+
+  body .updates-page .pagination {
+    justify-content: center;
+  }
+}
+
+body .updates-page {
+  max-width: none !important;
+}
+
+.updates-inline-skeleton {
+  display: grid;
+  gap: 16px;
+}
+
+.updates-inline-skeleton > span {
+  position: relative;
+  min-height: 178px;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.18);
+  background: #0a0a0c;
+}
+
+.updates-inline-skeleton > span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.08) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: updates-skeleton-scan 1.35s ease-in-out infinite;
+}
+
+.updates-load-error {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.62);
+  text-align: center;
+}
+
+@keyframes updates-skeleton-scan {
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .updates-inline-skeleton > span::after { animation: none; }
+}

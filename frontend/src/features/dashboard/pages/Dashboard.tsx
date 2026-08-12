@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "../styles/Dashboard.css";
 import { useAuth } from "../../auth/context/AuthContext";
 import PageLoader from "../../../shared/components/Skeletons/PageLoader";
+import RankBadge from "../../../shared/components/RankBadge";
 import {
   getDashboardViewModel,
   type DashboardViewModel,
@@ -10,6 +12,7 @@ import {
 
 function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState<DashboardViewModel | null>(null);
 
   const userName = user?.displayName || "Developer";
@@ -18,18 +21,33 @@ function Dashboard() {
     if (!user) return;
 
     let isMounted = true;
-    setDashboard(null);
 
-    getDashboardViewModel()
-      .then((viewModel) => {
+    const loadDashboard = async (showLoader = false) => {
+      if (showLoader) {
+        setDashboard(null);
+      }
+
+      try {
+        const viewModel = await getDashboardViewModel();
         if (isMounted) {
           setDashboard(viewModel);
         }
-      })
-      .catch(console.error);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void loadDashboard(true);
+
+    const handleActivityUpdate = () => {
+      void loadDashboard();
+    };
+
+    window.addEventListener("devarena:activity-updated", handleActivityUpdate);
 
     return () => {
       isMounted = false;
+      window.removeEventListener("devarena:activity-updated", handleActivityUpdate);
     };
   }, [user]);
 
@@ -40,230 +58,148 @@ function Dashboard() {
   const {
     activeDays,
     arenaScore,
-    currentRankMaxPoints,
     daysRemaining,
     heatmap,
     heatmapMonthMarkers,
-    mostActiveDay,
+    leaderboardPreview,
     nextRank,
     rank,
-    rankProgress,
-    recentLogs,
     remainingPoints,
     seasonNumber,
     seasonPoints,
     streak,
-    totalLogs,
   } = dashboard;
 
   return (
     <main className="dashboard">
-      {/* HERO */}
-
       <section className="dashboard-hero">
         <div>
           <p className="dashboard-label">Developer Growth Platform</p>
-
-          <h1>Welcome back, {userName}</h1>
-
+          <h1 className="dashboard-welcome-title">
+            <span className="dashboard-welcome-copy">Welcome back,</span>
+            <span className="dashboard-welcome-name">{userName}</span>
+          </h1>
           <p className="dashboard-subtitle">Keep building. Keep shipping.</p>
         </div>
       </section>
 
-      {/* STATS */}
+      <div className="dashboard-overview-row">
+        <section
+          className="dashboard-card dashboard-summary-card"
+          aria-label="Developer overview"
+        >
+          <article className="dashboard-summary-line">
+            <div><span>Arena Score</span><b aria-hidden="true">:</b><strong data-private-value="true">{arenaScore}</strong></div>
+            <p><i aria-hidden="true">←</i> Weighted activity points</p>
+          </article>
 
-      <section className="stats-grid">
-        <div className="stat-card">
-          <h3>Arena Score</h3>
-          <h2>{arenaScore}</h2>
-          <p>+5 to every log</p>
-        </div>
+          <article className="dashboard-summary-line">
+            <div><span>Season Points</span><b aria-hidden="true">:</b><strong data-private-value="true">{seasonPoints}</strong></div>
+            <p><i aria-hidden="true">←</i> {activeDays} Active {activeDays === 1 ? "Day" : "Days"}</p>
+          </article>
 
-        <div className="stat-card">
-          <h3>Season Points</h3>
-          <h2>{seasonPoints}</h2>
-          <p>{activeDays} Active Days</p>
-        </div>
+          <article className="dashboard-summary-line">
+            <div><span>Current Streak</span><b aria-hidden="true">:</b><strong data-private-value="true">{streak} {streak === 1 ? "Day" : "Days"}</strong></div>
+            <p><i aria-hidden="true">←</i> {streak === 0 ? "Start building" : "Consistent"}</p>
+          </article>
+        </section>
 
-        <div className="stat-card rank-card">
-          <h3>Developer Rank</h3>
+        <section
+          className="dashboard-card dashboard-rank-season-card"
+          aria-label="Rank and season status"
+        >
+          <article className="dashboard-rank-panel">
+            <p className="dashboard-stat-label">Developer Rank</p>
+            <h2 className="dashboard-rank-title">
+              <RankBadge rank={rank} size="large" />
+            </h2>
+            <p className="dashboard-rank-copy" data-private-value="true">
+              {seasonPoints} SP <span aria-hidden="true">•</span> {remainingPoints} Remaining
+            </p>
+            <div className="dashboard-next-rank">
+              <span aria-hidden="true">➜</span>
+              <RankBadge rank={nextRank} size="small" />
+            </div>
+          </article>
 
-          <h2>{rank}</h2>
+          <article className="dashboard-season-panel">
+            <p className="dashboard-stat-label">Season Status</p>
+            <h2>Season #{seasonNumber}</h2>
+            <p className="dashboard-season-copy">Ends in {daysRemaining} Days</p>
+          </article>
+        </section>
+      </div>
 
-          <p>
-            {seasonPoints} SP • {remainingPoints} Remaining
-          </p>
-
-          <small className="next-rank-label">➜ {nextRank}</small>
-
-          <div className="rank-progress">
-            <div
-              className="rank-progress-fill"
-              style={{
-                width: `${rankProgress}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <h3>Season Status</h3>
-
-          <h2>Season #{seasonNumber}</h2>
-
-          <p>Ends in {daysRemaining} Days</p>
-
-          <div style={{ marginTop: "12px" }}>
-            <strong>{rank}</strong>
-          </div>
-
-          <div style={{ marginTop: "8px" }}>
-            {seasonPoints} / {currentRankMaxPoints} SP
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <h3>Current Streak</h3>
-          <h2>{streak} Days</h2>
-
-          <p>{streak === 0 ? "Start building 🚀" : "🔥 Consistent"}</p>
-        </div>
-      </section>
-
-      {/* HEATMAP */}
-
-      <section className="dashboard-card consistency-card-inside">
-        <div className="consistency-header">
-          <div>
-            <h2>Developer Consistency</h2>
-          </div>
-
-          <div className="consistency-stats">
+      <section className="dashboard-card dashboard-insights-card">
+        <div className="dashboard-consistency-pane">
+          <div className="consistency-header">
             <div>
-              <span>{totalLogs}</span>
-              <p>Total Logs</p>
+              <p className="dashboard-stat-label">Yearly activity</p>
+              <h2>Developer Consistency</h2>
+            </div>
+            <span className="consistency-range">Last 53 Weeks</span>
+          </div>
+
+          <div className="dev-heatmap-wrapper">
+            <div className="month-row" aria-hidden="true">
+              {heatmapMonthMarkers.map((marker) => (
+                <span
+                  key={marker.date}
+                  style={{ gridColumnStart: marker.weekIndex + 1 }}
+                >
+                  {marker.label}
+                </span>
+              ))}
             </div>
 
-            <div>
-              <span>{arenaScore}</span>
-              <p>Arena Score</p>
+            <div className="heatmap-dashboard-inside" aria-label="Developer contribution heatmap">
+              {heatmap.map((cell) => (
+                <button
+                  type="button"
+                  key={cell.date}
+                  title={`${cell.title}. Open daily details.`}
+                  aria-label={`Open activity for ${cell.date}`}
+                  className={`heat-cell-dashboard ${cell.level}`}
+                  onClick={() => navigate(`/activity/${cell.date}`)}
+                />
+              ))}
             </div>
           </div>
-        </div>
 
-        <div className="contribution-summary">
-          <div>
-            <strong>{mostActiveDay || "N/A"}</strong>
-            <p>Most Active Day</p>
+          <div className="heatmap-footer">
+            <span>Less</span>
+            <div className="legend" aria-hidden="true">
+              <div className="heat-cell-dashboard" />
+              <div className="heat-cell-dashboard low" />
+              <div className="heat-cell-dashboard medium" />
+              <div className="heat-cell-dashboard high" />
+              <div className="heat-cell-dashboard max" />
+            </div>
+            <span>More</span>
           </div>
         </div>
 
-        {/* Heatmap Grid */}
-
-        <div className="dev-heatmap-wrapper">
-          <div className="heatmap-title-row">
-            <h3>Contribution Activity</h3>
-
-            <span>Last 53 Weeks</span>
+        <aside className="dashboard-leaderboard-pane" aria-labelledby="leaderboard-preview-title">
+          <div className="card-header">
+            <h2 id="leaderboard-preview-title">Leaderboard Preview</h2>
           </div>
 
-          <div className="month-row">
-            {heatmapMonthMarkers.map((marker) => (
-              <span
-                key={marker.date}
-                style={{
-                  gridColumnStart: marker.weekIndex + 1,
-                }}
-              >
-                {marker.label}
-              </span>
-            ))}
-          </div>
-
-          <div className="heatmap-dashboard-inside">
-            {heatmap.map((cell) => (
+          <div className="leaderboard" aria-live="polite">
+            {leaderboardPreview.map((entry) => (
               <div
-                key={cell.date}
-                title={cell.title}
-                className={`heat-cell-dashboard ${cell.level}`}
-              />
+                className={`leaderboard-row${entry.isCurrentUser ? " active-user" : ""}`}
+                key={entry.id}
+              >
+                <span>#{entry.position}</span>
+                <span>{entry.isCurrentUser ? `${entry.name} · You` : entry.name}</span>
+                <span data-private-value="true">{entry.arenaScore}</span>
+              </div>
             ))}
-          </div>
-        </div>
-
-        {/* PHASE 7 GOES HERE */}
-
-        <div className="heatmap-footer">
-          <span>Less</span>
-
-          <div className="legend">
-            <div className="heat-cell-dashboard"></div>
-
-            <div className="heat-cell-dashboard low"></div>
-
-            <div className="heat-cell-dashboard medium"></div>
-
-            <div className="heat-cell-dashboard high"></div>
-
-            <div className="heat-cell-dashboard max"></div>
-          </div>
-
-          <span>More</span>
-        </div>
-      </section>
-
-      <section className="dashboard-bottom-grid">
-        {/* RECENT ACTIVITY */}
-
-        <div className="dashboard-card">
-          <div className="card-header">
-            <h2>Recent Activity</h2>
-          </div>
-
-          <ul className="activity-list">
-            {recentLogs.length === 0 ? (
-              <li>No activity logged yet.</li>
-            ) : (
-              recentLogs.map((log) => <li key={log.id}>{log.text}</li>)
+            {leaderboardPreview.length === 0 && (
+              <p className="leaderboard-empty">Your live arena position will appear here.</p>
             )}
-          </ul>
-        </div>
-
-        {/* LEADERBOARD */}
-
-        <div className="dashboard-card">
-          <div className="card-header">
-            <h2>Leaderboard Preview</h2>
           </div>
-
-          <div className="leaderboard">
-            <div className="leaderboard-row">
-              <span>#1</span>
-              <span>Arpan</span>
-              <span>1842</span>
-            </div>
-            <div className="leaderboard-row active-user">
-              <span>#2</span>
-              <span>You</span>
-              <span>1542</span>
-            </div>
-            <div className="leaderboard-row">
-              <span>#3</span>
-              <span>Riya</span>
-              <span>1490</span>
-            </div>
-            <div className="leaderboard-row">
-              <span>#4</span>
-              <span>Harshit</span>
-              <span>1490</span>
-            </div>
-            <div className="leaderboard-row">
-              <span>#5</span>
-              <span>Priya</span>
-              <span>1490</span>
-            </div>
-          </div>
-        </div>
+        </aside>
       </section>
     </main>
   );

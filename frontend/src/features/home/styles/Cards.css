@@ -1,101 +1,51 @@
 .about-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(260px, 1fr)
-  );
-
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   justify-content: center;
-  gap: 24px;
-
-  margin-bottom: 25px;
+  gap: 1px;
+  margin-bottom: 72px;
 }
 
 .about-feature {
   display: flex;
+  min-width: 0;
+  min-height: 300px;
   flex-direction: column;
-
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 16px;
-
-  padding: 24px;
-
-  min-height: 220px;
-
-  transition:
-    transform 0.25s ease,
-    background 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-.about-feature:hover {
-  transform: translateY(-6px);
-
-  background: rgba(255, 255, 255, 0.1);
-
-  border-color: rgba(255, 255, 255, 0.22);
-
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.25),
-    0 0 25px rgba(125, 211, 252, 0.08);
+  padding: 36px 30px;
 }
 
 .about-feature .icon {
-  font-size: 32px;
-  margin-bottom: 16px;
-  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .about-feature h3 {
-  margin: 0 0 10px;
-
-  font-size: 18px;
-  font-weight: 700;
-
-  color: #ffffff;
+  overflow-wrap: anywhere;
 }
 
 .about-feature p {
   margin: 0;
-
-  font-size: 14px;
-  line-height: 1.7;
-
-  color: rgba(255, 255, 255, 0.82);
 }
 
-/* Tablet */
+/* Desktop and laptop: one horizontal row. */
+body .about-page .about-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
 
-@media (max-width: 1180px) {
-  .about-grid {
-    gap: 20px;
-  }
-
-  .about-feature {
-    min-height: auto;
+/* Tablet: two-by-two. */
+@media (max-width: 1023px) {
+  body .about-page .about-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
-/* Mobile */
-
-@media (max-width: 480px) {
-  .about-grid {
-    grid-template-columns: 1fr;
+/* Mobile: four cards in one vertical column. */
+@media (max-width: 640px) {
+  body .about-page .about-grid {
+    grid-template-columns: 1fr !important;
   }
 
-  .about-feature {
+  body .about-page .about-feature {
     width: 100%;
-  }
-
-  .about-feature h3 {
-    font-size: 17px;
-  }
-
-  .about-feature p {
-    font-size: 13px;
+    min-height: auto !important;
   }
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/DesktopAuthPages.css";
+import AuthBackButton from "../../components/AuthBackButton";
 
 import {
   getSocialAuthErrorMessage,
@@ -37,12 +38,13 @@ function Login() {
     try {
       setLoading(true);
 
-      const { token } = await signInWithSocialProvider(provider);
+      const { token, requiresUsername, requiresOnboarding } = await signInWithSocialProvider(provider);
 
       if (token) await loginWithToken(token);
 
-      toast.success("Welcome to DevArena!");
-      navigate("/dashboard");
+      const needsSetup = requiresUsername || requiresOnboarding;
+      toast.success(needsSetup ? "Complete your DevArena account setup." : "Welcome to DevArena!");
+      navigate(needsSetup ? "/choose-username" : "/dashboard");
     } catch (error) {
       console.error(error);
       toast.error(getSocialAuthErrorMessage(provider, "login", error));
@@ -71,10 +73,10 @@ function Login() {
       setLoading(true);
       const data = await loginWithEmail({ email, password, remember });
 
-      if (data.requires2FA) {
+      if (data.requires2FA && data.tempToken) {
         setPending2FAToken(data.tempToken);
         setVerifyGrid(data.verifyGrid || []);
-        toast("2FA Required", { icon: "🔒" });
+        toast("2FA Required");
         return;
       }
 
@@ -103,6 +105,7 @@ function Login() {
 
   return (
     <main className="auth-page">
+      <AuthBackButton />
       <div className="auth-container">
         {/* =========================================
             LEFT SIDE
@@ -126,7 +129,7 @@ function Login() {
               height="140"
               rx="14"
               fill="rgba(15, 23, 42, 0.85)"
-              stroke="rgba(125, 211, 252, 0.3)"
+              stroke="rgba(255, 255, 255, 0.3)"
               strokeWidth="1.5"
             />
 
@@ -148,7 +151,7 @@ function Login() {
               y="40"
               width="176"
               height="2"
-              fill="#38bdf8"
+              fill="#ffffff"
               opacity="0.45"
             >
               <animate
@@ -167,7 +170,7 @@ function Login() {
               width="60"
               height="5"
               rx="2.5"
-              fill="#7dd3fc"
+              fill="#ffffff"
               opacity="0.8"
             />
 
@@ -177,7 +180,7 @@ function Login() {
               width="90"
               height="5"
               rx="2.5"
-              fill="rgba(125, 211, 252, 0.35)"
+              fill="rgba(255, 255, 255, 0.35)"
             />
 
             <rect
@@ -186,7 +189,7 @@ function Login() {
               width="45"
               height="5"
               rx="2.5"
-              fill="#34d399"
+              fill="#d8d8dc"
               opacity="0.5"
             />
 
@@ -196,7 +199,7 @@ function Login() {
               width="70"
               height="5"
               rx="2.5"
-              fill="rgba(125, 211, 252, 0.25)"
+              fill="rgba(255, 255, 255, 0.25)"
             />
 
             <rect
@@ -205,7 +208,7 @@ function Login() {
               width="80"
               height="5"
               rx="2.5"
-              fill="rgba(125, 211, 252, 0.3)"
+              fill="rgba(255, 255, 255, 0.3)"
             />
 
             <rect
@@ -214,7 +217,7 @@ function Login() {
               width="55"
               height="5"
               rx="2.5"
-              fill="#a78bfa"
+              fill="#b8b8bd"
               opacity="0.55"
             />
 
@@ -224,7 +227,7 @@ function Login() {
               width="40"
               height="5"
               rx="2.5"
-              fill="rgba(125, 211, 252, 0.2)"
+              fill="rgba(255, 255, 255, 0.2)"
             />
 
             <rect
@@ -233,7 +236,7 @@ function Login() {
               width="100"
               height="5"
               rx="2.5"
-              fill="rgba(125, 211, 252, 0.35)"
+              fill="rgba(255, 255, 255, 0.35)"
             />
 
             <rect
@@ -242,13 +245,13 @@ function Login() {
               width="35"
               height="5"
               rx="2.5"
-              fill="#fbbf24"
+              fill="#f0f0fa"
               opacity="0.5"
             />
 
             {/* Cursor */}
 
-            <rect x="106" y="122" width="2" height="8" rx="1" fill="#7dd3fc">
+            <rect x="106" y="122" width="2" height="8" rx="1" fill="#ffffff">
               <animate
                 attributeName="opacity"
                 values="1;0.1;1"
@@ -265,7 +268,7 @@ function Login() {
               width="40"
               height="8"
               rx="2"
-              fill="rgba(125, 211, 252, 0.15)"
+              fill="rgba(255, 255, 255, 0.15)"
             />
 
             <rect
@@ -274,20 +277,20 @@ function Login() {
               width="70"
               height="6"
               rx="3"
-              fill="rgba(125, 211, 252, 0.1)"
+              fill="rgba(255, 255, 255, 0.1)"
             />
 
             {/* Shield */}
 
             <g transform="translate(190, 90)">
-              <circle cx="22" cy="22" r="22" fill="rgba(125, 211, 252, 0.12)" />
+              <circle cx="22" cy="22" r="22" fill="rgba(255, 255, 255, 0.12)" />
 
               <circle
                 cx="22"
                 cy="22"
                 r="16"
                 fill="rgba(7, 9, 18, 0.95)"
-                stroke="#7dd3fc"
+                stroke="#ffffff"
                 strokeWidth="1.2"
               />
 
@@ -297,24 +300,24 @@ function Login() {
                 width="12"
                 height="10"
                 rx="2"
-                fill="#7dd3fc"
+                fill="#ffffff"
                 opacity="0.8"
               />
 
               <path
                 d="M19 19v-3a3 3 0 0 1 6 0v3"
-                stroke="#7dd3fc"
+                stroke="#ffffff"
                 strokeWidth="1.5"
                 fill="none"
                 strokeLinecap="round"
               />
 
-              <circle cx="22" cy="23" r="1.2" fill="#07111f" />
+              <circle cx="22" cy="23" r="1.2" fill="#000000" />
             </g>
 
             {/* Floating Particles */}
 
-            <circle cx="35" cy="60" r="2" fill="#7dd3fc" opacity="0.3">
+            <circle cx="35" cy="60" r="2" fill="#ffffff" opacity="0.3">
               <animate
                 attributeName="cy"
                 values="60;50;60"
@@ -323,7 +326,7 @@ function Login() {
               />
             </circle>
 
-            <circle cx="250" cy="45" r="1.5" fill="#a78bfa" opacity="0.4">
+            <circle cx="250" cy="45" r="1.5" fill="#b8b8bd" opacity="0.4">
               <animate
                 attributeName="cy"
                 values="45;35;45"
@@ -332,7 +335,7 @@ function Login() {
               />
             </circle>
 
-            <circle cx="260" cy="150" r="2" fill="#34d399" opacity="0.3">
+            <circle cx="260" cy="150" r="2" fill="#d8d8dc" opacity="0.3">
               <animate
                 attributeName="cy"
                 values="150;140;150"

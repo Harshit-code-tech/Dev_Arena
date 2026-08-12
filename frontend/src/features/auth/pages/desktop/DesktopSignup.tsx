@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import "../../styles/DesktopAuthPages.css";
+import AuthBackButton from "../../components/AuthBackButton";
 import {
   getSocialAuthErrorMessage,
   signInWithSocialProvider,
@@ -41,15 +42,22 @@ function Signup() {
   const [show2FASetup, setShow2FASetup] = useState(false);
 
   const handleSocialSignup = async (provider: SocialAuthProvider) => {
+    if (!agreeTerms) {
+      const legalMessage = "Confirm that you are at least 18 and accept the Terms of Service and Privacy Policy before creating an account.";
+      setError(legalMessage);
+      toast.error(legalMessage);
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const { token } = await signInWithSocialProvider(provider);
+      const { token, requiresOnboarding } = await signInWithSocialProvider(provider, { acceptLegal: true });
 
       if (token) await loginWithToken(token);
 
-      toast.success("Welcome to DevArena!");
-      navigate("/dashboard");
+      toast.success(requiresOnboarding ? "Complete your DevArena username and GitHub setup." : "Welcome to DevArena!");
+      navigate(requiresOnboarding ? "/choose-username" : "/dashboard");
     } catch (error) {
       console.error(error);
       toast.error(getSocialAuthErrorMessage(provider, "signup", error));
@@ -126,6 +134,7 @@ function Signup() {
 
   return (
     <main className="auth-page">
+      <AuthBackButton />
       <div className="auth-container">
         {/* =====================================================
             LEFT SIDE
@@ -149,7 +158,7 @@ function Signup() {
                 rx="22"
                 ry="60"
                 fill="rgba(15, 23, 42, 0.88)"
-                stroke="rgba(125, 211, 252, 0.35)"
+                stroke="rgba(255, 255, 255, 0.35)"
                 strokeWidth="1.5"
               />
 
@@ -160,11 +169,11 @@ function Signup() {
                 cy="90"
                 r="12"
                 fill="rgba(2, 6, 23, 0.9)"
-                stroke="#7dd3fc"
+                stroke="#ffffff"
                 strokeWidth="1.2"
               />
 
-              <circle cx="50" cy="90" r="7" fill="rgba(125, 211, 252, 0.15)" />
+              <circle cx="50" cy="90" r="7" fill="rgba(255, 255, 255, 0.15)" />
 
               {/* Reflection */}
 
@@ -174,8 +183,8 @@ function Signup() {
 
               <path
                 d="M28 140 L10 170 L28 165"
-                fill="rgba(125, 211, 252, 0.12)"
-                stroke="rgba(125, 211, 252, 0.3)"
+                fill="rgba(255, 255, 255, 0.12)"
+                stroke="rgba(255, 255, 255, 0.3)"
                 strokeWidth="1"
               />
 
@@ -183,8 +192,8 @@ function Signup() {
 
               <path
                 d="M72 140 L90 170 L72 165"
-                fill="rgba(125, 211, 252, 0.12)"
-                stroke="rgba(125, 211, 252, 0.3)"
+                fill="rgba(255, 255, 255, 0.12)"
+                stroke="rgba(255, 255, 255, 0.3)"
                 strokeWidth="1"
               />
 
@@ -195,7 +204,7 @@ function Signup() {
                 cy="185"
                 rx="10"
                 ry="18"
-                fill="rgba(251, 191, 36, 0.4)"
+                fill="rgba(255, 255, 255, 0.4)"
               >
                 <animate
                   attributeName="ry"
@@ -210,7 +219,7 @@ function Signup() {
                 cy="185"
                 rx="6"
                 ry="14"
-                fill="rgba(248, 113, 113, 0.5)"
+                fill="rgba(255, 255, 255, 0.5)"
               >
                 <animate
                   attributeName="ry"
@@ -244,7 +253,7 @@ function Signup() {
               rx="120"
               ry="30"
               fill="none"
-              stroke="rgba(125, 211, 252, 0.08)"
+              stroke="rgba(255, 255, 255, 0.08)"
               strokeWidth="0.8"
               strokeDasharray="6 4"
             />
@@ -255,8 +264,8 @@ function Signup() {
               cx="45"
               cy="140"
               r="6"
-              fill="rgba(167, 139, 250, 0.25)"
-              stroke="rgba(167, 139, 250, 0.3)"
+              fill="rgba(255, 255, 255, 0.25)"
+              stroke="rgba(255, 255, 255, 0.3)"
               strokeWidth="0.8"
             />
 
@@ -271,7 +280,7 @@ function Signup() {
               />
             </circle>
 
-            <circle cx="250" cy="60" r="2" fill="#7dd3fc" opacity="0.4">
+            <circle cx="250" cy="60" r="2" fill="#ffffff" opacity="0.4">
               <animate
                 attributeName="opacity"
                 values="0.4;0.1;0.4"
@@ -280,7 +289,7 @@ function Signup() {
               />
             </circle>
 
-            <circle cx="220" cy="180" r="1.5" fill="#a78bfa" opacity="0.5">
+            <circle cx="220" cy="180" r="1.5" fill="#b8b8bd" opacity="0.5">
               <animate
                 attributeName="opacity"
                 values="0.5;0.15;0.5"
@@ -328,7 +337,7 @@ function Signup() {
                  <Color2FA 
                     isSetup={true} 
                     onSetupComplete={() => {
-                        navigate("/dashboard");
+                        navigate("/choose-username");
                     }} 
                  />
              </div>

@@ -1,52 +1,25 @@
-import { useState, useRef, useEffect } from "react";
+import type { ReactNode } from "react";
 
 import Sidebar from "../components/Sidebar";
-import NotificationPanel from "../components/NotificationPanel";
+import TopBar from "../components/TopBar";
+import WorkspaceBrief from "../components/WorkspaceBrief";
+import "../styles/AppLayout.css";
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function DashboardLayout({ children }: Props) {
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setNotificationsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleOutside);
-
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, []);
-
   return (
-    <>
+    <div className="app-layout">
       <Sidebar />
-
-      <main
-        style={{
-          marginLeft: "260px",
-          padding: "30px",
-        }}
-      >
-        <button
-          disabled={notificationsOpen}
-          className={notificationsOpen ? "bell disabled" : "bell"}
-        >
-          🔔
-        </button>
-
-        {children}
-      </main>
-
-      <div ref={panelRef}>
-        <NotificationPanel open={notificationsOpen} />
+      <div className="app-workspace">
+        <TopBar />
+        <main className="app-content">
+          <WorkspaceBrief />
+          <div className="route-stage">{children}</div>
+        </main>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { memo, useState, useCallback, useRef, useEffect } from "react";
 import type { UpdateEntry } from "../../../services/ReleaseService";
+import LiveDateTime from "../../../shared/components/LiveDateTime";
 
 type TimelineCardProps = {
   entry: UpdateEntry;
@@ -73,7 +74,7 @@ const TimelineCard = memo(function TimelineCard({
         <div className="card-header">
           <div className="timeline-meta">
             {isLatest && <span className="meta-latest">Latest</span>}
-            <time dateTime={entry.date} className="meta-date">{entry.date}</time>
+            <LiveDateTime value={entry.releasedAt} className="meta-date" />
             {entry.version && (
               <>
                 <span className="meta-sep" aria-hidden="true" />

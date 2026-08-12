@@ -5,6 +5,9 @@ const lines = [
     "Build your skills.",
     "Share your work.",
     "Compete in the arena.",
+    "Keep shipping.",
+    "Build with purpose.",
+    "Code. Learn. Grow.",
 ]
 
 function TypingLines() {
@@ -53,7 +56,6 @@ function TypingLines() {
     return (
         <span className="typing-line">
             {lines[lineIndex].slice(0, charIndex)}
-            <span className="typing-cursor">|</span>
         </span>
     )
 }

@@ -1,0 +1,143 @@
+.shared-project-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1408px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 150px clamp(22px, 4vw, 64px) 96px;
+}
+
+.shared-project-hero {
+  padding: clamp(28px, 5vw, 72px) 0 48px;
+  border-bottom: 1px solid #3a3a3f;
+}
+.shared-project-hero > p,
+.shared-project-milestones > div:first-child p,
+.shared-project-error > p {
+  margin: 0;
+  color: rgba(255,255,255,.48);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.shared-project-hero h1,
+.shared-project-error h1 { margin: 14px 0 18px; font-size: clamp(52px, 8vw, 110px); line-height: .88; }
+.shared-project-hero > span,
+.shared-project-error > span { display: block; max-width: 760px; color: rgba(255,255,255,.62); font-size: 16px; line-height: 1.7; }
+
+.shared-project-owner { display: flex; align-items: center; gap: 12px; margin-bottom: 42px; }
+.shared-owner-avatar { width: 44px; height: 44px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.65); font-family: var(--da-display); }
+.shared-owner-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.shared-project-owner > div { display: flex; flex-direction: column; gap: 3px; }
+.shared-project-owner span:last-child { color: rgba(255,255,255,.45); font-size: 11px; }
+
+.shared-project-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid #3a3a3f; border-top: 0; }
+.shared-project-metrics article { min-height: 130px; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 24px; border-right: 1px solid #3a3a3f; }
+.shared-project-metrics article:last-child { border-right: 0; }
+.shared-project-metrics span { color: rgba(255,255,255,.45); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.shared-project-metrics strong { font-size: clamp(21px, 2.5vw, 34px); text-transform: uppercase; }
+
+.shared-project-milestones { margin-top: 34px; padding: clamp(24px, 4vw, 48px); border: 1px solid #3a3a3f; background: #060606; }
+.shared-project-milestones h2 { margin: 6px 0 26px; font-size: clamp(32px, 5vw, 60px); }
+.shared-milestone-list { border-top: 1px solid #3a3a3f; }
+.shared-milestone-list article { display: grid; grid-template-columns: 60px minmax(0,1fr) auto; gap: 24px; align-items: start; padding: 22px 0; border-bottom: 1px solid #242428; }
+.shared-milestone-list article > span { font-family: var(--da-display); font-size: 18px; }
+.shared-milestone-list article > div { display: grid; gap: 7px; }
+.shared-milestone-list p { margin: 0; color: rgba(255,255,255,.52); line-height: 1.55; }
+.shared-milestone-list b { font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.shared-project-empty { padding: 30px 0; }
+.shared-project-error { display: flex; flex-direction: column; justify-content: center; padding-top: 100px; }
+
+@media (max-width: 760px) {
+  .shared-project-page { padding-right: 16px; padding-left: 16px; }
+  .shared-project-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .shared-project-metrics article:nth-child(2) { border-right: 0; }
+  .shared-project-metrics article:nth-child(-n+2) { border-bottom: 1px solid #3a3a3f; }
+  .shared-milestone-list article { grid-template-columns: 40px minmax(0,1fr); }
+  .shared-milestone-list b { grid-column: 2; }
+}
+
+.shared-project-back {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 18px;
+  padding: 8px 0;
+  border: 0 !important;
+  background: transparent !important;
+  color: #fff;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.shared-project-back::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+.shared-project-back:hover::after,
+.shared-project-back:focus-visible::after { transform: scaleX(1); }
+.shared-project-repository {
+  margin-top: 18px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: #08080a;
+}
+.shared-project-repository > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.shared-project-repository header p { margin: 0 0 6px; color: rgba(255,255,255,.42); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+.shared-project-repository header h2 { margin: 0; font-size: clamp(20px, 3vw, 38px); text-transform: uppercase; }
+.shared-project-repository header span,
+.shared-project-repository header a { color: rgba(255,255,255,.6); font-size: 9px; }
+.shared-project-repository header a { color: #fff; text-underline-offset: 4px; }
+.shared-language-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; margin-top: 20px; background: rgba(255,255,255,.12); }
+.shared-language-grid article { padding: 15px; background: #0c0c0e; }
+.shared-language-grid article > span { display: block; color: rgba(255,255,255,.5); font-size: 9px; }
+.shared-language-grid article > strong { display: block; margin-top: 7px; font-size: 20px; }
+.shared-language-grid i { display: block; height: 2px; margin-top: 10px; background: rgba(255,255,255,.12); }
+.shared-language-grid i u { display: block; height: 100%; background: #fff; text-decoration: none; }
+.shared-language-grid > p { margin: 0; padding: 16px; background: #0c0c0e; color: rgba(255,255,255,.5); font-size: 10px; }
+@media (max-width: 720px) {
+  .shared-project-repository > header { flex-direction: column; }
+  .shared-language-grid { grid-template-columns: 1fr; }
+}
+
+.shared-technology-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.shared-technology-list span {
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.75);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.shared-project-repository > footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+  color: rgba(255,255,255,.48);
+  font-size: 11px;
+}

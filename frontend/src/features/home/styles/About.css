@@ -1,11 +1,9 @@
 .about-wrap {
   max-width: 1200px;
   margin: 5px auto 0;
-  text-align: center;
 }
 
 .about-hero {
-  text-align: center;
   margin-bottom: 50px;
 }
 
@@ -21,90 +19,77 @@
   line-height: 1.7;
 }
 
-/* =========================
-   SUPPORT BANNER
-========================= */
-
 .support-banner {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 18px;
-
   padding: 32px;
   text-align: center;
 }
 
 .support-banner h3 {
+  margin-bottom: 8px;
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 8px;
 }
 
 .support-banner p {
-  font-size: 14px;
-  color: #ffffff;
   margin-bottom: 20px;
-}
-
-.support-btn {
-  padding: 12px 28px;
-
-  border-radius: 11px;
-
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
-
-  border: 1px solid rgba(255, 255, 255, 0.13);
-
   font-size: 14px;
+}
+
+/* Login / signup style text action: transparent with a left-to-right underline. */
+body .about-page .support-btn {
+  position: relative !important;
+  min-height: auto !important;
+  padding: 8px 0 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--da-on-primary) !important;
+  box-shadow: none !important;
   cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  transform: none !important;
 }
 
-.support-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
-  transform: translateY(-2px);
+body .about-page .support-btn::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+body .about-page .support-btn:hover,
+body .about-page .support-btn:focus-visible {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--da-on-primary) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .about-page .support-btn:hover::after,
+body .about-page .support-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+body .about-page .support-btn:focus-visible {
+  outline: 1px solid var(--da-on-primary);
+  outline-offset: 6px;
+}
 
 @media (max-width: 768px) {
   .about-hero h1 {
-    margin-top: 115px;
+    margin-top: 0;
     font-size: 42px;
-  }
-
-  .about-grid {
-    gap: 20px;
-  }
-
-  .about-feature {
-    min-height: auto;
   }
 }
 
 @media (max-width: 480px) {
   .about-hero h1 {
-    margin-top: 115px;
     font-size: 36px;
-  }
-
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .about-feature h3 {
-    font-size: 17px;
-  }
-
-  .about-feature p {
-    font-size: 13px;
   }
 }

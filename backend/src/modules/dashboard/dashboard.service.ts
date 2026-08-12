@@ -1,21 +1,21 @@
-import type { User } from "@prisma/client";
+import { ScoreCategory, type User } from "@prisma/client";
+import { randomUUID } from "crypto";
 import { dashboardRepository } from "./dashboard.repository";
+import { prisma } from "../../database/prisma";
+import { rebuildUserScoreState, upsertScoreEvent } from "../../shared/services/scoring.service";
+import { requiredText } from "../../shared/utils/tracking";
 import type {
     DashboardLogEntry,
     DashboardResponse,
     DashboardStats,
     DashboardUpdateData,
     DashboardUpdateInput,
-    ProfileResponse,
-    QuickLogInput,
-    QuickLogResponse,
 } from "./dashboard.types";
 
 type DashboardService = {
     getDashboard(userId: string): Promise<DashboardResponse | null>;
     updateDashboard(userId: string, input: DashboardUpdateInput): Promise<User>;
-    createQuickLog(userId: string, input: QuickLogInput): Promise<QuickLogResponse>;
-    getProfile(userId: string): Promise<ProfileResponse | null>;
+    createQuickLog(userId: string, activity: unknown): Promise<{ id: string; text: string; points: number; createdAt: Date }>;
 };
 
 export const dashboardService: DashboardService = {
@@ -26,28 +26,11 @@ export const dashboardService: DashboardService = {
             return null;
         }
 
-        const logs: DashboardLogEntry[] = [
-            ...user.dsaLogs.map((log) => ({
-                id: log.id,
-                text: `DSA: ${log.problemName}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.fullstackLogs.map((log) => ({
-                id: log.id,
-                text: `Fullstack: ${log.title}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.projectLogs.map((log) => ({
-                id: log.id,
-                text: `Project: ${log.description}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.practiceLogs.map((log) => ({
-                id: log.id,
-                text: `Practice: ${log.notes || "Completed"}`,
-                createdAt: log.createdAt,
-            })),
-        ];
+        const logs: DashboardLogEntry[] = user.scoreEvents.map((event) => ({
+            id: event.id,
+            text: event.label,
+            createdAt: event.occurredAt,
+        }));
 
         logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
@@ -66,85 +49,53 @@ export const dashboardService: DashboardService = {
         return { stats, logs };
     },
 
-    updateDashboard(userId: string, input: DashboardUpdateInput): Promise<User> {
-        const updateData: DashboardUpdateData = {};
+    async updateDashboard(userId: string, input: DashboardUpdateInput): Promise<User> {
+        if (input.resetSeason) {
+            return prisma.$transaction(async (tx) => {
+                await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        seasonStartDate: new Date(),
+                        seasonNumber: { increment: 1 },
+                        weeklyBonusClaimed: false,
+                        seasonBonusClaimed: false,
+                    },
+                });
+                await rebuildUserScoreState(tx, userId);
+                return tx.user.findUniqueOrThrow({ where: { id: userId } });
+            });
+        }
 
-        if (input.streak !== undefined) updateData.streak = input.streak;
-        if (input.activeDays !== undefined) updateData.activeDays = input.activeDays;
-        if (input.seasonPoints !== undefined) updateData.seasonPoints = input.seasonPoints;
-        if (input.rank !== undefined) updateData.rank = input.rank;
+        const updateData: DashboardUpdateData = {};
         if (input.weeklyBonusClaimed !== undefined) updateData.weeklyBonusClaimed = input.weeklyBonusClaimed;
         if (input.seasonBonusClaimed !== undefined) updateData.seasonBonusClaimed = input.seasonBonusClaimed;
-        if (input.seasonNumber !== undefined) updateData.seasonNumber = input.seasonNumber;
-        if (input.arenaScore !== undefined) updateData.arenaScore = input.arenaScore;
 
-        if (input.resetSeason) {
-            updateData.seasonStartDate = new Date();
+        if (Object.keys(updateData).length === 0) {
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) throw new Error("User not found");
+            return user;
         }
 
         return dashboardRepository.updateUserDashboard(userId, updateData);
     },
+    async createQuickLog(userId: string, activity: unknown) {
+        const text = requiredText(activity, "Activity", 10);
+        const id = randomUUID();
+        const occurredAt = new Date();
 
-    async createQuickLog(userId: string, input: QuickLogInput): Promise<QuickLogResponse> {
-        const text = input.text?.trim();
-
-        if (!text) {
-            throw new Error("Activity text is required");
-        }
-
-        const QUICK_LOG_SCORE = 5;
-        const { log, user } = await dashboardRepository.createQuickLog(userId, text, QUICK_LOG_SCORE);
-
-        return {
-            log: {
-                id: log.id,
-                text: `Practice: ${log.notes || "Completed"}`,
-                createdAt: log.createdAt,
-            },
-            arenaScore: user.arenaScore,
-        };
+        return prisma.$transaction(async (tx) => {
+            await upsertScoreEvent(tx, {
+                userId,
+                category: ScoreCategory.General,
+                sourceType: "QUICK_LOG",
+                sourceId: id,
+                label: `Quick Log: ${text}`,
+                points: 5,
+                occurredAt,
+            });
+            await rebuildUserScoreState(tx, userId);
+            return { id, text, points: 5, createdAt: occurredAt };
+        });
     },
 
-    async getProfile(userId: string): Promise<ProfileResponse | null> {
-        const user = await dashboardRepository.findUserWithLogs(userId);
-
-        if (!user) {
-            return null;
-        }
-
-        const logs: DashboardLogEntry[] = [
-            ...user.dsaLogs.map((log) => ({
-                id: log.id,
-                text: `DSA: ${log.problemName}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.fullstackLogs.map((log) => ({
-                id: log.id,
-                text: `Fullstack: ${log.title}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.projectLogs.map((log) => ({
-                id: log.id,
-                text: `Project: ${log.description}`,
-                createdAt: log.createdAt,
-            })),
-            ...user.practiceLogs.map((log) => ({
-                id: log.id,
-                text: `Practice: ${log.notes || "Completed"}`,
-                createdAt: log.createdAt,
-            })),
-        ];
-
-        logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-        return {
-            stats: {
-                arenaScore: user.arenaScore,
-                streak: user.streak,
-                rank: user.rank,
-            },
-            logs,
-            createdAt: user.createdAt,
-        };
-    },
 };

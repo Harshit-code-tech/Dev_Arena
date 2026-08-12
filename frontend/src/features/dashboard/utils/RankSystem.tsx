@@ -1,25 +1,15 @@
 export const RANKS = [
   { name: "Unranked", points: 0 },
-
-  { name: "Mud", points: 75 },
-
-  { name: "Wood", points: 125 },
-
-  { name: "Stone", points: 175 },
-
-  { name: "Iron", points: 250 },
-
-  { name: "Silver", points: 350 },
-
-  { name: "Gold", points: 475 },
-
-  { name: "Platinum", points: 625 },
-
-  { name: "Ruby", points: 800 },
-
-  { name: "Diamond", points: 1000 },
-
-  { name: "Developer", points: 1250 },
+  { name: "Mud", points: 100 },
+  { name: "Wood", points: 175 },
+  { name: "Stone", points: 250 },
+  { name: "Iron", points: 350 },
+  { name: "Silver", points: 475 },
+  { name: "Gold", points: 625 },
+  { name: "Platinum", points: 800 },
+  { name: "Ruby", points: 1000 },
+  { name: "Diamond", points: 1250 },
+  { name: "Developer", points: 1500 },
 ];
 
 export const getRankFromPoints = (points: number) => {

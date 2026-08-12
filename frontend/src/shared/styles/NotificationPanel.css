@@ -1,35 +1,483 @@
-.notification-panel {
+.profile-sidebar-backdrop {
   position: fixed;
+  inset: 0;
+  z-index: 1090;
+  border: 0;
+  background: rgba(0, 0, 0, 0.58);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+  cursor: default;
+  animation: profile-sidebar-fade-in 180ms ease both;
+}
 
+.profile-sidebar {
+  position: fixed;
   top: 0;
-  right: -400px;
-
-  width: 350px;
-  height: 100vh;
-
-  background: #0d1117;
-
-  transition: .3s;
-
-  border-left: 1px solid
-    rgba(255,255,255,.08);
-
-  padding: 24px;
-
-  z-index: 1000;
-}
-
-.notification-panel.open {
   right: 0;
+  z-index: 1100;
+  width: min(420px, 100vw);
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  background: #050505;
+  color: #ffffff;
+  box-shadow: -24px 0 70px rgba(0, 0, 0, 0.36);
+  animation: profile-sidebar-slide-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.notification-item {
-  padding: 14px;
+.profile-sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
 
-  border-radius: 10px;
+.profile-sidebar-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-  margin-top: 12px;
+.profile-sidebar-avatar {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000000;
+  font-size: 18px;
+  font-weight: 800;
+}
 
-  background:
-    rgba(255,255,255,.04);
+.profile-sidebar-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+}
+
+.profile-sidebar-eyebrow,
+.profile-sidebar-email,
+.profile-sidebar-section-heading p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.profile-sidebar-header h2 {
+  max-width: 245px;
+  margin: 5px 0 4px;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-sidebar-email {
+  max-width: 245px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.profile-sidebar-close {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.profile-sidebar-close:hover,
+.profile-sidebar-close:focus-visible {
+  border-color: #ffffff;
+  transform: rotate(5deg);
+  outline: none;
+}
+
+.profile-sidebar-close i {
+  font-size: 22px;
+}
+
+.profile-sidebar-notifications {
+  min-height: 0;
+  padding: 32px 28px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
+}
+
+.profile-sidebar-section-heading {
+  margin-bottom: 24px;
+}
+
+.profile-sidebar-section-heading h3 {
+  margin: 7px 0 0;
+  color: #ffffff;
+  font-size: 29px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.profile-sidebar-notification-list {
+  display: grid;
+  gap: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.profile-sidebar-notification {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 20px;
+  background: #050505;
+}
+
+.profile-sidebar-notification-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.profile-sidebar-notification h4 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.profile-sidebar-notification p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.profile-sidebar-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  padding: 1px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.profile-sidebar-actions button {
+  min-height: 66px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  background: #050505;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.profile-sidebar-actions button:hover,
+.profile-sidebar-actions button:focus-visible {
+  background: #ffffff;
+  color: #000000;
+  outline: none;
+}
+
+.profile-sidebar-actions i {
+  font-size: 18px;
+}
+
+@keyframes profile-sidebar-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes profile-sidebar-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .profile-sidebar-header,
+  .profile-sidebar-notifications {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .profile-sidebar-header h2,
+  .profile-sidebar-email {
+    max-width: 190px;
+  }
+
+  .profile-sidebar-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-sidebar,
+  .profile-sidebar-backdrop {
+    animation: none;
+  }
+}
+
+.profile-sidebar-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.notification-read-all {
+  position: relative;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255,255,255,.68);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.notification-read-all::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+
+.notification-read-all:hover,
+.notification-read-all:focus-visible {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+}
+
+.notification-read-all:hover::after,
+.notification-read-all:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.profile-sidebar-notification {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: background 180ms ease, transform 220ms cubic-bezier(.22,1,.36,1);
+}
+
+.profile-sidebar-notification:hover,
+.profile-sidebar-notification:focus-visible {
+  border: 0;
+  border-radius: 0;
+  background: #111113;
+  color: #fff;
+  transform: translateX(-3px);
+}
+
+.profile-sidebar-notification.read {
+  opacity: .62;
+}
+
+.profile-sidebar-notification.read .profile-sidebar-notification-dot {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.45);
+}
+
+.profile-sidebar-notification time {
+  display: block;
+  margin-top: 10px;
+  color: rgba(255,255,255,.34);
+  font-size: 10px;
+  letter-spacing: .4px;
+}
+
+.notification-empty {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 24px;
+  background: #050505;
+  text-align: center;
+}
+
+.notification-empty strong {
+  font-family: var(--da-display);
+  text-transform: uppercase;
+}
+
+.notification-empty span {
+  color: rgba(255,255,255,.46);
+  font-size: 12px;
+}
+
+.notification-skeleton {
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 20px;
+  background: #050505;
+}
+
+.notification-skeleton > span,
+.notification-skeleton i {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #18181b;
+}
+
+.notification-skeleton > span {
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+}
+
+.notification-skeleton div {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.notification-skeleton i {
+  height: 12px;
+}
+
+.notification-skeleton i:last-child {
+  width: 72%;
+}
+
+.notification-skeleton > span::after,
+.notification-skeleton i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.09), transparent);
+  animation: notification-scan 1.2s ease infinite;
+}
+
+@keyframes notification-scan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-read-all::after,
+  .profile-sidebar-notification,
+  .notification-skeleton > span::after,
+  .notification-skeleton i::after {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Keep drawer actions consistent with the non-pill DevArena action language. */
+.profile-sidebar-actions button {
+  position: relative;
+  background: #050505;
+  color: #fff;
+}
+
+.profile-sidebar-actions button::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: 15px;
+  left: 22px;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms ease;
+}
+
+.profile-sidebar-actions button:hover,
+.profile-sidebar-actions button:focus-visible {
+  background: #050505;
+  color: #fff;
+}
+
+.profile-sidebar-actions button:hover::after,
+.profile-sidebar-actions button:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Compact alert density: notifications remain readable without dominating the drawer. */
+.profile-sidebar-notifications { padding: 24px 22px; }
+.profile-sidebar-section-heading { margin-bottom: 16px; }
+.profile-sidebar-notification {
+  min-height: 76px;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.profile-sidebar-notification-dot { width: 6px; height: 6px; margin-top: 5px; }
+.profile-sidebar-notification h4 { margin-bottom: 4px; font-size: 11px; }
+.profile-sidebar-notification p { font-size: 12px; line-height: 1.4; }
+.profile-sidebar-notification time { display: block; margin-top: 5px; color: rgba(255,255,255,.38); font-size: 9px; letter-spacing: .04em; }
+.notification-skeleton { min-height: 72px; padding: 12px 14px; }
+
+.profile-sidebar-avatar img,
+.profile-avatar-button img {
+  image-rendering: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

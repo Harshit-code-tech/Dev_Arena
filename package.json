@@ -17,7 +17,8 @@
     "db:migrate": "npm run db:migrate --workspace @devarena/backend",
     "db:generate": "npm run db:generate --workspace @devarena/backend",
     "db:studio": "npm run db:studio --workspace @devarena/backend",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "scores:rebuild": "npm run scores:rebuild --workspace @devarena/backend"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

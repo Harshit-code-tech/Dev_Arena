@@ -1,14 +1,19 @@
 import { Router } from "express";
-import * as projectController from "./project.controller";
 import { protect } from "../../middleware/auth.middleware";
+import * as projectController from "./project.controller";
 
 const router = Router();
 
-router.use(protect);
+router.get("/shared/:shareSlug", projectController.getSharedProject);
 
+router.use(protect);
 router.get("/", projectController.getProjects);
 router.post("/", projectController.createProject);
+router.post("/github/reverify", projectController.reverifyGitHubRepositories);
 router.put("/:id", projectController.updateProject);
+router.put("/:id/sharing", projectController.updateSharing);
+router.post("/:id/github", projectController.attachGitHubRepository);
+router.post("/:id/github/refresh", projectController.refreshGitHubRepository);
 
 router.post("/:id/logs", projectController.addLog);
 router.put("/:id/logs/:logId", projectController.updateLog);

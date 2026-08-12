@@ -12,10 +12,20 @@ import fullstackRoutes from "./modules/fullstack/fullstack.routes";
 import projectRoutes from "./modules/projects/project.routes";
 import practiceRoutes from "./modules/practice/practice.routes";
 import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes";
-import challengeRoutes from "./modules/challenges/challenge.routes";
+import tournamentRoutes from "./modules/tournaments/tournament.routes";
+import adminRoutes from "./modules/admin/admin.routes";
 import blogRoutes from "./modules/blog/blog.routes";
 import releaseRoutes from "./modules/releases/release.routes";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
+import settingsRoutes from "./modules/settings/settings.routes";
+import friendRoutes from "./modules/friends/friend.routes";
+import notificationRoutes from "./modules/notifications/notification.routes";
+import platformRoutes from "./modules/platform/platform.routes";
+import realtimeRoutes from "./modules/realtime/realtime.routes";
+import activityRoutes from "./modules/activity/activity.routes";
+import playerHubRoutes from "./modules/player-hub/player-hub.routes";
+import githubRoutes from "./modules/github/github.routes";
+import feedbackRoutes from "./modules/feedback/feedback.routes";
 
 export function createApp(port: number) {
     const app = express();
@@ -23,7 +33,15 @@ export function createApp(port: number) {
     // ── Global middleware ─────────────────────────────────────────
     app.use(helmet());
     app.use(cors());
-    app.use(express.json());
+    app.use(express.json({
+        limit: "8mb",
+        verify: (req, _res, buffer) => {
+            const request = req as Request & { rawBody?: Buffer };
+            if ((request.originalUrl || request.url || "").startsWith("/api/github/webhook")) {
+                request.rawBody = Buffer.from(buffer);
+            }
+        },
+    }));
     app.use(morgan("dev"));
 
     // ── Health check ──────────────────────────────────────────────
@@ -48,9 +66,20 @@ export function createApp(port: number) {
     app.use("/api/projects", projectRoutes);
     app.use("/api/practice", practiceRoutes);
     app.use("/api/leaderboard", leaderboardRoutes);
-    app.use("/api/challenge", challengeRoutes);
+    app.use("/api/tournaments", tournamentRoutes);
+    app.use("/api/challenge", tournamentRoutes); // legacy compatibility
+    app.use("/api/admin", adminRoutes);
     app.use("/api/blog", blogRoutes);
     app.use("/api/releases", releaseRoutes);
+    app.use("/api/settings", settingsRoutes);
+    app.use("/api/friends", friendRoutes);
+    app.use("/api/notifications", notificationRoutes);
+    app.use("/api/public", platformRoutes);
+    app.use("/api/realtime", realtimeRoutes);
+    app.use("/api/activity", activityRoutes);
+    app.use("/api/player-hub", playerHubRoutes);
+    app.use("/api/github", githubRoutes);
+    app.use("/api/feedback", feedbackRoutes);
 
     // ── 404 fallback ──────────────────────────────────────────────
     app.use((_req: Request, res: Response) => {

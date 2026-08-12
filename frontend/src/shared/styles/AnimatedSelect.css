@@ -1,0 +1,178 @@
+.animated-select {
+  position: relative;
+  width: 100%;
+  z-index: 4;
+}
+
+.animated-select.is-open { z-index: 40; }
+
+.animated-select__trigger {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 2px 9px;
+  border: 0 !important;
+  border-bottom: 1px solid #5b5b61 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  cursor: pointer;
+  font-size: 15px;
+  text-align: left;
+  transform: none !important;
+  transition: border-color 220ms ease, color 220ms ease;
+}
+
+.animated-select__trigger:hover,
+.animated-select__trigger:focus-visible,
+.animated-select.is-open .animated-select__trigger {
+  border-bottom-color: #fff !important;
+  outline: 0 !important;
+  background: transparent !important;
+}
+
+.animated-select__trigger i {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform 260ms cubic-bezier(.22,1,.36,1);
+}
+
+.animated-select.is-open .animated-select__trigger i {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.animated-select__menu {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  left: 0;
+  max-height: 260px;
+  padding: 7px;
+  overflow-y: auto;
+  border: 1px solid #3a3a3f;
+  background: #09090b;
+  box-shadow: 0 22px 64px rgba(0,0,0,.62);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px) scale(.985);
+  transform-origin: top;
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(.22,1,.36,1);
+}
+
+.animated-select.is-open .animated-select__menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.animated-select__menu button {
+  width: 100%;
+  display: grid;
+  gap: 3px;
+  padding: 12px 13px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.68) !important;
+  cursor: pointer;
+  text-align: left;
+  transform: none !important;
+  transition: background-color 160ms ease, color 160ms ease, padding-left 180ms ease;
+}
+
+.animated-select__menu button:hover,
+.animated-select__menu button:focus-visible,
+.animated-select__menu button.is-selected {
+  outline: 0 !important;
+  background: rgba(255,255,255,.08) !important;
+  color: #fff !important;
+  padding-left: 18px;
+}
+
+.animated-select__menu button.is-selected::before {
+  content: "→";
+  position: absolute;
+  right: 18px;
+}
+
+.animated-select__menu span {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.animated-select__menu small {
+  color: rgba(255,255,255,.42);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-select__trigger,
+  .animated-select__trigger i,
+  .animated-select__menu,
+  .animated-select__menu button { transition: none; }
+}
+
+.animated-select.has-error .animated-select__trigger {
+  border-bottom-color: #ff8f8f !important;
+}
+
+.animated-select.is-disabled { opacity: .55; }
+
+.animated-select__search-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 6px 7px 9px;
+  background: #09090b;
+}
+
+.animated-select__search {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid #525259;
+  border-radius: 0;
+  outline: 0;
+  background: #141417;
+  color: #fff;
+}
+
+.animated-select__search:focus { border-bottom-color: #fff; }
+
+.animated-select__menu button.is-active:not(:disabled) {
+  background: rgba(255,255,255,.08) !important;
+  color: #fff !important;
+}
+
+.animated-select__menu button:disabled {
+  cursor: not-allowed;
+  opacity: .38;
+}
+
+.animated-select__empty,
+.animated-select__error {
+  display: block;
+  margin: 0;
+  padding: 12px 13px;
+  color: rgba(255,255,255,.48);
+  font-size: 12px;
+}
+
+.animated-select__error {
+  padding: 7px 2px 0;
+  color: #ffaaaa;
+}

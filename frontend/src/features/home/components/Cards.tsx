@@ -10,28 +10,28 @@ type Feature = {
 const features: Feature[] = [
   {
     id: "community",
-    icon: "🤝",
+    icon: "01",
     title: "Community First",
     description:
       "Connect with developers, share experiences, and grow together through meaningful collaboration.",
   },
   {
     id: "privacy",
-    icon: "🔒",
+    icon: "02",
     title: "Privacy Focused",
     description:
       "Your data belongs to you. We never sell personal information or compromise your privacy.",
   },
   {
     id: "global",
-    icon: "🌍",
+    icon: "03",
     title: "Built for Everyone",
     description:
       "Whether you're a student, freelancer, startup founder, or enterprise developer, DevArena adapts to your needs.",
   },
   {
     id: "rapid",
-    icon: "🚀",
+    icon: "04",
     title: "Rapid Development",
     description:
       "Features are shipped continuously based on real community feedback and developer needs.",

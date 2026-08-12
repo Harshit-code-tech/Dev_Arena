@@ -1,7 +1,4 @@
-import {
-  RELEASE_DATE_FORMAT_OPTIONS,
-  RELEASES_PER_PAGE,
-} from "./ReleaseConstants";
+import { RELEASES_PER_PAGE } from "./ReleaseConstants";
 
 export type BreakingChange = {
   area: string;
@@ -10,7 +7,7 @@ export type BreakingChange = {
 
 export type UpdateEntry = {
   id: string;
-  date: string;
+  releasedAt: string;
   title: string;
   summary: string;
   releaseTag?: string;
@@ -75,7 +72,7 @@ function mapReleasesToUpdateEntries(releases: BackendRelease[]) {
 function mapReleaseToUpdateEntry(release: BackendRelease): UpdateEntry {
   return {
     id: release.id,
-    date: formatReleaseDate(release.releasedAt),
+    releasedAt: release.releasedAt,
     title: release.title,
     summary: release.summary,
     releaseTag: release.releaseTag,
@@ -83,10 +80,6 @@ function mapReleaseToUpdateEntry(release: BackendRelease): UpdateEntry {
     status: release.status,
     changelogSpecs: release.changelogSpecs,
   };
-}
-
-function formatReleaseDate(releasedAt: string) {
-  return new Date(releasedAt).toLocaleDateString("en-US", RELEASE_DATE_FORMAT_OPTIONS);
 }
 
 function normalizeTotalPages(totalPages: number | undefined) {

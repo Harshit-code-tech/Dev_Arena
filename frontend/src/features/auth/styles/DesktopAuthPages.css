@@ -1,592 +1,1217 @@
-@media (min-width: 831px) {
-  .auth-page {
-    height: 85vh;
-    margin-top: 3vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+/* =========================================================
+   DEVARENA RESPONSIVE AUTH EXPERIENCE
+   One component system for desktop, tablet and mobile.
+========================================================= */
 
-    overflow: hidden;
+body .app.auth-route .auth-page {
+  position: relative !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #030303 !important;
+  color: #f5f5f5 !important;
+}
 
-    position: relative;
+body .app.auth-route .auth-container {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #030303 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
 
-    background: transparent;
+body .app.auth-route .auth-container::after {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+/* =========================================================
+   LEFT / FORM PANEL
+========================================================= */
+
+body .app.auth-route .auth-form-panel {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: clamp(68px, 8vh, 96px) clamp(46px, 7vw, 118px) clamp(38px, 6vh, 72px) !important;
+  overflow: hidden !important;
+  background: #050505 !important;
+}
+
+body .app.auth-route .auth-form-shell {
+  width: min(100%, 510px);
+  margin: 0 auto;
+}
+
+body .app.auth-route .auth-page--signup .auth-form-shell {
+  width: min(100%, 560px);
+}
+
+body .app.auth-route .form-top {
+  margin: 0 0 clamp(20px, 2.8vh, 32px);
+}
+
+body .app.auth-route .auth-badge {
+  display: block !important;
+  width: auto !important;
+  margin: 0 0 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #a9aaae !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 1.8px !important;
+  text-transform: uppercase !important;
+}
+
+body .app.auth-route .auth-form-panel h1 {
+  margin: 0 !important;
+  color: #f5f5f5 !important;
+  font-size: clamp(42px, 4.2vw, 70px) !important;
+  font-weight: 700 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -2px !important;
+  text-transform: uppercase !important;
+}
+
+body .app.auth-route .auth-subtitle {
+  max-width: 440px;
+  margin: 15px 0 0 !important;
+  color: #999a9f !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+}
+
+body .app.auth-route .auth-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(16px, 2vh, 22px) !important;
+  width: 100%;
+}
+
+body .app.auth-route .name-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+/* Floating line fields */
+body .app.auth-route .floating-field {
+  position: relative;
+  min-width: 0;
+  height: 62px;
+  background: rgba(148, 149, 154, 0.08);
+  border-bottom: 1px solid #55565b;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+body .app.auth-route .floating-field::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: #f5f5f5;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+  pointer-events: none;
+}
+
+body .app.auth-route .floating-field:focus-within {
+  background: rgba(148, 149, 154, 0.14);
+  border-bottom-color: transparent;
+}
+
+body .app.auth-route .floating-field:focus-within::after {
+  transform: scaleX(1);
+}
+
+body .app.auth-route .floating-field input {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 24px 14px 8px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+  caret-color: #fff;
+}
+
+body .app.auth-route .floating-field--password input {
+  padding-right: 66px !important;
+}
+
+body .app.auth-route .floating-field label {
+  position: absolute !important;
+  z-index: 3;
+  top: 50%;
+  left: 14px;
+  margin: 0 !important;
+  color: #a5a6aa !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  transition:
+    top 180ms ease,
+    color 180ms ease,
+    font-size 180ms ease,
+    transform 180ms ease;
+  pointer-events: none;
+}
+
+body .app.auth-route .floating-field input:focus + label,
+body .app.auth-route .floating-field input:not(:placeholder-shown) + label,
+body .app.auth-route .floating-field.has-value label {
+  top: 11px;
+  color: #d8d8da !important;
+  font-size: 9px !important;
+  transform: translateY(0);
+}
+
+body .app.auth-route .floating-field input:-webkit-autofill,
+body .app.auth-route .floating-field input:-webkit-autofill:hover,
+body .app.auth-route .floating-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f5f5f5 !important;
+  -webkit-box-shadow: 0 0 0 1000px #151517 inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+body .app.auth-route .password-toggle {
+  position: absolute !important;
+  z-index: 5;
+  top: 50% !important;
+  right: 13px !important;
+  left: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 7px 0 5px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #c3c3c6 !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  transform: translateY(-50%) !important;
+  cursor: pointer;
+}
+
+body .app.auth-route .password-toggle::after,
+body .app.auth-route .text-action::after,
+body .app.auth-route .terms-check button::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms ease;
+}
+
+body .app.auth-route .password-toggle:hover,
+body .app.auth-route .password-toggle:focus-visible,
+body .app.auth-route .text-action:hover,
+body .app.auth-route .text-action:focus-visible,
+body .app.auth-route .terms-check button:hover,
+body .app.auth-route .terms-check button:focus-visible {
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: none !important;
+  transform: none !important;
+}
+
+body .app.auth-route .password-toggle:hover {
+  transform: translateY(-50%) !important;
+}
+
+body .app.auth-route .password-toggle:hover::after,
+body .app.auth-route .password-toggle:focus-visible::after,
+body .app.auth-route .text-action:hover::after,
+body .app.auth-route .text-action:focus-visible::after,
+body .app.auth-route .terms-check button:hover::after,
+body .app.auth-route .terms-check button:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Checkboxes and supporting actions */
+body .app.auth-route .form-extras {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  margin: -2px 0 0 !important;
+}
+
+body .app.auth-route .auth-check {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin: 0 !important;
+  color: #a7a8ac !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  cursor: pointer;
+}
+
+body .app.auth-route .auth-check > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body .app.auth-route .auth-check-box {
+  position: relative;
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #6e6f74;
+  background: #151517;
+}
+
+body .app.auth-route .auth-check > input:checked + .auth-check-box {
+  border-color: #f2f2f2;
+  background: #f2f2f2;
+}
+
+body .app.auth-route .auth-check > input:checked + .auth-check-box::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 4px;
+  height: 7px;
+  border: solid #050505;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+body .app.auth-route .auth-check > input:focus-visible + .auth-check-box {
+  outline: 1px solid #fff;
+  outline-offset: 3px;
+}
+
+body .app.auth-route .text-action,
+body .app.auth-route .terms-check button {
+  position: relative !important;
+  display: inline-block !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 5px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #d7d7d9 !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  cursor: pointer;
+}
+
+body .app.auth-route .forgot-link {
+  left: auto !important;
+  margin: 0 !important;
+}
+
+/* Primary underline action */
+body .app.auth-route .auth-submit {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  height: 46px !important;
+  margin: 2px 0 0 !important;
+  padding: 12px 4px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.7px !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition: color 180ms ease, opacity 180ms ease !important;
+}
+
+body .app.auth-route .auth-submit::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #505156;
+}
+
+body .app.auth-route .auth-submit::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #f5f5f5;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+
+body .app.auth-route .auth-submit:hover,
+body .app.auth-route .auth-submit:focus-visible {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+}
+
+body .app.auth-route .auth-submit:hover::after,
+body .app.auth-route .auth-submit:focus-visible::after {
+  transform: scaleX(1);
+}
+
+body .app.auth-route .auth-submit:disabled {
+  color: #66676b !important;
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+body .app.auth-route .auth-submit:disabled::after {
+  display: none;
+}
+
+body .app.auth-route .btn-loader {
+  width: 15px;
+  height: 15px;
+  border: 1px solid #55565b;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: authSpin 700ms linear infinite;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Password strength */
+body .app.auth-route .password-feedback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -9px;
+}
+
+body .app.auth-route .password-strength {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  flex: 1;
+  gap: 5px !important;
+  margin: 0 !important;
+}
+
+body .app.auth-route .strength-bar {
+  display: block;
+  height: 2px;
+  background: #333438;
+}
+
+body .app.auth-route .strength-bar.active {
+  background: #d9d9da !important;
+}
+
+body .app.auth-route .strength-label {
+  margin: 0 !important;
+  color: #9d9ea2 !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase;
+}
+
+body .app.auth-route .terms-check {
+  align-items: flex-start !important;
+  margin-top: -2px !important;
+}
+
+body .app.auth-route .terms-check > span:last-child {
+  display: inline;
+}
+
+body .app.auth-route .terms-check button {
+  vertical-align: baseline;
+  color: #e2e2e3 !important;
+}
+
+/* Divider, social auth and footer */
+body .app.auth-route .auth-divider {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin: clamp(16px, 2.2vh, 24px) 0 12px !important;
+  color: #77787d !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.1px !important;
+  text-transform: uppercase !important;
+}
+
+body .app.auth-route .auth-divider::before,
+body .app.auth-route .auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #242529;
+}
+
+body .app.auth-route .social-buttons {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin: 0 !important;
+}
+
+body .app.auth-route .social-btn {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  padding: 9px 12px !important;
+  border: 1px solid #414247 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #d7d7d9 !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.1px !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease !important;
+}
+
+body .app.auth-route .social-btn::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 7px;
+  left: 12px;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms ease;
+}
+
+body .app.auth-route .social-btn:hover,
+body .app.auth-route .social-btn:focus-visible {
+  border-color: #77787d !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+}
+
+body .app.auth-route .social-btn:hover::after,
+body .app.auth-route .social-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+body .app.auth-route .social-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body .app.auth-route .auth-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 15px 0 0 !important;
+  color: #77787d !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+}
+
+/* Messages and email OTP verification */
+body .app.auth-route .auth-error {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 9px !important;
+  margin: 0 0 16px !important;
+  padding: 10px 12px !important;
+  border: 1px solid #5a5b60 !important;
+  border-radius: 0 !important;
+  background: #151517 !important;
+  color: #ededed !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+body .app.auth-route .auth-otp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+body .app.auth-route .auth-otp-copy {
+  margin: 0 !important;
+  color: #a9aaae !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+}
+
+body .app.auth-route .auth-otp-copy strong {
+  color: #f0f0fa;
+  font-weight: 700;
+}
+
+body .app.auth-route .auth-otp-form {
+  gap: 18px !important;
+}
+
+body .app.auth-route .auth-otp-field input {
+  padding-right: 14px !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: 8px !important;
+  text-align: center !important;
+}
+
+body .app.auth-route .auth-otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+body .app.auth-route .text-action:disabled,
+body .app.auth-route .text-action:disabled:hover,
+body .app.auth-route .text-action:disabled:focus-visible {
+  color: #66676b !important;
+  cursor: not-allowed;
+}
+
+body .app.auth-route .text-action:disabled::after,
+body .app.auth-route .text-action:disabled:hover::after,
+body .app.auth-route .text-action:disabled:focus-visible::after {
+  transform: scaleX(0) !important;
+}
+
+/* =========================================================
+   RIGHT / VISUAL PANEL
+========================================================= */
+
+body .app.auth-route .auth-illustration {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(10px, 1.8vh, 22px) !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: clamp(48px, 6vh, 74px) clamp(70px, 8vw, 142px) clamp(38px, 5vh, 64px) clamp(50px, 6vw, 110px) !important;
+  overflow: hidden !important;
+  background: #0c0e10 !important;
+  isolation: isolate;
+}
+
+body .app.auth-route .auth-illustration::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  inset: 0 !important;
+  display: block !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) !important;
+  background-size: 54px 54px !important;
+  pointer-events: none;
+}
+
+body .app.auth-route .auth-wordmark {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: clamp(8px, 1.2vw, 22px);
+  color: transparent;
+  -webkit-text-stroke: 0 transparent;
+  font-size: clamp(72px, 8vw, 150px);
+  font-weight: 700;
+  line-height: 0.78;
+  letter-spacing: -3px;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: translateY(-50%);
+  user-select: none;
+  pointer-events: none;
+}
+
+body .app.auth-route .auth-wordmark-dev,
+body .app.auth-route .auth-wordmark-arena {
+  color: transparent;
+}
+
+body .app.auth-route .auth-wordmark-dev {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-dev, #ffffff) 22%, transparent);
+}
+
+body .app.auth-route .auth-wordmark-arena {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-arena, #77787d) 42%, transparent);
+}
+
+body .app.auth-route .illustration-icon {
+  position: relative;
+  z-index: 2;
+  display: block !important;
+  width: min(100%, 510px) !important;
+  max-width: 510px !important;
+  height: auto !important;
+  max-height: 45dvh !important;
+  margin: 0 auto !important;
+  animation: authFloat 5.5s ease-in-out infinite;
+  overflow: visible;
+}
+
+body .app.auth-route .illustration-icon--rocket {
+  width: min(100%, 500px) !important;
+  max-width: 500px !important;
+}
+
+body .app.auth-route .auth-visual-copy {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 540px);
+  margin: 0 auto;
+  text-align: center;
+}
+
+body .app.auth-route .auth-visual-kicker {
+  margin: 0 0 9px !important;
+  color: #929398 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 1.8px !important;
+  text-transform: uppercase !important;
+}
+
+body .app.auth-route .auth-illustration h2 {
+  margin: 0 !important;
+  color: #f5f5f5 !important;
+  font-size: clamp(32px, 3.2vw, 54px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: -1.6px !important;
+  text-transform: uppercase !important;
+}
+
+body .app.auth-route .auth-illustration p:not(.auth-visual-kicker) {
+  max-width: 520px !important;
+  margin: 15px auto 0 !important;
+  color: #a1a2a6 !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+}
+
+@keyframes authFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .app.auth-route .illustration-icon,
+  body .app.auth-route .btn-loader {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   TABLET / MOBILE: SAME COMPONENTS, FORM-ONLY PRESENTATION
+========================================================= */
+
+@media (max-width: 900px) {
+  body .app.auth-route .auth-container {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  /* REMOVE BACKGROUND GLOWS */
-
-  .auth-page::before,
-  .auth-page::after {
-    display: none;
+  body .app.auth-route .auth-container::after,
+  body .app.auth-route .auth-illustration {
+    display: none !important;
   }
 
-  .auth-container {
-    width: 100%;
-    max-width: 1180px;
-
-    height: 92vh;
-
-    background: rgba(15, 23, 42, 0.55);
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    backdrop-filter: blur(18px);
-
-    border-radius: 28px;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    overflow: hidden;
-
-    position: relative;
-    z-index: 2;
-
-    box-shadow:
-      0 10px 40px rgba(0, 0, 0, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
-
-    animation: fadeUp 0.8s ease;
+  body .app.auth-route .auth-form-panel {
+    grid-column: 1 !important;
+    width: 100% !important;
+    padding: 64px clamp(24px, 8vw, 72px) 24px !important;
+    background: #050505 !important;
   }
 
-  .auth-illustration {
-    position: relative;
-
-    padding: 48px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    background: linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.45),
-      rgba(2, 6, 23, 0.92)
-    );
-
-    overflow: hidden;
+  body .app.auth-route .auth-form-shell,
+  body .app.auth-route .auth-page--signup .auth-form-shell {
+    width: min(100%, 540px);
   }
 
-  .auth-illustration::before {
-    content: "";
+  body .app.auth-route .auth-form-panel h1 {
+    font-size: clamp(40px, 10vw, 64px) !important;
+  }
+}
 
-    position: absolute;
-    inset: 0;
-
-    background: linear-gradient(
-      135deg,
-      rgba(56, 189, 248, 0.04),
-      rgba(168, 85, 247, 0.03)
-    );
-
-    pointer-events: none;
+@media (max-width: 520px) {
+  body .app.auth-route .auth-form-panel {
+    align-items: center !important;
+    padding: 58px 20px 16px !important;
   }
 
-  .illustration-icon {
-    width: 100%;
-    max-width: 320px;
-
-    margin-bottom: 28px;
-    margin-left: 90px;
-    animation: floatMonitor 5s ease-in-out infinite;
+  body .app.auth-route .form-top {
+    margin-bottom: 18px;
   }
 
-  .auth-illustration h2 {
-    color: #f8fafc;
+  body .app.auth-route .auth-badge {
+    margin-bottom: 10px !important;
+    font-size: 9px !important;
+  }
 
-    font-size: 38px;
+  body .app.auth-route .auth-form-panel h1 {
+    font-size: clamp(36px, 11.5vw, 54px) !important;
+    letter-spacing: -1.3px !important;
+  }
 
-    line-height: 1.08;
+  body .app.auth-route .auth-subtitle {
+    margin-top: 10px !important;
+    font-size: 12px !important;
+  }
 
+  body .app.auth-route .auth-form {
+    gap: 14px !important;
+  }
+
+  body .app.auth-route .name-row {
+    gap: 10px !important;
+  }
+
+  body .app.auth-route .floating-field {
+    height: 54px;
+  }
+
+  body .app.auth-route .floating-field input {
+    padding: 21px 11px 7px !important;
+    font-size: 14px !important;
+  }
+
+  body .app.auth-route .floating-field label {
+    left: 11px;
+    font-size: 11px !important;
+  }
+
+  body .app.auth-route .floating-field input:focus + label,
+  body .app.auth-route .floating-field input:not(:placeholder-shown) + label,
+  body .app.auth-route .floating-field.has-value label {
+    top: 9px;
+    font-size: 8px !important;
+  }
+
+  body .app.auth-route .form-extras {
+    gap: 10px !important;
+  }
+
+  body .app.auth-route .auth-check,
+  body .app.auth-route .text-action,
+  body .app.auth-route .terms-check button {
+    font-size: 10px !important;
+  }
+
+  body .app.auth-route .auth-submit {
+    min-height: 42px !important;
+    height: 42px !important;
+  }
+
+  body .app.auth-route .social-btn {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  body .app.auth-route .auth-divider {
+    margin: 14px 0 10px !important;
+  }
+
+  body .app.auth-route .auth-footer {
+    margin-top: 12px !important;
+  }
+}
+
+/* Short laptop/mobile screens stay inside one viewport. */
+@media (max-height: 760px) {
+  body .app.auth-route .auth-form-panel {
+    padding-top: 54px !important;
+    padding-bottom: 16px !important;
+  }
+
+  body .app.auth-route .form-top {
     margin-bottom: 14px;
-
-    font-weight: 700;
-
-    letter-spacing: -1px;
   }
 
-  .auth-illustration p {
-    color: rgba(226, 232, 240, 0.72);
-
-    line-height: 1.7;
-
-    max-width: 390px;
-
-    font-size: 15px;
+  body .app.auth-route .auth-badge {
+    margin-bottom: 8px !important;
   }
 
-  .auth-form-panel {
-    padding: 48px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    background: linear-gradient(
-      180deg,
-      rgba(2, 6, 23, 0.94),
-      rgba(15, 23, 42, 0.95)
-    );
-
-    overflow-y: auto;
-
-    scrollbar-width: none;
+  body .app.auth-route .auth-form-panel h1 {
+    font-size: clamp(34px, 4vw, 50px) !important;
   }
 
-  .auth-form-panel::-webkit-scrollbar {
-    display: none;
+  body .app.auth-route .auth-subtitle {
+    margin-top: 8px !important;
+    font-size: 11px !important;
   }
 
-  .auth-form-panel h1 {
-    color: white;
-
-    font-size: 38px;
-
-    margin-bottom: 5px;
+  body .app.auth-route .auth-form {
+    gap: 12px !important;
   }
 
-  .auth-subtitle {
-    color: rgba(255, 255, 255, 0.62);
-
-    margin-bottom: 20px;
-
-    font-size: 15px;
-  }
-
-  .auth-form {
-    gap: 2px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .input-group label {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    color: rgba(255, 255, 255, 0.82);
-
-    font-size: 13px;
-
-    font-weight: 500;
-  }
-
-  .input-wrapper {
-    position: relative;
-  }
-
-  .input-wrapper i {
-    position: absolute;
-
-    top: 50%;
-    left: 18px;
-
-    transform: translateY(-50%);
-
-    color: rgba(255, 255, 255, 0.45);
-
-    font-size: 18px;
-  }
-
-  .input-wrapper input {
-    width: 100%;
-
+  body .app.auth-route .floating-field {
     height: 50px;
-
-    padding: 0 56px;
-
-    border-radius: 14px;
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    background: rgba(255, 255, 255, 0.03);
-
-    color: white;
-
-    font-size: 14px;
-
-    transition: all 0.25s ease;
   }
 
-  .input-wrapper input:focus {
-    outline: none;
-
-    border-color: rgba(56, 189, 248, 0.7);
-
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.08);
-
-    background: rgba(255, 255, 255, 0.05);
+  body .app.auth-route .auth-submit {
+    min-height: 38px !important;
+    height: 38px !important;
   }
 
-  .input-wrapper input::placeholder {
-    color: rgba(255, 255, 255, 0.28);
+  body .app.auth-route .auth-divider {
+    margin: 10px 0 8px !important;
   }
 
-  .password-toggle {
-    position: absolute;
-
-    top: 50%;
-    right: 18px;
-
-    transform: translateY(-50%);
-
-    border: none;
-    background: transparent;
-
-    color: #7dd3fc;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s ease;
+  body .app.auth-route .social-btn {
+    min-height: 36px !important;
+    height: 36px !important;
   }
 
-  .password-toggle:hover {
-    color: white;
+  body .app.auth-route .auth-footer {
+    margin-top: 9px !important;
   }
 
-  .auth-submit {
-    height: 50px;
-    margin-bottom: 8px;
-    border: none;
+  body .app.auth-route .auth-wordmark-dev,
+body .app.auth-route .auth-wordmark-arena {
+  color: transparent;
+}
 
-    border-radius: 14px;
+body .app.auth-route .auth-wordmark-dev {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-dev, #ffffff) 22%, transparent);
+}
 
-    background: linear-gradient(135deg, #38bdf8);
+body .app.auth-route .auth-wordmark-arena {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-arena, #77787d) 42%, transparent);
+}
 
-    color: white;
-
-    font-size: 18px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease;
+body .app.auth-route .illustration-icon {
+    max-height: 40dvh !important;
   }
 
-  .auth-submit:hover {
-    transform: translateY(-2px);
-
-    box-shadow: 0 12px 30px rgba(56, 189, 248, 0.22);
+  body .app.auth-route .auth-illustration h2 {
+    font-size: clamp(28px, 2.8vw, 42px) !important;
   }
 
-  .social-buttons {
-    display: flex;
-    margin-top: 9px;
-    gap: 10px;
+  body .app.auth-route .auth-illustration p:not(.auth-visual-kicker) {
+    margin-top: 9px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-height: 650px) and (max-width: 900px) {
+  body .app.auth-route .auth-badge,
+  body .app.auth-route .auth-subtitle {
+    display: none !important;
   }
 
-  .social-btn {
-    flex: 1;
-
-    height: 50px;
-    font-size: 16px;
-    border-radius: 14px;
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    background: rgba(255, 255, 255, 0.03);
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    cursor: pointer;
-
-    transition: all 0.25s ease;
+  body .app.auth-route .form-top {
+    margin-bottom: 10px;
   }
 
-  .social-btn:hover {
-    background: rgba(255, 255, 255, 0.07);
-
-    transform: translateY(-2px);
+  body .app.auth-route .auth-form {
+    gap: 9px !important;
   }
 
-  .auth-footer {
-    margin-top: 22px;
-
-    text-align: center;
-
-    color: rgba(255, 255, 255, 0.62);
-
-    font-size: 14px;
+  body .app.auth-route .floating-field {
+    height: 45px;
   }
 
-  @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  body .app.auth-route .floating-field input {
+    padding-top: 18px !important;
   }
 
-  @keyframes floatMonitor {
-    0% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-8px);
-    }
-
-    100% {
-      transform: translateY(0px);
-    }
+  body .app.auth-route .auth-divider {
+    margin: 7px 0 6px !important;
   }
 
-  .terms-check {
-    display: flex;
-    align-items: flex-start;
+  body .app.auth-route .auth-footer {
+    margin-top: 6px !important;
+  }
+}
 
-    gap: 12px;
+/* Keep Forgot password as a text-only underline action. */
+body .app.auth-route .forgot-link,
+body .app.auth-route .forgot-link:hover,
+body .app.auth-route .forgot-link:focus-visible {
+  position: relative !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 5px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
 
-    margin-top: 14px;
+body .app.auth-route .forgot-link::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  display: block !important;
+  height: 1px !important;
+  background: currentColor !important;
+  transform: scaleX(0) !important;
+  transform-origin: left center !important;
+  transition: transform 200ms ease !important;
+}
 
-    color: rgba(255, 255, 255, 0.72);
+body .app.auth-route .forgot-link:hover::after,
+body .app.auth-route .forgot-link:focus-visible::after {
+  transform: scaleX(1) !important;
+}
 
-    font-size: 13px;
+body .app.auth-route .field-prefix {
+  position: absolute;
+  right: 14px;
+  bottom: 13px;
+  z-index: 4;
+  color: rgba(255,255,255,.42);
+  font-size: 13px;
+  pointer-events: none;
+}
 
-    line-height: 1.7;
+/* Only the rocket body launches; the orbit rings and surrounding scene stay fixed. */
+body .app.auth-route .illustration-icon--rocket {
+  overflow: visible;
+}
+
+body .app.auth-route .illustration-rocket-body {
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+body .app.auth-route .illustration-rocket-body.is-launching {
+  animation: auth-rocket-launch 620ms cubic-bezier(0.55, 0.02, 0.35, 1) forwards;
+}
+
+@keyframes auth-rocket-launch {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, calc(-1 * var(--rocket-launch-distance, 520px)), 0) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .app.auth-route .illustration-rocket-body.is-launching {
+    animation-duration: 120ms;
+  }
+}
+
+
+body .app.auth-route .username-rule,
+body .app.auth-route .auth-legal-note {
+  margin: -8px 0 4px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 10px;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+}
+
+body .app.auth-route .auth-legal-note {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+body .app.auth-route .auth-legal-note button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+}
+
+body .app.auth-route .auth-legal-note button::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 180ms ease;
+}
+
+body .app.auth-route .auth-legal-note button:hover::after,
+body .app.auth-route .auth-legal-note button:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Shared DevArena authentication modal */
+body .app.auth-route .auth-modal-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+body .app.auth-route .auth-modal {
+  width: min(100%, 470px);
+  max-height: min(90dvh, 720px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid #3a3a3f;
+  background: #080808;
+  color: #f5f5f5;
+}
+
+body .app.auth-route .auth-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+body .app.auth-route .auth-modal-header h2 {
+  margin: 0;
+  color: #f5f5f5;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
+
+body .app.auth-route .auth-modal-header .auth-badge {
+  margin-bottom: 10px !important;
+}
+
+body .app.auth-route .auth-modal-close {
+  flex: 0 0 auto;
+}
+
+body .app.auth-route .auth-modal-copy {
+  margin: 0 0 20px;
+  color: #a9aaae;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+body .app.auth-route .auth-modal-form {
+  gap: 16px !important;
+}
+
+@media (max-width: 520px) {
+  body .app.auth-route .auth-modal-overlay {
+    padding: 12px;
   }
 
-  .terms-check input {
-    margin-top: 3px;
-
-    accent-color: #38bdf8;
-
-    cursor: pointer;
-  }
-
-  .terms-check span {
-    padding-left: -2px;
-    position: relative;
-  }
-
-  .terms-check button {
-    position: relative;
-
-    border: none;
-    background: transparent;
-
-    color: #7dd3fc;
-
-    cursor: pointer;
-
-    font-size: 13px;
-    font-weight: 500;
-
-    padding: 0;
-
-    transition:
-      color 0.25s ease,
-      transform 0.25s ease;
-  }
-
-  /* Animated underline */
-
-  .terms-check button::after {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    bottom: -2px;
-
-    width: 0%;
-    height: 1px;
-
-    background: #7dd3fc;
-
-    transition: width 0.3s ease;
-  }
-
-  .terms-check button:hover {
-    color: white;
-
-    transform: translateY(-1px);
-  }
-
-  .terms-check button:hover::after {
-    width: 100%;
-  }
-
-  /* Click animation */
-
-  .terms-check button:active {
-    transform: scale(0.96);
-  }
-
-  /* =========================================================
-   AUTH FOOTER LOGIN/SIGNUP LINK
-========================================================= */
-
-  .auth-footer {
-    margin-top: 22px;
-
-    text-align: center;
-
-    color: rgba(255, 255, 255, 0.62);
-
-    font-size: 14px;
-  }
-
-  .auth-footer button {
-    position: relative;
-
-    border: none;
-    background: transparent;
-
-    color: #7dd3fc;
-
-    cursor: pointer;
-
-    font-weight: 600;
-
-    margin-left: 4px;
-
-    transition:
-      color 0.25s ease,
-      transform 0.25s ease;
-  }
-
-  /* Animated underline */
-
-  .auth-footer button::after {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    bottom: -3px;
-
-    width: 0%;
-    height: 1px;
-
-    background: #7dd3fc;
-
-    transition: width 0.3s ease;
-  }
-
-  .auth-footer button:hover {
-    color: white;
-
-    transform: translateY(-1px);
-  }
-
-  .auth-footer button:hover::after {
-    width: 100%;
-  }
-
-  /* Click feedback */
-
-  .auth-footer button:active {
-    transform: scale(0.96);
-  }
-
-  /* =========================================================
-   EXTRA PREMIUM MICRO-INTERACTIONS
-========================================================= */
-
-  /* Smooth hover glow */
-
-  .auth-footer button:hover,
-  .terms-check button:hover {
-    text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
-  }
-
-  /* Smooth transition rendering */
-
-  .auth-footer button,
-  .terms-check button {
-    will-change: transform;
-  }
-
-  /* =========================================================
-   FORGOT PASSWORD LINK
-========================================================= */
-
-  .forgot-link {
-    position: relative;
-
-    border: none;
-    background: transparent;
-
-    color: #7dd3fc;
-
-    cursor: pointer;
-    left: 50%;
-    font-size: 14px;
-    font-weight: 500;
-
-    padding: 5px;
-
-    margin-bottom: 5px;
-
-    transition:
-      color 0.25s ease,
-      transform 0.25s ease;
-  }
-
-  /* Animated underline */
-
-  .forgot-link::after {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    bottom: -3px;
-
-    width: 0%;
-    height: 1px;
-
-    background: #7dd3fc;
-
-    transition: width 0.3s ease;
-  }
-
-  /* Hover animation */
-
-  .forgot-link:hover {
-    color: white;
-
-    transform: translateY(-1px);
-
-    text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
-  }
-
-  .forgot-link:hover::after {
-    width: 100%;
-  }
-
-  /* Click animation */
-
-  .forgot-link:active {
-    transform: scale(0.96);
-  }
-
-  /* Better focus accessibility */
-
-  .forgot-link:focus-visible {
-    outline: none;
-
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
-
-    border-radius: 6px;
+  body .app.auth-route .auth-modal {
+    padding: 22px 18px;
   }
 }
