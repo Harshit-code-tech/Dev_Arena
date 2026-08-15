@@ -1,0 +1,161 @@
+.history-export-control {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.history-export-control > button {
+  position: relative;
+  min-width: 164px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 6px 0 7px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.history-export-control > button::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease;
+}
+
+.history-export-control > button:hover::after,
+.history-export-control > button:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.history-export-control > button:focus-visible {
+  outline: none;
+}
+
+.history-export-control > button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.history-export-label {
+  line-height: 1;
+}
+
+.history-export-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.035);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.history-export-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 180ms ease;
+}
+
+.history-export-control > button:hover .history-export-icon,
+.history-export-control > button:focus-visible .history-export-icon {
+  border-color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.history-export-control > button:hover .history-export-icon svg,
+.history-export-control > button:focus-visible .history-export-icon svg {
+  transform: translateY(1px);
+}
+
+.history-export-control > p {
+  max-width: 280px;
+  margin: 0;
+  color: #ff9f9f;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.history-export-loader {
+  min-width: 164px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.history-export-loader i {
+  width: 3px;
+  height: 13px;
+  background: currentColor;
+  animation: history-export-wave 0.65s ease-in-out infinite alternate;
+}
+
+.history-export-loader i:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.history-export-loader i:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+@keyframes history-export-wave {
+  from {
+    opacity: 0.25;
+    transform: scaleY(0.45);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .history-export-control {
+    justify-items: start;
+  }
+
+  .history-export-control > p {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-export-control > button::after,
+  .history-export-icon,
+  .history-export-icon svg {
+    transition: none;
+  }
+
+  .history-export-loader i {
+    animation: none;
+  }
+}

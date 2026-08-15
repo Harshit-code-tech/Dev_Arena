@@ -1,28 +1,18 @@
-import {
-  AUTH_TOKEN_STORAGE_KEY,
-  DEVICE_TOKEN_STORAGE_KEY,
-} from "./AuthConstants";
+import { AUTH_TOKEN_STORAGE_KEY } from "./AuthConstants";
+
+const REALTIME_CURSOR_STORAGE_KEY = "devarena_realtime_cursor";
 
 export function getStoredAuthToken() {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 }
 
 export function storeAuthToken(token: string) {
+  const previousToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  if (previousToken !== token) sessionStorage.removeItem(REALTIME_CURSOR_STORAGE_KEY);
   localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
 }
 
 export function clearStoredAuthToken() {
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-}
-
-export function getStoredDeviceToken() {
-  return localStorage.getItem(DEVICE_TOKEN_STORAGE_KEY);
-}
-
-export function storeDeviceToken(deviceToken?: string) {
-  if (!deviceToken) {
-    return;
-  }
-
-  localStorage.setItem(DEVICE_TOKEN_STORAGE_KEY, deviceToken);
+  sessionStorage.removeItem(REALTIME_CURSOR_STORAGE_KEY);
 }

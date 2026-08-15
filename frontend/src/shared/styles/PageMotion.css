@@ -1,0 +1,258 @@
+/* Route and section motion shared by all DevArena pages.
+   Motion is intentionally transform/opacity-only to keep navigation responsive. */
+.route-stage {
+  min-height: calc(100vh - 1px);
+  animation: route-stage-enter 220ms cubic-bezier(.22,1,.36,1) both;
+}
+
+.page-reveal,
+.dashboard > *,
+.profile-page > *,
+.tracking-page > *,
+.about-page .about-wrap > *,
+.updates-page .updates-layout > *,
+.support-page .support-wrap > * {
+  animation: section-rise 260ms cubic-bezier(.22,1,.36,1) both;
+  animation-delay: min(calc(var(--reveal-order, 0) * 20ms), 100ms);
+}
+
+.dashboard-card,
+.profile-card,
+.tracking-summary,
+.tracking-form-shell,
+.tracking-history,
+.project-card,
+.about-card,
+.value-card,
+.timeline-item,
+.faq-item,
+.contact-box {
+  transition: border-color 150ms ease, transform 150ms ease, opacity 150ms ease;
+}
+
+.dashboard-card:hover,
+.profile-card:hover,
+.tracking-summary:hover,
+.project-card:hover,
+.value-card:hover,
+.timeline-item:hover {
+  border-color: rgba(255,255,255,.52);
+  transform: translateY(-1px);
+}
+
+.tracking-tabs button,
+.year-selector button,
+.pagination button,
+.faq-question {
+  transition: color 140ms ease, transform 140ms ease, opacity 140ms ease;
+}
+
+.tracking-tabs button:hover,
+.year-selector button:hover,
+.pagination button:hover,
+.faq-question:hover {
+  transform: translateY(-1px);
+}
+
+@keyframes route-stage-enter {
+  from { opacity: 0; transform: translate3d(0, 5px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes section-rise {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-stage,
+  .page-reveal,
+  .dashboard > *,
+  .profile-page > *,
+  .tracking-page > *,
+  .about-page .about-wrap > *,
+  .updates-page .updates-layout > *,
+  .support-page .support-wrap > * {
+    animation: none;
+  }
+
+  .dashboard-card,
+  .profile-card,
+  .tracking-summary,
+  .tracking-form-shell,
+  .tracking-history,
+  .project-card,
+  .about-card,
+  .value-card,
+  .timeline-item,
+  .faq-item,
+  .contact-box,
+  .tracking-tabs button,
+  .year-selector button,
+  .pagination button,
+  .faq-question {
+    transition: none;
+  }
+}
+
+/* Stored workspace preferences are applied at the document level. */
+body.compact-workspace .dashboard-page,
+body.compact-workspace .dsa-page,
+body.compact-workspace .projects-page,
+body.compact-workspace .profile-page,
+body.compact-workspace .settings-page,
+body.compact-workspace .friends-page {
+  --workspace-gap: clamp(10px, 1vw, 16px);
+}
+
+body.compact-workspace .dashboard-page section,
+body.compact-workspace .dsa-page section,
+body.compact-workspace .projects-page section,
+body.compact-workspace .profile-page section,
+body.compact-workspace .settings-section,
+body.compact-workspace .friends-command-card,
+body.compact-workspace .request-panel,
+body.compact-workspace .friends-list-panel {
+  padding-top: clamp(14px, 1.4vw, 22px);
+  padding-bottom: clamp(14px, 1.4vw, 22px);
+}
+
+body.privacy-mode .dashboard-stat-value,
+body.privacy-mode .dashboard-rank-value,
+body.privacy-mode .profile-stat-value,
+body.privacy-mode .profile-analytics-number,
+body.privacy-mode .friend-meta span,
+body.privacy-mode [data-private-value="true"] {
+  color: transparent !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+  user-select: none;
+}
+
+.placeholder-page {
+  min-height: calc(100vh - 76px);
+  padding: 48px clamp(22px, 4vw, 64px) 80px;
+  background: #000;
+  color: #fff;
+}
+
+.placeholder-hero,
+.placeholder-module {
+  max-width: 1280px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.placeholder-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 30px;
+  align-items: end;
+  padding-bottom: 30px;
+  border-bottom: 1px solid rgba(255,255,255,.22);
+}
+
+.placeholder-hero p,
+.placeholder-module p {
+  margin: 0 0 9px;
+  color: rgba(255,255,255,.5);
+  font-size: 11px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.placeholder-hero h1 {
+  margin: 0;
+  font-size: clamp(48px, 8vw, 86px);
+  line-height: .92;
+  text-transform: uppercase;
+}
+
+.placeholder-hero > span {
+  color: rgba(255,255,255,.52);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.placeholder-module {
+  min-height: 430px;
+  display: grid;
+  grid-template-columns: minmax(240px, .7fr) minmax(0, 1.3fr);
+  gap: clamp(34px, 7vw, 100px);
+  align-items: center;
+  margin-top: 22px;
+  padding: clamp(30px, 5vw, 64px);
+  border: 1px solid rgba(255,255,255,.22);
+  background: #09090b;
+}
+
+.placeholder-module h2 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(30px, 5vw, 58px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.placeholder-module span {
+  display: block;
+  max-width: 650px;
+  margin-top: 22px;
+  color: rgba(255,255,255,.55);
+  line-height: 1.7;
+}
+
+.placeholder-orbit {
+  position: relative;
+  width: min(290px, 65vw);
+  aspect-ratio: 1;
+  justify-self: center;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 50%;
+  animation: placeholder-turn 14s linear infinite;
+}
+
+.placeholder-orbit::before,
+.placeholder-orbit::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 50%;
+}
+
+.placeholder-orbit::before { inset: 18%; }
+.placeholder-orbit::after { inset: 38%; background: #fff; }
+.placeholder-orbit i { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: #fff; }
+.placeholder-orbit i:nth-child(1) { top: 10%; left: 20%; }
+.placeholder-orbit i:nth-child(2) { right: 8%; bottom: 30%; }
+.placeholder-orbit i:nth-child(3) { bottom: 5%; left: 42%; }
+
+@keyframes placeholder-turn { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .placeholder-page { padding: 32px 16px 64px; }
+  .placeholder-hero,
+  .placeholder-module { grid-template-columns: 1fr; }
+  .placeholder-module { min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placeholder-orbit { animation: none; }
+}
+
+/* Every route except the landing page keeps scrolling functional but hides scrollbar chrome. */
+html.hide-page-scrollbars,
+body.hide-page-scrollbars,
+html.hide-page-scrollbars *,
+body.hide-page-scrollbars * {
+  scrollbar-width: none;
+}
+
+html.hide-page-scrollbars::-webkit-scrollbar,
+body.hide-page-scrollbars::-webkit-scrollbar,
+html.hide-page-scrollbars *::-webkit-scrollbar,
+body.hide-page-scrollbars *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

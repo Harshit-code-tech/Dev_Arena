@@ -1,55 +1,55 @@
 export type AuthServiceResult = {
-    statusCode: number;
-    body: Record<string, unknown>;
+  statusCode: number;
+  body: Record<string, unknown>;
 };
 
 export type RegisterInput = {
-    email?: string;
-    password?: string;
-    name?: string;
+  email?: string;
+  password?: string;
+  name?: string;
+  acceptLegal?: boolean;
 };
 
 export type LoginInput = {
-    email?: string;
-    password?: string;
-    deviceToken?: string;
-    remember?: boolean;
+  email?: string;
+  password?: string;
+  remember?: boolean;
 };
 
-export type Setup2FAInput = {
-    userId?: string;
-    colorSequence?: string[];
+export type VerifyAuthOtpInput = {
+  tempToken?: string;
+  otp?: string;
 };
 
-export type Verify2FAInput = {
-    tempToken?: string;
-    attemptSequence?: string[];
-};
-
-export type SendOtpInput = {
-    tempToken?: string;
-    confirmEmail?: string;
-};
-
-export type VerifyOtpInput = {
-    tempToken?: string;
-    otp?: string;
+export type ResendAuthOtpInput = {
+  tempToken?: string;
 };
 
 export type ForgotPasswordInput = {
-    email?: string;
+  email?: string;
 };
 
 export type ResetPasswordInput = {
-    tempToken?: string;
-    otp?: string;
-    newPassword?: string;
+  tempToken?: string;
+  otp?: string;
+  newPassword?: string;
 };
 
 export type SyncFirebaseInput = {
-    uid?: string;
-    email?: string;
-    displayName?: string;
-    photoURL?: string | null;
-    provider?: string;
+  idToken?: string;
+  provider?: string;
+  displayName?: string;
+  photoURL?: string | null;
+  acceptLegal?: boolean;
+  remember?: boolean;
+  migrationToken?: string;
+};
+
+export type PrepareFirebaseMigrationInput = {
+  email?: string;
+  password?: string;
+};
+
+export type ChooseUsernameInput = {
+  username?: string;
 };

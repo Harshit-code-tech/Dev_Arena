@@ -1,0 +1,57 @@
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: inherit;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.rank-badge__icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: none;
+}
+
+.rank-badge__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-badge--small {
+  gap: 7px;
+  font-size: 11px;
+}
+
+.rank-badge--small .rank-badge__icon {
+  width: 22px;
+  height: 22px;
+}
+
+.rank-badge--medium {
+  gap: 9px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.rank-badge--medium .rank-badge__icon {
+  width: 34px;
+  height: 34px;
+}
+
+.rank-badge--large {
+  gap: 12px;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.rank-badge--large .rank-badge__icon {
+  width: clamp(40px, 3.5vw, 52px);
+  height: clamp(40px, 3.5vw, 52px);
+}

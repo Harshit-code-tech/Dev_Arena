@@ -1,0 +1,26 @@
+import { Router } from "express";
+import { protect } from "../../middleware/auth.middleware";
+import { requireAdmin } from "../../middleware/admin.middleware";
+import * as controller from "./admin.controller";
+
+const router = Router();
+router.use(protect);
+router.post("/presence/heartbeat", controller.heartbeat);
+router.get("/access", controller.access);
+router.use(requireAdmin);
+router.get("/overview", controller.overview);
+router.get("/presence/history", controller.presenceHistory);
+router.get("/metrics", controller.metrics);
+router.get("/tournaments", controller.listTournaments);
+router.post("/tournaments", controller.createTournament);
+router.put("/tournaments/:tournamentId", controller.updateTournament);
+router.get("/tournaments/:tournamentId/questions", controller.listQuestions);
+router.post("/tournaments/:tournamentId/questions", controller.createQuestion);
+router.post("/tournaments/:tournamentId/announcements", controller.createAnnouncement);
+router.post("/tournaments/:tournamentId/publish-results", controller.publishResults);
+router.get("/submissions", controller.listSubmissions);
+router.put("/dsa-submissions/:submissionId", controller.reviewDsa);
+router.put("/project-submissions/:submissionId", controller.reviewProject);
+router.get("/moderation", controller.moderation);
+router.get("/system-health", controller.systemHealth);
+export default router;

@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import "../../styles/MobileAuthPages.css";
+import AuthBackButton from "../../components/AuthBackButton";
 
 import {
   getSocialAuthErrorMessage,
@@ -126,6 +127,7 @@ function Signup() {
 
   return (
     <div className="auth-wrap">
+      <AuthBackButton />
       {/* BACKGROUND BLOBS */}
 
       <div className="auth-card">

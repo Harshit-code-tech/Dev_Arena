@@ -24,34 +24,13 @@ export type DashboardResponse = {
 };
 
 export type DashboardUpdateInput = {
-    streak?: number;
-    activeDays?: number;
-    seasonPoints?: number;
-    rank?: string;
     weeklyBonusClaimed?: boolean;
     seasonBonusClaimed?: boolean;
-    seasonNumber?: number;
-    arenaScore?: number;
     resetSeason?: boolean;
 };
 
 export type DashboardUpdateData = Prisma.UserUpdateInput;
 
 export type QuickLogInput = {
-    text: string;
-};
-
-export type QuickLogResponse = {
-    log: DashboardLogEntry;
-    arenaScore: number;
-};
-
-export type ProfileResponse = {
-    stats: {
-        arenaScore: number;
-        streak: number;
-        rank: string;
-    };
-    logs: DashboardLogEntry[];
-    createdAt: Date;
+    activity: string;
 };

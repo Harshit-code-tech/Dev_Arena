@@ -1,10 +1,37 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TypingLines from "../components/TypingLines";
+import { getPlatformPulse, type PlatformPulse } from "../../../services/PlatformService";
 import "../styles/Home.css";
 
 function Home() {
   const navigate = useNavigate();
+  const [pulse, setPulse] = useState<PlatformPulse | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const refresh = async () => {
+      try {
+        const nextPulse = await getPlatformPulse();
+        if (mounted) setPulse(nextPulse);
+      } catch (error) {
+        console.error("Could not refresh Developer Pulse", error);
+      }
+    };
+
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 15000);
+    return () => {
+      mounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const formatPulse = (value: number | undefined) => {
+    if (typeof value !== "number") return "—";
+    return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+  };
 
   const activeCells = {
     /* MAX */
@@ -91,44 +118,33 @@ function Home() {
 
         <div className="hero-actions">
           <button
-            className={
-              location.pathname === "/signup" ? "cta-btn active-cta" : "cta-btn"
-            }
+            className="cta-btn hero-underline-btn"
             type="button"
             onClick={() => navigate("/signup")}
           >
             Start building
           </button>
 
-          <button
-            className={
-              location.pathname === "/signup"
-                ? "cta-btn secondary active-cta"
-                : "cta-btn secondary"
-            }
-            type="button"
-            onClick={() => navigate("/about")}
-          >
-            Explore features
-          </button>
         </div>
       </section>
       <section className="cards" aria-label="DevArena highlights">
-        <article className="card">
+        <div className="home-card-row">
+          <article className="card">
           <div className="consistency-card">
             <div className="consistency-header">
               <h3>Consistency</h3>
-              <span className="streak">🔥 11 week streak</span>
+              <span className="streak">22 week streak</span>
             </div>
 
             <div className="heatmap">
-              {Array.from({ length: 11 }).map((_, week) => (
+              {Array.from({ length: 22 }).map((_, week) => (
                 <div className="heatmap-column" key={week}>
                   {Array.from({ length: 7 }).map((_, day) => {
                     const dayNumber = week * 7 + day + 1;
+                    const patternDay = ((dayNumber - 1) % 77) + 1;
 
                     const level =
-                      activeCells[dayNumber as keyof typeof activeCells] ||
+                      activeCells[patternDay as keyof typeof activeCells] ||
                       "empty";
 
                     return (
@@ -156,48 +172,47 @@ function Home() {
 
               <span>More</span>
             </div>
+
+            <button
+              className="cta-btn secondary feature-underline-btn"
+              type="button"
+              onClick={() => navigate("/about")}
+            >
+              Explore features
+            </button>
           </div>
         </article>
 
         <article className="motivation-card">
-          <div className="motivation-top">
-            <span className="motivation-dot"></span>
-            <p className="motivation-label">Daily Motivation</p>
-          </div>
-
           <blockquote className="motivation-quote">
             “{motivations[Math.floor(Math.random() * motivations.length)]}”
           </blockquote>
 
           <div className="motivation-footer">
-            <span>Keep building ✨</span>
+            <span>Keep building</span>
           </div>
-        </article>
+          </article>
+        </div>
 
         <article className="pulse-card">
           <div className="pulse-top">
-            <p className="pulse-label">Developer Pulse</p>
-
-            <div className="pulse-live">
-              <span className="pulse-dot"></span>
-              Live
-            </div>
+            <p className="pulse-label">Our Developer Pulse</p>
           </div>
 
           <div className="pulse-stats">
             <div className="pulse-stat">
-              <h2>12.4K</h2>
+              <h2>{formatPulse(pulse?.projectsShared)}</h2>
               <span>Projects Shared</span>
             </div>
 
             <div className="pulse-stat">
-              <h2>3.8K</h2>
-              <span>Articles Written</span>
+              <h2>{formatPulse(pulse?.logsCreated)}</h2>
+              <span>Logs Created</span>
             </div>
 
             <div className="pulse-stat">
-              <h2>9.1K</h2>
-              <span>Developers Active</span>
+              <h2>{formatPulse(pulse?.developers)}</h2>
+              <span>Developers Registered</span>
             </div>
           </div>
 

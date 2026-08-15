@@ -1,5 +1,6 @@
 import {
   signInWithPopup,
+  signOut,
   type AuthProvider,
 } from "firebase/auth";
 
@@ -18,14 +19,22 @@ import type {
 
 export async function signInWithSocialProvider(
   provider: SocialAuthProvider,
+  options: { acceptLegal?: boolean } = {},
 ): Promise<SocialAuthResult> {
   const user = await signInWithFirebasePopup(provider);
-  const token = await syncFirebaseUser(user, provider);
 
-  return {
-    token,
-    user,
-  };
+  try {
+    const syncResult = await syncFirebaseUser(user, provider, options.acceptLegal === true);
+    return {
+      token: syncResult.token,
+      requiresUsername: syncResult.requiresUsername,
+      requiresOnboarding: syncResult.requiresOnboarding,
+      user,
+    };
+  } catch (error) {
+    await signOut(auth).catch(() => undefined);
+    throw error;
+  }
 }
 
 export function getSocialAuthErrorMessage(
@@ -51,6 +60,9 @@ export function getSocialAuthErrorMessage(
       return "Account already exists with another login method.";
 
     default:
+      if (error instanceof Error && error.message) {
+        return error.message;
+      }
       return `${providerName} ${action === "signup" ? "signup" : "login"} failed.`;
   }
 }

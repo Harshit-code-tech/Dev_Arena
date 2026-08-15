@@ -1,0 +1,62 @@
+.profile-cropper-layer { position: fixed; inset: 0; z-index: 1400; display: grid; place-items: center; padding: 18px; }
+.profile-cropper-backdrop { position: absolute; inset: 0; border: 0; background: rgba(0,0,0,.78); backdrop-filter: blur(8px); animation: crop-fade 180ms ease both; }
+.profile-cropper-dialog { position: relative; z-index: 1; width: min(620px, 100%); max-height: calc(100dvh - 36px); overflow-y: auto; border: 1px solid rgba(255,255,255,.24); background: #070707; color: #fff; animation: crop-enter 260ms cubic-bezier(.22,1,.36,1) both; }
+.profile-cropper-dialog > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; padding: 24px 26px; border-bottom: 1px solid rgba(255,255,255,.15); }
+.profile-cropper-dialog header p { margin: 0 0 7px; color: rgba(255,255,255,.45); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.profile-cropper-dialog h2 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1; text-transform: uppercase; }
+.profile-cropper-close { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; background: transparent; color: #fff; cursor: pointer; font-size: 22px; }
+.profile-cropper-viewport { position: relative; width: min(420px, calc(100vw - 72px)); aspect-ratio: 1; margin: 28px auto 20px; overflow: hidden; border: 1px solid rgba(255,255,255,.24); background: #111; cursor: grab; touch-action: none; user-select: none; }
+.profile-cropper-viewport:active { cursor: grabbing; }
+.profile-cropper-viewport img { position: absolute; top: 50%; left: 50%; max-width: none; object-fit: contain; pointer-events: none; will-change: transform; }
+.profile-cropper-circle { position: absolute; inset: 7%; border: 1px solid rgba(255,255,255,.9); border-radius: 50%; box-shadow: 0 0 0 999px rgba(0,0,0,.42); pointer-events: none; }
+.profile-cropper-grid { position: absolute; inset: 7%; display: grid; grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr); border-radius: 50%; overflow: hidden; pointer-events: none; opacity: .42; }
+.profile-cropper-grid i { border-right: 1px solid rgba(255,255,255,.28); border-bottom: 1px solid rgba(255,255,255,.28); }
+.profile-cropper-grid i:nth-child(2n) { border-right: 0; }
+.profile-cropper-grid i:nth-child(n+3) { border-bottom: 0; }
+.profile-cropper-controls { padding: 0 26px 24px; }
+.profile-cropper-controls label { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 18px; }
+.profile-cropper-controls label span { color: rgba(255,255,255,.52); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.profile-cropper-controls input[type="range"] { width: 100%; accent-color: #fff; }
+.profile-cropper-controls p { margin: 14px 0 0; color: rgba(255,255,255,.48); font-size: 12px; line-height: 1.55; }
+.profile-cropper-dialog footer { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; border-top: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.14); }
+.profile-cropper-dialog footer button { min-height: 50px; border: 0; border-radius: 0; background: #080808; color: rgba(255,255,255,.68); cursor: pointer; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.profile-cropper-dialog footer button:hover:not(:disabled), .profile-cropper-dialog footer button:focus-visible:not(:disabled), .profile-cropper-dialog footer .profile-cropper-save { background: #fff; color: #000; }
+.profile-cropper-dialog footer button:disabled { cursor: wait; opacity: .55; }
+.profile-cropper-loader { width: 17px; height: 17px; display: inline-block; border: 1px solid rgba(0,0,0,.26); border-top-color: #000; border-radius: 50%; animation: crop-spin .7s linear infinite; }
+@keyframes crop-enter { from { opacity: 0; transform: translateY(20px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes crop-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes crop-spin { to { transform: rotate(360deg); } }
+@media (max-width: 560px) { .profile-cropper-layer { padding: 0; } .profile-cropper-dialog { width: 100%; max-height: 100dvh; } .profile-cropper-viewport { width: min(360px, calc(100vw - 42px)); } .profile-cropper-dialog footer { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .profile-cropper-dialog, .profile-cropper-backdrop { animation: none; } }
+
+.profile-cropper-error { margin: 0 26px 22px; padding: 12px 14px; border: 1px solid rgba(255,126,126,.55); background: rgba(155,28,28,.16); color: #ffd0d0; font-size: 12px; line-height: 1.5; }
+
+/* Rendered through a body portal so transformed page shells can never trap the cropper. */
+body > .profile-cropper-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  place-items: center;
+  isolation: isolate;
+}
+
+body > .profile-cropper-layer .profile-cropper-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw;
+  height: 100dvh;
+}
+
+body > .profile-cropper-layer .profile-cropper-dialog {
+  max-height: min(780px, calc(100dvh - 32px));
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+body > .profile-cropper-layer .profile-cropper-dialog::-webkit-scrollbar {
+  display: none;
+}

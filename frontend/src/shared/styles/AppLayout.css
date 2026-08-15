@@ -1,12 +1,104 @@
-.app-layout {
-  display: flex;
+:root {
+  --authenticated-sidebar-width: 260px;
+  --authenticated-topbar-height: 82px;
 }
 
-.app-content {
-  margin-left: 260px;
-  width: calc(100% - 260px);
+body .app-layout {
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  background: #000000 !important;
+}
 
-  min-height: 100vh;
+body .app-layout .app-workspace {
+  width: calc(100% - var(--authenticated-sidebar-width)) !important;
+  min-width: 0 !important;
+  min-height: 100vh !important;
+  margin-left: var(--authenticated-sidebar-width) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #000000 !important;
+}
 
-  padding: 1px;
+body .app-layout .app-content {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: calc(100vh - var(--authenticated-topbar-height)) !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #000000 !important;
+}
+
+body .app-layout .route-stage {
+  width: 100% !important;
+  min-height: calc(100vh - var(--authenticated-topbar-height)) !important;
+  padding-top: 0 !important;
+}
+
+body .app-layout .route-stage > .dashboard,
+body .app-layout .route-stage > .profile-page,
+body .app-layout .route-stage > .tracking-page,
+body .app-layout .route-stage > .friends-page,
+body .app-layout .route-stage > .settings-page,
+body .app-layout .route-stage > .leaderboard-page,
+body .app-layout .route-stage > .player-hub-page,
+body .app-layout .route-stage > .placeholder-page,
+body .app-layout .route-stage > .activity-day-page {
+  width: min(100%, 1280px) !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  box-sizing: border-box !important;
+}
+
+body.authenticated-shell {
+  scrollbar-width: none;
+  scrollbar-gutter: stable;
+}
+
+body.authenticated-shell::-webkit-scrollbar,
+.app-layout *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.app-layout *,
+body.authenticated-shell * {
+  scrollbar-width: none;
+}
+
+.app-layout input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.app-layout input[type="number"]::-webkit-inner-spin-button,
+.app-layout input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --authenticated-sidebar-width: 0px;
+    --authenticated-topbar-height: 68px;
+  }
+
+  body .app-layout .app-workspace {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  body .app-layout .route-stage > .dashboard,
+  body .app-layout .route-stage > .profile-page,
+  body .app-layout .route-stage > .tracking-page,
+  body .app-layout .route-stage > .friends-page,
+  body .app-layout .route-stage > .settings-page,
+  body .app-layout .route-stage > .leaderboard-page,
+  body .app-layout .route-stage > .player-hub-page,
+  body .app-layout .route-stage > .placeholder-page,
+  body .app-layout .route-stage > .activity-day-page {
+    width: 100% !important;
+  }
 }

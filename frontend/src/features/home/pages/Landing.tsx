@@ -1,17 +1,18 @@
-import Home from "./Home";
 import { Navigate } from "react-router-dom";
+
 import { useAuth } from "../../auth/context/AuthContext";
 import PageLoader from "../../../shared/components/Skeletons/PageLoader";
+import Home from "./Home";
 
 export default function Landing() {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return <PageLoader />;
-  }
+  if (loading) return <PageLoader />;
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    const requiresUsername = "requiresUsername" in user && Boolean(user.requiresUsername);
+    const requiresOnboarding = "requiresOnboarding" in user && Boolean(user.requiresOnboarding);
+    return <Navigate to={requiresUsername || requiresOnboarding ? "/choose-username" : "/dashboard"} replace />;
   }
 
   return <Home />;

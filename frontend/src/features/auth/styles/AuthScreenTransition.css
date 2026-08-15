@@ -1,0 +1,33 @@
+.auth-screen-transition {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  background: #8b8c90;
+  clip-path: inset(
+    var(--auth-transition-top)
+    var(--auth-transition-right)
+    var(--auth-transition-bottom)
+    var(--auth-transition-left)
+    round var(--auth-transition-radius)
+  );
+  pointer-events: none;
+  contain: strict;
+  transform: translateZ(0);
+  will-change: clip-path;
+  transition: clip-path var(--auth-transition-duration) cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.auth-screen-transition.is-expanded {
+  clip-path: inset(0 0 0 0 round 0);
+}
+
+.auth-screen-transition.is-revealing {
+  clip-path: inset(0 0 100% 0 round 0);
+  transition-duration: 520ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-screen-transition {
+    transition-duration: 120ms;
+  }
+}

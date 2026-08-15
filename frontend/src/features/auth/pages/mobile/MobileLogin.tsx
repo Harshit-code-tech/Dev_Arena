@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/MobileAuthPages.css";
+import AuthBackButton from "../../components/AuthBackButton";
 
 import toast from "react-hot-toast";
 import {
@@ -70,10 +71,10 @@ function Login() {
       setLoading(true);
       const data = await loginWithEmail({ email, password });
 
-      if (data.requires2FA) {
+      if (data.requires2FA && data.tempToken) {
         setPending2FAToken(data.tempToken);
         setVerifyGrid(data.verifyGrid || []);
-        toast("2FA Required", { icon: "🔒" });
+        toast("2FA Required");
         return;
       }
 
@@ -102,6 +103,7 @@ function Login() {
 
   return (
     <div className="auth-wrap">
+      <AuthBackButton />
       {/* BACKGROUND BLOBS */}
       <div className="blob blob-1"></div>
       <div className="blob blob-2"></div>

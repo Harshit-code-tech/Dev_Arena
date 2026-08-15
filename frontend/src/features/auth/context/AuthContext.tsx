@@ -10,12 +10,14 @@ import {
   getCurrentBackendUser,
   signOutFirebaseUser,
 } from "../api/AuthSessionService";
-import type { AppUser, AuthContextValue } from "../api/AuthTypes";
+import { syncFirebaseUser } from "../api/FirebaseUserSyncService";
+import type { AppUser, AuthContextValue, FirebaseAuthProvider } from "../api/AuthTypes";
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
   loginWithToken: async () => {},
+  refreshUser: async () => {},
   logout: () => {},
 });
 
@@ -39,6 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchUserFromBackend(token);
   };
 
+  const refreshUser = async () => {
+    const token = getStoredAuthToken();
+    if (token) await fetchUserFromBackend(token);
+  };
+
   const logout = () => {
     clearStoredAuthToken();
     signOutFirebaseUser();
@@ -46,23 +53,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    const handleProfileUpdate = () => { void refreshUser(); };
+    window.addEventListener("devarena:profile-updated", handleProfileUpdate);
+
     const token = getStoredAuthToken();
-    
+    let unsubscribe: (() => void) | undefined;
+
     if (token) {
-      // 1. Try to log in using our Custom JWT
       fetchUserFromBackend(token).finally(() => setLoading(false));
     } else {
-      // 2. Fallback to Firebase (for existing Google/GitHub sessions)
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        setLoading(false);
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (!currentUser) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        void (async () => {
+          try {
+            const tokenResult = await currentUser.getIdTokenResult();
+            const providerId = tokenResult.signInProvider;
+            const provider: FirebaseAuthProvider = providerId === "google.com"
+              ? "google"
+              : providerId === "github.com"
+                ? "github"
+                : "password";
+            const synced = await syncFirebaseUser(currentUser, provider, false, { remember: true });
+            if (!synced.token) throw new Error("DevArena session could not be restored.");
+            await loginWithToken(synced.token);
+          } catch (error) {
+            console.warn("Firebase session exists but DevArena session could not be restored:", error);
+            setUser(null);
+          } finally {
+            setLoading(false);
+          }
+        })();
       });
-      return unsubscribe;
     }
+
+    return () => {
+      window.removeEventListener("devarena:profile-updated", handleProfileUpdate);
+      unsubscribe?.();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithToken, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithToken, refreshUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

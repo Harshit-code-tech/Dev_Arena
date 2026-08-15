@@ -1,21 +1,47 @@
 import type { Request, Response } from "express";
+import { sendTrackingError } from "../../shared/utils/tracking";
 import { fullstackService } from "./fullstack.service";
+import type { FullstackLogInput } from "./fullstack.types";
 
-// Scoring: Learning = 2pt, Building = 4pt
-// Rules: edit/delete only within 24 hours of creation
+function userId(req: Request) {
+    return req.user?.id || "";
+}
 
-export const getLogs = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(fullstackService.getLogs());
+export const getLogs = async (req: Request, res: Response): Promise<void> => {
+    try {
+        res.status(200).json({ success: true, data: await fullstackService.getLogs(userId(req)) });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const createLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(fullstackService.createLog());
+export const createLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const log = await fullstackService.createLog(userId(req), req.body as Partial<FullstackLogInput>);
+        res.status(201).json({ success: true, data: log });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const updateLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(fullstackService.updateLog());
+export const updateLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const log = await fullstackService.updateLog(userId(req), req.params.id as string, req.body as Partial<FullstackLogInput>);
+        res.status(200).json({ success: true, data: log });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const deleteLog = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(fullstackService.deleteLog());
+export const deleteLog = async (req: Request, res: Response): Promise<void> => {
+    try {
+        await fullstackService.deleteLog(userId(req), req.params.id as string);
+        res.status(200).json({ success: true, message: "Fullstack entry deleted." });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };

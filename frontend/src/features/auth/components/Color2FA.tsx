@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 import {
   sendTwoFactorOtp,
   setupColor2FA,
@@ -20,6 +21,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
   verifyGrid = [], 
   onVerifySuccess 
 }) => {
+  const { user } = useAuth();
   
   // State for Color Grid
   const [sequence, setSequence] = useState<string[]>([]);
@@ -50,7 +52,13 @@ export const Color2FA: React.FC<Color2FAProps> = ({
 
     if (isSetup) {
       try {
-        await setupColor2FA(newSequence);
+        if (!user || !user.uid) {
+            toast.error("You must be logged in to setup 2FA");
+            setLoading(false);
+            return;
+        }
+
+        await setupColor2FA(user.uid, newSequence);
         toast.success("2FA Setup Complete!");
         if (onSetupComplete) onSetupComplete();
       } catch (error) {
@@ -129,7 +137,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
     return (
       <div style={containerStyle}>
         <h2>Email Verification Fallback</h2>
-        <p style={{color: '#a5b4fc', fontSize: '14px', marginBottom: '20px'}}>
+        <p style={{color: '#f0f0fa', fontSize: '14px', marginBottom: '20px'}}>
           Please confirm your account email address. We will send a 6-digit OTP to verify your identity.
         </p>
         <form onSubmit={handleSendOTP} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -153,7 +161,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
     return (
       <div style={containerStyle}>
         <h2>Enter OTP</h2>
-        <p style={{color: '#a5b4fc', fontSize: '14px', marginBottom: '20px'}}>
+        <p style={{color: '#f0f0fa', fontSize: '14px', marginBottom: '20px'}}>
           Enter the 6-digit code sent to your email.
         </p>
         <form onSubmit={handleVerifyOTP} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -183,7 +191,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
         {isSetup ? 'Setup Color 2FA' : '2FA Challenge'}
       </h2>
       
-      <p style={{ textAlign: 'center', minHeight: '24px', color: '#a5b4fc', marginBottom: '20px', fontSize: '14px' }}>
+      <p style={{ textAlign: 'center', minHeight: '24px', color: '#f0f0fa', marginBottom: '20px', fontSize: '14px' }}>
         {statusMessage}
       </p>
 
@@ -203,7 +211,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
                 cursor: (isSetup && isSelected) ? 'not-allowed' : 'pointer',
                 opacity: (isSetup && isSelected) || loading ? 0.4 : 1,
                 transition: 'transform 0.1s, opacity 0.2s',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                boxShadow: 'none',
               }}
               onMouseDown={(e) => { if (!loading) e.currentTarget.style.transform = 'scale(0.95)'; }}
               onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
@@ -223,7 +231,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
         </div>
 
         {!isSetup && (
-          <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '10px' }}>
+          <p style={{ color: '#ffffff', fontSize: '12px', marginTop: '10px' }}>
             Failed Attempts: {failedAttempts} / {COLOR_2FA_MAX_FAILED_ATTEMPTS}
           </p>
         )}
@@ -232,7 +240,7 @@ export const Color2FA: React.FC<Color2FAProps> = ({
             <button 
                 onClick={() => setSequence([])} 
                 disabled={loading}
-                style={{ padding: '8px 16px', background: '#3f3f46', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
+                style={{ padding: '12px 18px', background: '#000000', color: '#ffffff', border: '1px solid #ffffff', borderRadius: '32px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, letterSpacing: '1.17px', textTransform: 'uppercase' }}
             >
                 Reset Selection
             </button>
@@ -255,20 +263,20 @@ export const Color2FA: React.FC<Color2FAProps> = ({
 // Common inline styles
 const containerStyle: React.CSSProperties = {
   maxWidth: '400px', margin: '0 auto', padding: '20px', 
-  backgroundColor: '#0f172a', color: '#f8fafc', 
-  borderRadius: '12px', border: '1px solid #1e293b'
+  backgroundColor: '#000000', color: '#ffffff', 
+  borderRadius: '4px', border: '1px solid #3a3a3f'
 };
 const inputStyle: React.CSSProperties = {
-  padding: '12px', borderRadius: '6px', border: '1px solid #334155',
-  background: '#1e293b', color: 'white', fontSize: '16px', outline: 'none'
+  padding: '12px 16px', borderRadius: '4px', border: '1px solid #e0e0e8',
+  background: '#ffffff', color: '#000000', fontSize: '16px', outline: 'none'
 };
 const btnStyle: React.CSSProperties = {
-  padding: '12px', borderRadius: '6px', border: 'none',
-  background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'
+  padding: '17px 24px', borderRadius: '32px', border: '1px solid #ffffff',
+  background: '#000000', color: '#ffffff', fontWeight: 700, cursor: 'pointer', fontSize: '13px', letterSpacing: '1.17px', textTransform: 'uppercase'
 };
 const linkBtnStyle: React.CSSProperties = {
-  padding: '8px 16px', background: 'transparent', color: '#38bdf8', 
-  border: '1px solid #38bdf8', borderRadius: '4px', cursor: 'pointer', fontSize: '14px'
+  padding: '12px 18px', background: '#000000', color: '#ffffff', 
+  border: '1px solid #ffffff', borderRadius: '32px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, letterSpacing: '1.17px', textTransform: 'uppercase'
 };
 
 function getErrorMessage(error: unknown, fallback: string) {

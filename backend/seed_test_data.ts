@@ -8,7 +8,7 @@ async function seed() {
 
   console.log('Creating test user...');
   const user = await prisma.user.create({
-    data: { name: 'Harshit Ghosh', email: 'test@devarena.dev', passwordHash: 'hash' }
+    data: { name: 'Harshit Ghosh', username: 'harshit_test', email: 'test@devarena.dev', passwordHash: 'hash' }
   });
 
   console.log('Creating blog posts...');

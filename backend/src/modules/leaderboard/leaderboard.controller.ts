@@ -1,13 +1,56 @@
 import type { Request, Response } from "express";
+import { sendTrackingError } from "../../shared/utils/tracking";
 import { leaderboardService } from "./leaderboard.service";
 
-// Week: Monday 00:00 IST → Sunday 23:59 IST
-// Tie-break: 1) DSA pts  2) Active days  3) Challenge score  4) Earlier last activity
+function requireUserId(req: Request) {
+    return req.user?.id || null;
+}
 
-export const getWeeklyLeaderboard = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(leaderboardService.getWeeklyLeaderboard());
+export const getLeaderboard = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = requireUserId(req);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Not authenticated" });
+            return;
+        }
+
+        const limit = Number(req.query.limit || 10);
+        const data = await leaderboardService.getLeaderboard(userId, limit);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };
 
-export const getHistory = async (_req: Request, res: Response): Promise<void> => {
-    res.status(501).json(leaderboardService.getHistory());
+export const getNearby = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = requireUserId(req);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Not authenticated" });
+            return;
+        }
+
+        const data = await leaderboardService.getNearby(userId);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
+};
+
+export const searchLeaderboard = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = requireUserId(req);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Not authenticated" });
+            return;
+        }
+
+        const data = await leaderboardService.search(userId, req.query.q);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
 };

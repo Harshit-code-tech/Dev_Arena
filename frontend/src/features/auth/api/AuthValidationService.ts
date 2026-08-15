@@ -10,7 +10,11 @@ import type {
 
 export function validateEmailLoginInput({ email, password }: EmailLoginInput) {
   if (!email.trim()) {
-    return "Email is required.";
+    return "Email address is required.";
+  }
+
+  if (!isValidEmail(email.trim())) {
+    return "Please enter a valid email address.";
   }
 
   if (!password.trim()) {
@@ -54,7 +58,7 @@ export function validateEmailSignupInput(input: EmailSignupInput) {
   }
 
   if (!input.agreeTerms) {
-    return "You must agree to the Terms and Privacy Policy.";
+    return "Confirm that you are at least 18 and accept the Terms of Service and Privacy Policy.";
   }
 
   return "";
