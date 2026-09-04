@@ -71,22 +71,10 @@ export const activityService = {
       }),
     ]);
 
-    const quickLogs = scoreEvents.filter((event) => event.sourceType === "QUICK_LOG");
     const revision = practice.filter((item) => item.type === "DSA_Revision");
     const learning = practice.filter((item) => item.type === "Concept_Explanation");
 
     const sections: DayActivitySection[] = [
-      {
-        key: "quickLogs",
-        title: "Quick Logs",
-        items: quickLogs.map((item) => ({
-          id: item.id,
-          title: item.label.replace(/^Quick Log:\s*/i, ""),
-          metadata: ["Quick evidence", `${item.points} points`],
-          occurredAt: item.occurredAt,
-          points: item.points,
-        })),
-      },
       {
         key: "dsa",
         title: "DSA Problems",

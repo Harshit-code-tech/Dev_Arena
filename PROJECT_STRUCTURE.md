@@ -269,7 +269,7 @@ registered in `frontend/src/app/Router.tsx`. Links inside those pages refer to
 
 ### Players, navigation, and app shell
 
-- The authenticated application uses a fixed, non-scrolling left sidebar with Dashboard, DSA, Projects, Players, Leaderboard, Challenges, Tournaments, Player Hub, Profile, and a bottom Quick Log action.
+- The authenticated application uses a fixed, non-scrolling left sidebar with Dashboard, DSA, Projects, Players, Leaderboard, Challenges, Tournaments, Player Hub, and Profile links.
 - `/players` shows all other registered users before a query is entered and filters by name, email, or permanent username.
 - Player rows include privacy-aware profile imagery, name, username, relationship state, and two deterministic placeholder technology tags. The tags are intentionally replaceable by a future AI-derived profile model.
 - The network system supports email invitations, incoming/outgoing requests, connected-player removal, email alerts, in-app notifications, and the legacy `/friends` redirect.
@@ -314,15 +314,10 @@ The structured tracking modules are implemented end to end:
 
 The intended scoring rules are recorded in the corresponding controller files.
 
-### Profile and quick logging
+### Profile
 
 - `frontend/src/features/profile/pages/Profile.tsx` reads authoritative score,
   activity, rank, recent-log, and contribution data through the dashboard API.
-- `frontend/src/shared/components/QuickLogModal.tsx` submits a specific activity
-  to `POST /api/dashboard/quick-log`, which creates a General score event with
-  zero points (Quick Log scoring was removed per the scoring redesign).
-- Quick-log completion broadcasts `devarena:activity-updated` so dashboard and
-  profile views refresh without a full page reload.
 
 ## 5. API map
 

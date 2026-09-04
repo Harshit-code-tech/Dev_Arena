@@ -1,9 +1,8 @@
-import { ScoreCategory, type User } from "@prisma/client";
-import { randomUUID } from "crypto";
+import type { User } from "@prisma/client";
 import { dashboardRepository } from "./dashboard.repository";
 import { prisma } from "../../database/prisma";
-import { rebuildUserScoreState, upsertScoreEvent } from "../../shared/services/scoring.service";
-import { requiredText, getWeekStart, getWeekEnd } from "../../shared/utils/tracking";
+import { rebuildUserScoreState } from "../../shared/services/scoring.service";
+import { getWeekStart, getWeekEnd } from "../../shared/utils/tracking";
 import type {
     DashboardLogEntry,
     DashboardResponse,
@@ -22,7 +21,6 @@ function consistencyRating(weeklyActiveDays: number): "Low" | "Moderate" | "Cons
 type DashboardService = {
     getDashboard(userId: string): Promise<DashboardResponse | null>;
     updateDashboard(userId: string, input: DashboardUpdateInput): Promise<User>;
-    createQuickLog(userId: string, activity: unknown): Promise<{ id: string; text: string; points: number; createdAt: Date }>;
 };
 
 export const dashboardService: DashboardService = {
@@ -97,24 +95,5 @@ export const dashboardService: DashboardService = {
 
         return dashboardRepository.updateUserDashboard(userId, updateData);
     },
-    async createQuickLog(userId: string, activity: unknown) {
-        const text = requiredText(activity, "Activity", 10);
-        const id = randomUUID();
-        const occurredAt = new Date();
-
-        return prisma.$transaction(async (tx) => {
-            await upsertScoreEvent(tx, {
-                userId,
-                category: ScoreCategory.General,
-                sourceType: "QUICK_LOG",
-                sourceId: id,
-                label: `Quick Log: ${text}`,
-                points: 0,
-                occurredAt,
-            });
-            await rebuildUserScoreState(tx, userId);
-            return { id, text, points: 0, createdAt: occurredAt };
-        });
-    },
-
 };
+

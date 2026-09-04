@@ -10,7 +10,6 @@ export type DayActivityItem = {
 
 export type DayActivitySection = {
   key:
-    | "quickLogs"
     | "dsa"
     | "revision"
     | "learning"

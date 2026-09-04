@@ -56,7 +56,7 @@ export default function Privacy() {
 
             <h3>Developer activity and project data</h3>
             <ul>
-              <li>Quick Logs, DSA entries, revision and learning logs, Fullstack activity, time spent, notes, complexity details, and proof links;</li>
+              <li>DSA entries, revision and learning logs, Fullstack activity, time spent, notes, complexity details, and proof links;</li>
               <li>project titles, descriptions, domains, status, work sessions, milestones, completion data, share settings, and public share links;</li>
               <li>Arena Score, Season Points, streaks, active days, ranks, leaderboard position, and scoring events.</li>
             </ul>

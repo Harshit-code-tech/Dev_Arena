@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
-import QuickLogModal from "./QuickLogModal";
 import { useAuth } from "../../features/auth/context/AuthContext";
 import "../styles/Sidebar.css";
 
@@ -25,7 +24,6 @@ type SidebarProps = {
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
-  const [quickLogOpen, setQuickLogOpen] = useState(false);
   const visibleLinks = user && "isAdmin" in user && user.isAdmin
     ? [...links, { name: "Admin", path: "/admin", icon: "bx-shield-quarter" } as const]
     : links;
@@ -74,14 +72,9 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
             <strong>Learn · Log · Build · Rank</strong>
             <p>Meaningful evidence moves your score, consistency, and position.</p>
           </div>
-
-          <button className="quick-log-btn" type="button" onClick={() => setQuickLogOpen(true)}>
-            <span aria-hidden="true">+</span> Quick Log
-          </button>
         </div>
-
-        <QuickLogModal open={quickLogOpen} onClose={() => setQuickLogOpen(false)} />
       </aside>
     </>
   );
 }
+

@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { dashboardService } from "./dashboard.service";
-import type { DashboardUpdateInput, QuickLogInput } from "./dashboard.types";
-import { sendTrackingError } from "../../shared/utils/tracking";
+import type { DashboardUpdateInput } from "./dashboard.types";
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : String(error);
@@ -51,18 +50,3 @@ export const updateDashboard = async (req: Request, res: Response): Promise<void
     }
 };
 
-export const createQuickLog = async (req: Request, res: Response): Promise<void> => {
-    try {
-        if (!req.user?.id) {
-            res.status(401).json({ success: false, message: "Not authenticated" });
-            return;
-        }
-
-        const input = req.body as Partial<QuickLogInput>;
-        const log = await dashboardService.createQuickLog(req.user.id, input.activity);
-        res.status(201).json({ success: true, data: log });
-    } catch (error: unknown) {
-        const result = sendTrackingError(error);
-        res.status(result.status).json({ success: false, message: result.message });
-    }
-};

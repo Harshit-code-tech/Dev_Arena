@@ -105,7 +105,7 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
       : location.pathname.startsWith("/activity/")
       ? {
           title: "Daily Activity",
-          description: "Audit the complete DSA, project, learning, challenge, and Quick Log evidence for one day.",
+          description: "Audit the complete DSA, project, learning, and challenge evidence for one day.",
         }
       : pageDetails[location.pathname] || {
           title: "DevArena",

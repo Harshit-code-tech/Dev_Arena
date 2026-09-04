@@ -160,78 +160,6 @@ body .sidebar .sidebar-link.active::after {
   line-height: 1.45;
 }
 
-body .sidebar .quick-log-btn {
-  position: relative !important;
-  inset: auto !important;
-  width: 100% !important;
-  min-height: 54px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-  padding: 14px 0 13px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  cursor: pointer;
-  font-size: 14px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.115em !important;
-  text-transform: uppercase;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-body .sidebar .quick-log-btn > span {
-  color: #85868b;
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 0;
-  transform: translateY(-1px);
-}
-
-body .sidebar .quick-log-btn::before {
-  content: "" !important;
-  position: absolute;
-  right: 0;
-  bottom: 5px;
-  left: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.22);
-}
-
-body .sidebar .quick-log-btn::after {
-  content: "" !important;
-  position: absolute;
-  right: 0;
-  bottom: 5px;
-  left: 0;
-  height: 1px;
-  display: block !important;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 180ms ease;
-}
-
-body .sidebar .quick-log-btn:hover,
-body .sidebar .quick-log-btn:focus-visible {
-  border: 0 !important;
-  background: transparent !important;
-  color: #ffffff !important;
-  outline: none !important;
-  transform: none !important;
-}
-
-body .sidebar .quick-log-btn:hover::after,
-body .sidebar .quick-log-btn:focus-visible::after {
-  transform: scaleX(1);
-}
 
 .sidebar-backdrop { display: none; }
 
@@ -242,7 +170,6 @@ body .sidebar .quick-log-btn:focus-visible::after {
   body .sidebar .sidebar-link { min-height: 38px !important; padding-top: 7px !important; padding-bottom: 7px !important; }
   .sidebar-mission p { display: none; }
   .sidebar-footer { gap: 10px; padding-top: 11px; }
-  body .sidebar .quick-log-btn { min-height: 48px !important; }
 }
 
 @media (max-width: 980px) {
@@ -276,8 +203,7 @@ body .sidebar .quick-log-btn:focus-visible::after {
   .sidebar,
   .sidebar-backdrop,
   .sidebar-link,
-  .sidebar-link i,
-  .quick-log-btn::after {
+  .sidebar-link i {
     transition: none !important;
   }
 }

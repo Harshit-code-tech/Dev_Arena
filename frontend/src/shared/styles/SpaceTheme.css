@@ -446,7 +446,6 @@ body .draft-edit-btn,
 body .draft-delete-btn,
 body .save-btn,
 body .save-log-btn,
-body .quick-log-btn,
 body .pagination button,
 body .year-selector button,
 body .contact-actions button,
@@ -480,7 +479,6 @@ body .draft-edit-btn:hover,
 body .draft-delete-btn:hover,
 body .save-btn:hover,
 body .save-log-btn:hover,
-body .quick-log-btn:hover,
 body .pagination button:hover,
 body .year-selector button:hover,
 body .contact-actions button:hover,
@@ -1045,14 +1043,6 @@ body .sidebar-link i {
   color: inherit !important;
 }
 
-body .quick-log-btn {
-  width: calc(100% - 40px) !important;
-  position: absolute !important;
-  right: 20px !important;
-  bottom: 28px !important;
-  left: 20px !important;
-}
-
 body .topbar {
   position: sticky !important;
   top: 0 !important;
@@ -1313,13 +1303,11 @@ body .profile-stat {
    MODALS / DROPDOWNS / NOTIFICATIONS
 ========================================================= */
 
-body .quicklog-overlay,
 body .draft-modal-backdrop {
   background: rgba(0, 0, 0, 0.88) !important;
   backdrop-filter: none !important;
 }
 
-body .quicklog-modal,
 body .draft-modal,
 body .profile-dropdown,
 body .notification-panel {
@@ -1330,7 +1318,6 @@ body .notification-panel {
   color: var(--da-on-primary) !important;
 }
 
-body .quicklog-modal h2,
 body .draft-modal h2,
 body .profile-dropdown h3,
 body .notification-panel h3 {
@@ -1339,7 +1326,6 @@ body .notification-panel h3 {
   letter-spacing: 0.96px;
 }
 
-body .quicklog-modal textarea,
 body .draft-modal input,
 body .draft-modal textarea {
   width: 100% !important;
@@ -1350,10 +1336,6 @@ body .draft-modal textarea {
   background: var(--da-canvas-light) !important;
   color: var(--da-ink) !important;
   box-shadow: none !important;
-}
-
-body .quicklog-modal textarea {
-  min-height: 160px !important;
 }
 
 body .profile-dropdown button,
@@ -1952,12 +1934,6 @@ body .loader-card::after {
   body .sidebar-link {
     width: auto !important;
     min-width: max-content !important;
-  }
-
-  body .quick-log-btn {
-    position: static !important;
-    width: 100% !important;
-    margin-top: 14px !important;
   }
 
   body .app-layout {

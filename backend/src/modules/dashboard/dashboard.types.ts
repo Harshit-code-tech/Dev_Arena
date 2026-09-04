@@ -33,7 +33,3 @@ export type DashboardUpdateInput = {
 };
 
 export type DashboardUpdateData = Prisma.UserUpdateInput;
-
-export type QuickLogInput = {
-    activity: string;
-};
