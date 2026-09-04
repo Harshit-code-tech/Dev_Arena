@@ -27,6 +27,8 @@ type BackendDashboardStats = {
   seasonStartDate?: string | Date | null;
   weeklyBonusClaimed?: boolean | null;
   seasonBonusClaimed?: boolean | null;
+  weeklyActiveDays?: number | null;
+  consistencyRating?: string | null;
 };
 
 type BackendDashboardLog = {
@@ -55,6 +57,7 @@ export type DashboardLog = {
 export type DashboardViewModel = {
   activeDays: number;
   arenaScore: number;
+  consistencyRating: string;
   currentRankMaxPoints: number;
   daysRemaining: number;
   heatmap: HeatmapCell[];
@@ -71,6 +74,7 @@ export type DashboardViewModel = {
   seasonPoints: number;
   streak: number;
   totalLogs: number;
+  weeklyActiveDays: number;
 };
 
 export async function getDashboardViewModel(): Promise<DashboardViewModel> {
@@ -124,6 +128,7 @@ function buildDashboardViewModel(
   return {
     activeDays: normalizeNumber(response.stats.activeDays, 0),
     arenaScore: normalizeNumber(response.stats.arenaScore, 0),
+    consistencyRating: response.stats.consistencyRating || "Low",
     currentRankMaxPoints: nextRank?.points ?? seasonPoints,
     daysRemaining: calculateDaysRemaining(response.stats.seasonStartDate),
     heatmap,
@@ -140,6 +145,7 @@ function buildDashboardViewModel(
     seasonPoints,
     streak: normalizeNumber(response.stats.streak, 0),
     totalLogs: logs.length,
+    weeklyActiveDays: normalizeNumber(response.stats.weeklyActiveDays, 0),
   };
 }
 

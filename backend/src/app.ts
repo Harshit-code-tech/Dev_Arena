@@ -26,6 +26,7 @@ import activityRoutes from "./modules/activity/activity.routes";
 import playerHubRoutes from "./modules/player-hub/player-hub.routes";
 import githubRoutes from "./modules/github/github.routes";
 import feedbackRoutes from "./modules/feedback/feedback.routes";
+import challengeRoutes from "./modules/challenges/challenge.routes";
 
 export function createApp(port: number) {
     const app = express();
@@ -67,7 +68,7 @@ export function createApp(port: number) {
     app.use("/api/practice", practiceRoutes);
     app.use("/api/leaderboard", leaderboardRoutes);
     app.use("/api/tournaments", tournamentRoutes);
-    app.use("/api/challenge", tournamentRoutes); // legacy compatibility
+    app.use("/api/challenge", challengeRoutes);
     app.use("/api/admin", adminRoutes);
     app.use("/api/blog", blogRoutes);
     app.use("/api/releases", releaseRoutes);

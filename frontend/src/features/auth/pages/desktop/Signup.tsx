@@ -78,7 +78,7 @@ function Signup() {
 
   const handleSocialSignup = async (provider: SocialAuthProvider, source: HTMLButtonElement | null) => {
     if (!agreeTerms) {
-      const legalMessage = "Confirm that you are at least 18 and accept the Terms of Service and Privacy Policy before creating an account.";
+      const legalMessage = "Please accept the Terms of Service and Privacy Policy before creating an account.";
       setError(legalMessage);
       toast.error(legalMessage);
       return;
@@ -279,7 +279,7 @@ function Signup() {
                   />
                   <span className="auth-check-box" aria-hidden="true" />
                   <span>
-                    I confirm I am at least 18 and agree to the{" "}
+                    I agree to the{" "}
                     <button type="button" onClick={() => navigate("/terms")}>
                       Terms of Service
                     </button>{" "}

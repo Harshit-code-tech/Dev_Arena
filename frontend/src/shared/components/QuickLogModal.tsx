@@ -62,7 +62,7 @@ export default function QuickLogModal({ open, onClose }: Props) {
       }
 
       setSaved(true);
-      toast.success("+5 Arena Score");
+      toast.success("Activity Saved");
       window.dispatchEvent(new CustomEvent("devarena:activity-updated"));
 
       window.setTimeout(() => {
@@ -92,7 +92,7 @@ export default function QuickLogModal({ open, onClose }: Props) {
         aria-labelledby="quicklog-title"
       >
         <div className="quicklog-kicker-row">
-          <span>Quick Log / +5 Points</span>
+          <span>Quick Log</span>
           <button className="quicklog-close" type="button" onClick={onClose} disabled={saving} aria-label="Close quick log">×</button>
         </div>
 
@@ -105,7 +105,6 @@ export default function QuickLogModal({ open, onClose }: Props) {
         <div className="quicklog-signal-grid" aria-hidden="true">
           <span><strong>Specific</strong><small>One completed outcome</small></span>
           <span><strong>Meaningful</strong><small>Avoid vague bulk logs</small></span>
-          <span><strong>+5</strong><small>General activity points</small></span>
         </div>
 
         <label className="quicklog-field">

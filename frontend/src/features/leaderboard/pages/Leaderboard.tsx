@@ -87,8 +87,8 @@ export default function Leaderboard() {
         </div>
 
         <div className="leaderboard-self-metrics">
-          <article><span>Position</span><strong>#{currentUser.position}</strong><small>Top {scorePercentile}% of arena</small></article>
-          <article><span>Arena Score</span><strong data-private-value="true">{currentUser.arenaScore}</strong><small>{currentUser.activeDays} active days</small></article>
+          <article><span>Position</span><strong>#{currentUser.position || "—"}</strong><small>Top {scorePercentile}% of arena</small></article>
+          <article><span>Competition Score</span><strong data-private-value="true">{currentUser.competitionScore}</strong><small>{currentUser.activeDays} active days</small></article>
           <article><span>Season Points</span><strong data-private-value="true">{currentUser.seasonPoints}</strong><small>Current season</small></article>
           <article className="leaderboard-self-rank"><span>Developer Rank</span><RankBadge rank={currentUser.rank} size="large" /></article>
         </div>
@@ -97,12 +97,12 @@ export default function Leaderboard() {
       <section className="leaderboard-top-ten page-reveal" aria-labelledby="top-ten-title">
         <div className="leaderboard-section-heading">
           <div><p>Arena standings</p><h2 id="top-ten-title">Top 10 Performers</h2></div>
-          <span>Score · Season · Activity · Earliest record</span>
+          <span>Score · Season · Activity · Rank</span>
         </div>
 
         <div className="leaderboard-table" role="table" aria-label="Top ten DevArena performers">
           <div className="leaderboard-table-head" role="row">
-            <span>Position</span><span>Developer</span><span>Rank</span><span>Active</span><span>Arena Score</span>
+            <span>Position</span><span>Developer</span><span>Rank</span><span>Active</span><span>Score</span>
           </div>
           {data.topPerformers.map((entry) => (
             <article key={entry.id} className={entry.isCurrentUser ? "is-current" : ""} role="row">
@@ -110,7 +110,7 @@ export default function Leaderboard() {
               <div className="leaderboard-user-cell"><ArenaAvatar entry={entry} /><div><strong>{entry.name}</strong><span>@{entry.username}</span></div></div>
               <RankBadge rank={entry.rank} size="small" />
               <span>{entry.activeDays} days</span>
-              <b data-private-value="true">{entry.arenaScore}</b>
+              <b data-private-value="true">{entry.competitionScore}</b>
             </article>
           ))}
         </div>

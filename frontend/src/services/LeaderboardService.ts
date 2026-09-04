@@ -1,4 +1,4 @@
-import { getStoredAuthToken } from "../features/auth/api/AuthStorageService";
+import { apiRequest } from "./ApiClient";
 
 export type LeaderboardEntry = {
   id: string;
@@ -11,6 +11,7 @@ export type LeaderboardEntry = {
   seasonPoints: number;
   activeDays: number;
   rank: string;
+  competitionScore: number;
   position: number;
   isCurrentUser: boolean;
 };
@@ -26,32 +27,16 @@ export type NearbyLeaderboardData = {
   entries: LeaderboardEntry[];
 };
 
-type Envelope<T> = { success: boolean; data: T; message?: string };
-
-async function authorizedRequest<T>(path: string): Promise<T> {
-  const token = getStoredAuthToken();
-  if (!token) throw new Error("Authentication token is missing.");
-
-  const response = await fetch(path, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const payload = (await response.json().catch(() => null)) as Envelope<T> | null;
-  if (!response.ok || !payload?.success) {
-    throw new Error(payload?.message || "Could not load leaderboard data.");
-  }
-  return payload.data;
-}
-
 export function getLeaderboard(limit = 10) {
-  return authorizedRequest<LeaderboardData>(`/api/leaderboard?limit=${limit}`);
+  return apiRequest<LeaderboardData>(`/api/leaderboard?limit=${limit}`);
 }
 
 export function getNearbyLeaderboard() {
-  return authorizedRequest<NearbyLeaderboardData>("/api/leaderboard/nearby");
+  return apiRequest<NearbyLeaderboardData>("/api/leaderboard/nearby");
 }
 
 export function searchLeaderboard(query: string) {
-  return authorizedRequest<{ query: string; results: LeaderboardEntry[] }>(
+  return apiRequest<{ query: string; results: LeaderboardEntry[] }>(
     `/api/leaderboard/search?q=${encodeURIComponent(query)}`,
   );
 }

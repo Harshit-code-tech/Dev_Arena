@@ -1,6 +1,6 @@
 # DevArena Project Structure and Feature Register
 
-Last reviewed: 2026-08-01
+Last reviewed: 2026-09-04
 
 This file is the living technical map for DevArena. Update it whenever a route,
 feature, data model, integration, or major directory changes.
@@ -152,6 +152,9 @@ Dev_Arena/
 - `frontend/src/shared/components` contains reusable UI and app-shell components
   such as `Header`, `Sidebar`, `TopBar`, `QuickLogModal`, `Pagination`,
   `NotificationPanel`, `RankBadge`, and `PageLoader`.
+- The authenticated application sidebar includes Dashboard, DSA, Projects,
+  Players, Leaderboard, Challenges, Tournaments, Player Hub, Profile, and
+  a bottom Quick Log action.
 - `frontend/src/shared/styles/Global.css` contains global app CSS.
 - `frontend/src/shared/styles` also contains shared component CSS. The previously
   unused `frontend/src/styles/index.css` was preserved at
@@ -193,7 +196,7 @@ Dev_Arena/
 | `/players` | Protected | Global player directory, email invites, requests, and connected players | Implemented |
 | `/friends` | Protected | Legacy redirect to `/players` | Implemented |
 | `/leaderboard` | Protected | Current user summary, real top 10, and player-rank search | Implemented |
-| `/challenges` | Protected | Placeholder screen | Planned |
+| `/challenges` | Protected | Active weekly competition, task submission, and results | Implemented |
 | `/player-hub` | Protected | Routed, responsive placeholder for the future community hub | Scaffolded |
 | `/settings` | Protected | Profile/privacy, identity, preferences, notifications, data controls, and player management | Implemented |
 
@@ -233,6 +236,8 @@ registered in `frontend/src/app/Router.tsx`. Links inside those pages refer to
   points, active days, rank, streak, weekly score buckets, and contribution
   dates. The frontend service maps those values into rank progress, recent
   activity, and the rolling 53-week contribution heatmap.
+- Dashboard stats include a weekly consistency rating (Low / Moderate /
+  Consistent) based on the current week's active days (§14).
 - `frontend/src/features/dashboard/pages/Dashboard.tsx` renders the dashboard
   view model and no longer owns those calculations directly.
 - A day counts as active when it contains at least one scored activity.
@@ -264,7 +269,7 @@ registered in `frontend/src/app/Router.tsx`. Links inside those pages refer to
 
 ### Players, navigation, and app shell
 
-- The authenticated application uses a fixed, non-scrolling left sidebar with Dashboard, DSA, Projects, Players, Leaderboard, Challenges, Player Hub, Profile, and a bottom Quick Log action.
+- The authenticated application uses a fixed, non-scrolling left sidebar with Dashboard, DSA, Projects, Players, Leaderboard, Challenges, Tournaments, Player Hub, Profile, and a bottom Quick Log action.
 - `/players` shows all other registered users before a query is entered and filters by name, email, or permanent username.
 - Player rows include privacy-aware profile imagery, name, username, relationship state, and two deterministic placeholder technology tags. The tags are intentionally replaceable by a future AI-derived profile model.
 - The network system supports email invitations, incoming/outgoing requests, connected-player removal, email alerts, in-app notifications, and the legacy `/friends` redirect.
@@ -275,11 +280,14 @@ The structured tracking modules are implemented end to end:
 
 - `/dsa` combines DSA problem logs, revision sessions, and concept-learning logs.
 - `/projects` combines long-running projects with Full Stack Open learning/building logs.
-- DSA scores Easy/Medium/Hard entries at 1/3/5 points and rejects duplicate problems.
+- DSA scores Easy/Medium/Hard entries at 1/3/5 base progress points with daily
+  diminishing returns, and rejects duplicate problems.
 - Practice scores revision/concept explanation at 2/3 points.
 - Full-stack separates Full Stack Open course progress from practical work;
   Learning scores 2 points and Building scores 4 points.
-- Projects score work sessions, milestone completion, and project completion at 3/8/20 points.
+- Projects score work sessions, milestone completion, and project completion
+  through an evidence-based formula. Milestones carry size-based progress points:
+  Minor = 2, Major = 5, Release = 8 (§11 of `docs/scoringupdate.md`).
   Milestone and project completion awards are persisted once, so reopening and
   completing the same item cannot farm or move points into a later week.
 - New log forms use the server/current date automatically; existing backend date validation remains for compatibility, and editable log records lock after 24 hours.
@@ -287,10 +295,22 @@ The structured tracking modules are implemented end to end:
   sessions; DSA additionally blocks duplicate problem names or URLs across all time.
 - `ScoreEvent` is the auditable scoring source. Each mutation rebuilds Arena Score,
   current-season points, rank, streak, active days, contribution dates, and weekly scores.
-- `frontend/src/services/TrackingService.ts` centralizes authenticated requests and
-  shared tracking view types.
+- `frontend/src/services/TrackingService.ts` centralizes tracking view types.
+- `frontend/src/services/ApiClient.ts` centralizes authenticated API requests;
+  all service files (`TrackingService`, `LeaderboardService`, `ChallengeService`)
+  import `apiRequest` from this shared client instead of maintaining their own
+  fetch wrappers.
+- `frontend/src/services/ChallengeService.ts` provides typed API wrappers for
+  active competition viewing, code submission, and results querying.
+- Leaderboard: current week competition-based ranking with tie-breaking.
+  The primary ranking metric is `competitionScore` (from `ChallengeResult`).
+  Users without a current-week competition result receive position 0 with a
+  graceful fallback instead of a 404 error.
 - Leaderboard: current week and historical results.
-- Weekly challenge: result listing and submission.
+- Weekly challenge: competition listing, code submission, and result aggregation.
+- Admin endpoints support creating competitions, adding tasks with authoritative
+  metadata, adding test cases, activating competitions, and aggregating results
+  into ChallengeResult records.
 
 The intended scoring rules are recorded in the corresponding controller files.
 
@@ -299,7 +319,8 @@ The intended scoring rules are recorded in the corresponding controller files.
 - `frontend/src/features/profile/pages/Profile.tsx` reads authoritative score,
   activity, rank, recent-log, and contribution data through the dashboard API.
 - `frontend/src/shared/components/QuickLogModal.tsx` submits a specific activity
-  to `POST /api/dashboard/quick-log`, which creates a 5-point General score event.
+  to `POST /api/dashboard/quick-log`, which creates a General score event with
+  zero points (Quick Log scoring was removed per the scoring redesign).
 - Quick-log completion broadcasts `devarena:activity-updated` so dashboard and
   profile views refresh without a full page reload.
 
@@ -319,7 +340,7 @@ Unless marked public, endpoints require the custom JWT bearer token.
 | `/api/practice` | Revision/learning CRUD and weekly summary | Implemented |
 | `/api/projects` | Projects, work sessions, milestones, status, and scoring | Implemented |
 | `/api/leaderboard` | Current-user summary, top 10, nearby ranks, and player search | Implemented |
-| `/api/challenge` | Weekly results and submission | Scaffolded (`501`) in `backend/src/modules/challenges` |
+| `/api/challenge` | `GET /`, `POST /submit`, `GET /results`, admin CRUD for competitions/tasks/test-cases/activation/aggregation | Implemented in `backend/src/modules/challenges` |
 | `/api/friends` | Player overview, global search, requests, email invitations, and removal | Implemented (legacy API namespace) |
 | `/api/settings` | Profile/privacy preferences, verified identity changes, export, and account deletion | Implemented |
 | `/api/notifications` | Notification list and read-state updates | Implemented |
@@ -335,10 +356,16 @@ PostgreSQL models in `backend/prisma/schema.prisma`:
   activity timestamps. Current frontend forms no longer expose manual activity dates. `FullstackLog` distinguishes course progress
   from practical work.
 - `Project`, `ProjectLog`, `Milestone`: project tracking and progress, including
-  immutable completion-award timestamps for anti-abuse scoring.
+  immutable completion-award timestamps for anti-abuse scoring. Milestones carry
+  a `MilestoneSize` (Minor/Major/Release) with differentiated progress values.
 - `ScoreEvent`: idempotent, source-linked points used for score rebuilding and
   activity history.
 - `WeeklyScore`, `ChallengeResult`: category totals, competition, and ranking data.
+- `WeeklyCompetition`, `CompetitionTask`, `CompetitionTestCase`,
+  `CompetitionSubmission`: the weekly competition engine schema. Competitions
+  contain tasks with authoritative metadata (expected complexity, accepted tiers,
+  scoring weights); test cases validate submissions; submissions track per-user
+  code, evaluation status, correctness, and efficiency.
 - `Activity`: one activity marker per user/date.
 - `Notification`: typed, read/unread user messages.
 - `Achievement`, `UserAchievement`: achievement definitions and unlocks.
@@ -412,3 +439,8 @@ There is currently no automated test suite.
 3. The support form only updates local UI state and does not send a message.
 4. Player technology tags are derived from verified project evidence; future player matching still requires its ranking model and feedback loop.
 5. No tests or CI validation are defined.
+6. The weekly competition engine infrastructure is built (create, submit, aggregate)
+   but automatic code evaluation against test cases is not yet implemented.
+7. Automatic achievement unlocking (Phase 4) is not yet implemented.
+8. AI Coach / inactivity feedback (Phase 5) is not yet implemented.
+9. Rank decay is deferred until automatic competition evaluation is operational.

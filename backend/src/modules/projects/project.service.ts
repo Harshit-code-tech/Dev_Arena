@@ -1,4 +1,5 @@
 import {
+    MilestoneSize,
     MilestoneStatus,
     ProjectDomain,
     ProjectStatus,
@@ -60,10 +61,17 @@ function parseLogInput(input: Partial<ProjectLogInput>, existingActivityDate?: D
     };
 }
 
+function parseMilestoneSize(value: unknown): MilestoneSize {
+    if (value === undefined) return MilestoneSize.Minor;
+    if (Object.values(MilestoneSize).includes(value as MilestoneSize)) return value as MilestoneSize;
+    throw new TrackingError("Milestone size must be Minor, Major, or Release.");
+}
+
 function parseMilestoneInput(input: Partial<MilestoneInput>) {
     return {
         title: requiredText(input.title, "Milestone title", 4),
         description: optionalText(input.description),
+        size: parseMilestoneSize(input.size),
         status: parseMilestoneStatus(input.status),
     };
 }
@@ -430,6 +438,7 @@ export const projectService = {
         const data = {
             ...(input.title !== undefined && { title: requiredText(input.title, "Milestone title", 4) }),
             ...(input.description !== undefined && { description: optionalText(input.description) }),
+            ...(input.size !== undefined && { size: parseMilestoneSize(input.size) }),
             ...(input.status !== undefined && { status: parseMilestoneStatus(input.status) }),
         };
 

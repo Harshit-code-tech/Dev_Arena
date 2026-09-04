@@ -172,7 +172,7 @@ export const authService = {
         return { statusCode: 400, body: { message: "Name, email, and password are required" } };
       }
       if (acceptLegal !== true) {
-        return { statusCode: 400, body: { message: "You must confirm that you are at least 18 and accept the Terms of Service and Privacy Policy" } };
+        return { statusCode: 400, body: { message: "You must accept the Terms of Service and Privacy Policy to continue" } };
       }
 
       const trimmedEmail = email.trim().toLowerCase();

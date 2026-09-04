@@ -49,6 +49,13 @@ enum MilestoneStatus {
   Completed
 }
 
+// 11 — Milestone size categories with differentiated progress values
+enum MilestoneSize {
+  Minor
+  Major
+  Release
+}
+
 enum NotificationType {
   reminder
   summary
@@ -138,6 +145,28 @@ enum TournamentSubmissionStatus {
   Under_Review
   Scored
   Disqualified
+}
+
+enum CompetitionStatus {
+  Draft
+  Active
+  Evaluating
+  Completed
+}
+
+enum CompetitionTaskType {
+  DSA
+  Development
+  Debugging
+}
+
+enum CompetitionSubmissionStatus {
+  Pending
+  Evaluating
+  Passed
+  Partial
+  Failed
+  Error
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -262,6 +291,7 @@ model User {
   tournamentAnnouncements       TournamentAnnouncement[] @relation("TournamentAnnouncementAuthor")
   adminAuditLogs                 AdminAuditLog[] @relation("AdminAuditActor")
   presence                       UserPresence?
+  competitionSubmissions          CompetitionSubmission[]
 
   @@map("users")
 }
@@ -480,6 +510,7 @@ model Milestone {
   projectId   String          @map("project_id")
   title       String
   description String?
+  size                MilestoneSize   @default(Minor)
   status              MilestoneStatus @default(Pending)
   completionAwardedAt DateTime?       @map("completion_awarded_at")
   createdAt           DateTime        @default(now()) @map("created_at")
@@ -556,17 +587,113 @@ model ChallengeResult {
   id             String   @id @default(uuid())
   userId         String   @map("user_id")
   weekStart      DateTime @map("week_start") @db.Date
-  score          Int      @default(0)
-  problemsSolved Int      @default(0) @map("problems_solved")
-  completionTime Int?     @map("completion_time") // in minutes
+  score          Float    @default(0) // Overall competitive score
+  correctness    Float    @default(0) // New: Tie-breaker 1
+  problemsSolved Int      @default(0) @map("problems_solved") // Tie-breaker 2
+  efficiency     Float    @default(0) // New: Tie-breaker 3
+  completionTime Int?     @map("completion_time") // Tie-breaker 4
   rank           Int?
   submissionLink String?  @map("submission_link") // GitHub link or upload proof
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekStart])
-  @@index([weekStart, score(sort: Desc)])
+  @@index([weekStart, score(sort: Desc), correctness(sort: Desc)])
   @@map("challenge_results")
+}
+
+// ── Competition Engine ──────────────────────────────────────────
+
+model WeeklyCompetition {
+  id        String            @id @default(uuid())
+  weekStart DateTime          @unique @map("week_start") @db.Date
+  title     String
+  status    CompetitionStatus @default(Draft)
+  opensAt   DateTime?         @map("opens_at")
+  closesAt  DateTime?         @map("closes_at")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  tasks CompetitionTask[]
+
+  @@index([status, weekStart(sort: Desc)])
+  @@map("weekly_competitions")
+}
+
+model CompetitionTask {
+  id              String             @id @default(uuid())
+  competitionId   String             @map("competition_id")
+  type            CompetitionTaskType
+  title           String
+  description     String             @db.Text
+  difficulty      String
+  sortOrder       Int                @default(0) @map("sort_order")
+
+  // Authoritative metadata (scoringupdate.md §22)
+  inputConstraints  String?  @db.Text @map("input_constraints")
+  expectedTime      String?  @map("expected_time")       // e.g. "O(n log n)"
+  expectedSpace     String?  @map("expected_space")      // e.g. "O(1)"
+  acceptedTimeTiers Json?    @map("accepted_time_tiers") // ["O(n)", "O(n log n)"]
+  memoryLimitMb     Int?     @map("memory_limit_mb")
+  timeLimitMs       Int?     @map("time_limit_ms")
+
+  // Scoring weights (scoringupdate.md §21)
+  correctnessWeight Float @default(0.70) @map("correctness_weight")
+  efficiencyWeight  Float @default(0.20) @map("efficiency_weight")
+  timeWeight        Float @default(0.10) @map("time_weight")
+
+  weightPercentage Int @default(50) @map("weight_percentage") // Share of total competition score
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  competition WeeklyCompetition     @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  testCases   CompetitionTestCase[]
+  submissions CompetitionSubmission[]
+
+  @@index([competitionId, sortOrder])
+  @@map("competition_tasks")
+}
+
+model CompetitionTestCase {
+  id             String  @id @default(uuid())
+  taskId         String  @map("task_id")
+  input          String  @db.Text
+  expectedOutput String  @db.Text @map("expected_output")
+  isHidden       Boolean @default(false) @map("is_hidden")
+  weight         Int     @default(1)
+
+  task CompetitionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("competition_test_cases")
+}
+
+model CompetitionSubmission {
+  id     String @id @default(uuid())
+  taskId String @map("task_id")
+  userId String @map("user_id")
+
+  code     String @db.Text
+  language String
+
+  // Evaluation results (scoringupdate.md §21)
+  status         CompetitionSubmissionStatus @default(Pending)
+  correctness    Float    @default(0) // 0–100
+  efficiency     Float    @default(0) // 0–100
+  completionTime Int      @default(0) @map("completion_time") // seconds from task open to submit
+  testsPassed    Int      @default(0) @map("tests_passed")
+  testsTotal     Int      @default(0) @map("tests_total")
+  evaluationLog  String?  @db.Text @map("evaluation_log")
+
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  evaluatedAt DateTime? @map("evaluated_at")
+
+  task CompetitionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([userId, submittedAt(sort: Desc)])
+  @@map("competition_submissions")
 }
 
 model Activity {

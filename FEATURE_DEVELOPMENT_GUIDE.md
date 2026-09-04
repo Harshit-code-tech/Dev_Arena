@@ -1,6 +1,6 @@
 # DevArena Feature Development Guide
 
-Last updated: 2026-07-13
+Last updated: 2026-08-28
 
 This guide explains how to add a new feature to DevArena without breaking the
 current project structure. Use `PROJECT_STRUCTURE.md` to understand what already
@@ -102,9 +102,23 @@ React components:
 - normalizing missing or invalid response values;
 - reusing the same client-side computation in more than one component.
 
+### Shared API client
+
+All authenticated API calls should use the shared `apiRequest` helper exported
+from `frontend/src/services/ApiClient.ts`. This centralizes token handling,
+envelope parsing, and error extraction so that individual service files only
+define types and thin endpoint wrappers.
+
+Do **not** create new `request()` or `authorizedRequest()` helpers in individual
+service files. Import `apiRequest` from `ApiClient` instead.
+
 Example:
 
 ```text
+frontend/src/services/ApiClient.ts          — shared authenticated request helper
+frontend/src/services/ChallengeService.ts   — types + thin endpoint wrappers
+frontend/src/services/LeaderboardService.ts — types + thin endpoint wrappers
+frontend/src/services/TrackingService.ts    — types + thin endpoint wrappers
 frontend/src/services/DashboardService.ts
 frontend/src/services/DashboardConstants.ts
 ```
@@ -196,7 +210,6 @@ backend/src/modules/<feature>/
   feature.routes.ts
   feature.controller.ts
   feature.service.ts
-  feature.repository.ts
   feature.types.ts
 ```
 
@@ -204,12 +217,31 @@ Responsibilities:
 
 - `routes`: Express route paths, HTTP methods, and middleware only.
 - `controller`: read request data, call the service, send the response.
-- `service`: business rules and orchestration.
-- `repository`: direct Prisma/database queries.
+- `service`: business rules, orchestration, and Prisma queries.
 - `types`: request, response, and module domain types.
 
+Controller pattern — every handler follows this shape:
+
+```ts
+function userId(req: Request) { return req.user?.id || ""; }
+
+export const handler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await service.method(userId(req), req.body as InputType);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
+};
+```
+
 Do not put Prisma queries in controllers. Do not put Express `req` or `res`
-objects in services or repositories.
+objects in services.
+
+Reference implementation: `backend/src/modules/challenges/` demonstrates a
+complete module with routes, controller, service, and types for the weekly
+competition engine.
 
 ## 8. Adding a backend route
 

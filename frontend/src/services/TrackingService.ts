@@ -1,4 +1,4 @@
-import { getStoredAuthToken } from "../features/auth/api/AuthStorageService";
+import { apiRequest } from "./ApiClient";
 
 export type Difficulty = "Easy" | "Medium" | "Hard";
 export type PracticeType = "DSA_Revision" | "Concept_Explanation";
@@ -148,12 +148,6 @@ export type Project = {
   };
 };
 
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-  message?: string;
-};
-
 export type DsaData = {
   logs: DsaLog[];
   summary: {
@@ -200,55 +194,34 @@ export type ProjectData = {
   };
 };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getStoredAuthToken();
-  if (!token) throw new Error("Your session has expired. Please sign in again.");
-
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...init?.headers,
-    },
-  });
-
-  const payload = (await response.json()) as ApiEnvelope<T>;
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || "The tracking request failed.");
-  }
-
-  return payload.data;
-}
-
 export const trackingApi = {
-  getDsa: () => request<DsaData>("/api/dsa"),
-  createDsa: (input: Record<string, unknown>) => request<DsaLog>("/api/dsa", { method: "POST", body: JSON.stringify(input) }),
-  updateDsa: (id: string, input: Record<string, unknown>) => request<DsaLog>(`/api/dsa/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  deleteDsa: (id: string) => request<never>(`/api/dsa/${id}`, { method: "DELETE" }),
+  getDsa: () => apiRequest<DsaData>("/api/dsa"),
+  createDsa: (input: Record<string, unknown>) => apiRequest<DsaLog>("/api/dsa", { method: "POST", body: JSON.stringify(input) }),
+  updateDsa: (id: string, input: Record<string, unknown>) => apiRequest<DsaLog>(`/api/dsa/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteDsa: (id: string) => apiRequest<never>(`/api/dsa/${id}`, { method: "DELETE" }),
 
-  getPractice: () => request<PracticeData>("/api/practice"),
-  createPractice: (input: Record<string, unknown>) => request<PracticeLog>("/api/practice", { method: "POST", body: JSON.stringify(input) }),
-  updatePractice: (id: string, input: Record<string, unknown>) => request<PracticeLog>(`/api/practice/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  deletePractice: (id: string) => request<never>(`/api/practice/${id}`, { method: "DELETE" }),
+  getPractice: () => apiRequest<PracticeData>("/api/practice"),
+  createPractice: (input: Record<string, unknown>) => apiRequest<PracticeLog>("/api/practice", { method: "POST", body: JSON.stringify(input) }),
+  updatePractice: (id: string, input: Record<string, unknown>) => apiRequest<PracticeLog>(`/api/practice/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deletePractice: (id: string) => apiRequest<never>(`/api/practice/${id}`, { method: "DELETE" }),
 
-  getFullstack: () => request<FullstackData>("/api/fullstack"),
-  createFullstack: (input: Record<string, unknown>) => request<FullstackLog>("/api/fullstack", { method: "POST", body: JSON.stringify(input) }),
-  updateFullstack: (id: string, input: Record<string, unknown>) => request<FullstackLog>(`/api/fullstack/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  deleteFullstack: (id: string) => request<never>(`/api/fullstack/${id}`, { method: "DELETE" }),
+  getFullstack: () => apiRequest<FullstackData>("/api/fullstack"),
+  createFullstack: (input: Record<string, unknown>) => apiRequest<FullstackLog>("/api/fullstack", { method: "POST", body: JSON.stringify(input) }),
+  updateFullstack: (id: string, input: Record<string, unknown>) => apiRequest<FullstackLog>(`/api/fullstack/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteFullstack: (id: string) => apiRequest<never>(`/api/fullstack/${id}`, { method: "DELETE" }),
 
-  getProjects: () => request<ProjectData>("/api/projects"),
-  createProject: (input: Record<string, unknown>) => request<Project>("/api/projects", { method: "POST", body: JSON.stringify(input) }),
-  updateProject: (id: string, input: Record<string, unknown>) => request<Project>(`/api/projects/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  updateProjectSharing: (id: string, enabled: boolean) => request<Project>(`/api/projects/${id}/sharing`, { method: "PUT", body: JSON.stringify({ enabled }) }),
-  attachProjectRepository: (id: string, repositoryUrl: string) => request<Project>(`/api/projects/${id}/github`, { method: "POST", body: JSON.stringify({ repositoryUrl }) }),
-  refreshProjectRepository: (id: string) => request<Project>(`/api/projects/${id}/github/refresh`, { method: "POST" }),
-  reverifyProjectRepositories: () => request<{ checked: number; verified: number; failed: number }>("/api/projects/github/reverify", { method: "POST" }),
-  addProjectLog: (projectId: string, input: Record<string, unknown>) => request<ProjectLog>(`/api/projects/${projectId}/logs`, { method: "POST", body: JSON.stringify(input) }),
-  updateProjectLog: (projectId: string, logId: string, input: Record<string, unknown>) => request<ProjectLog>(`/api/projects/${projectId}/logs/${logId}`, { method: "PUT", body: JSON.stringify(input) }),
-  deleteProjectLog: (projectId: string, logId: string) => request<never>(`/api/projects/${projectId}/logs/${logId}`, { method: "DELETE" }),
-  addMilestone: (projectId: string, input: Record<string, unknown>) => request<Milestone>(`/api/projects/${projectId}/milestones`, { method: "POST", body: JSON.stringify(input) }),
-  updateMilestone: (projectId: string, milestoneId: string, input: Record<string, unknown>) => request<Milestone>(`/api/projects/${projectId}/milestones/${milestoneId}`, { method: "PUT", body: JSON.stringify(input) }),
+  getProjects: () => apiRequest<ProjectData>("/api/projects"),
+  createProject: (input: Record<string, unknown>) => apiRequest<Project>("/api/projects", { method: "POST", body: JSON.stringify(input) }),
+  updateProject: (id: string, input: Record<string, unknown>) => apiRequest<Project>(`/api/projects/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  updateProjectSharing: (id: string, enabled: boolean) => apiRequest<Project>(`/api/projects/${id}/sharing`, { method: "PUT", body: JSON.stringify({ enabled }) }),
+  attachProjectRepository: (id: string, repositoryUrl: string) => apiRequest<Project>(`/api/projects/${id}/github`, { method: "POST", body: JSON.stringify({ repositoryUrl }) }),
+  refreshProjectRepository: (id: string) => apiRequest<Project>(`/api/projects/${id}/github/refresh`, { method: "POST" }),
+  reverifyProjectRepositories: () => apiRequest<{ checked: number; verified: number; failed: number }>("/api/projects/github/reverify", { method: "POST" }),
+  addProjectLog: (projectId: string, input: Record<string, unknown>) => apiRequest<ProjectLog>(`/api/projects/${projectId}/logs`, { method: "POST", body: JSON.stringify(input) }),
+  updateProjectLog: (projectId: string, logId: string, input: Record<string, unknown>) => apiRequest<ProjectLog>(`/api/projects/${projectId}/logs/${logId}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteProjectLog: (projectId: string, logId: string) => apiRequest<never>(`/api/projects/${projectId}/logs/${logId}`, { method: "DELETE" }),
+  addMilestone: (projectId: string, input: Record<string, unknown>) => apiRequest<Milestone>(`/api/projects/${projectId}/milestones`, { method: "POST", body: JSON.stringify(input) }),
+  updateMilestone: (projectId: string, milestoneId: string, input: Record<string, unknown>) => apiRequest<Milestone>(`/api/projects/${projectId}/milestones/${milestoneId}`, { method: "PUT", body: JSON.stringify(input) }),
 };
 
 export function todayInputValue() {

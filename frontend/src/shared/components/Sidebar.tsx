@@ -11,6 +11,7 @@ const links = [
   { name: "Projects", path: "/projects", icon: "bx-folder" },
   { name: "Players", path: "/players", icon: "bx-group" },
   { name: "Leaderboard", path: "/leaderboard", icon: "bx-trophy" },
+  { name: "Challenges", path: "/challenges", icon: "bx-target-lock" },
   { name: "Tournaments", path: "/tournaments", icon: "bx-trophy" },
   { name: "Player Hub", path: "/player-hub", icon: "bx-network-chart" },
   { name: "Profile", path: "/profile", icon: "bx-user" },

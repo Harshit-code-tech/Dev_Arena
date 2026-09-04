@@ -28,6 +28,7 @@ const Terms = lazy(() => import("../features/legal/pages/Terms"));
 const Privacy = lazy(() => import("../features/legal/pages/Privacy"));
 const ActivityDay = lazy(() => import("../features/activity/pages/ActivityDay"));
 const Tournaments = lazy(() => import("../features/tournaments/pages/Tournaments"));
+const Challenges = lazy(() => import("../features/challenges/pages/Challenges"));
 const Admin = lazy(() => import("../features/admin/pages/Admin"));
 const AdminMetrics = lazy(() => import("../features/admin/pages/AdminMetrics"));
 
@@ -117,7 +118,7 @@ export function AppRouter() {
           <Route path="players" element={<Players />} />
           <Route path="friends" element={<Navigate to="/players" replace />} />
           <Route path="leaderboard" element={<Leaderboard />} />
-          <Route path="challenges" element={<Navigate to="/tournaments" replace />} />
+          <Route path="challenges" element={<Challenges />} />
           <Route path="tournaments" element={<Tournaments />} />
           <Route path="tournaments/:tournamentId" element={<Tournaments />} />
           <Route path="admin" element={<Admin />} />

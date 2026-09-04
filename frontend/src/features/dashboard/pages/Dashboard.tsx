@@ -192,7 +192,7 @@ function Dashboard() {
               >
                 <span>#{entry.position}</span>
                 <span>{entry.isCurrentUser ? `${entry.name} · You` : entry.name}</span>
-                <span data-private-value="true">{entry.arenaScore}</span>
+                <span data-private-value="true">{entry.competitionScore}</span>
               </div>
             ))}
             {leaderboardPreview.length === 0 && (

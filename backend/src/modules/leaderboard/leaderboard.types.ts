@@ -9,6 +9,7 @@ export type LeaderboardUser = {
     seasonPoints: number;
     activeDays: number;
     rank: string;
+    competitionScore: number;
     position: number;
     isCurrentUser: boolean;
 };

@@ -16,6 +16,9 @@ export type DashboardStats = {
     seasonStartDate: Date;
     weeklyBonusClaimed: boolean;
     seasonBonusClaimed: boolean;
+    // 14 — Consistency classification based on current week's active days
+    weeklyActiveDays: number;
+    consistencyRating: "Low" | "Moderate" | "Consistent";
 };
 
 export type DashboardResponse = {

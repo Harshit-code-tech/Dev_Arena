@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { dashboardRepository } from "./dashboard.repository";
 import { prisma } from "../../database/prisma";
 import { rebuildUserScoreState, upsertScoreEvent } from "../../shared/services/scoring.service";
-import { requiredText } from "../../shared/utils/tracking";
+import { requiredText, getWeekStart, getWeekEnd } from "../../shared/utils/tracking";
 import type {
     DashboardLogEntry,
     DashboardResponse,
@@ -11,6 +11,13 @@ import type {
     DashboardUpdateData,
     DashboardUpdateInput,
 } from "./dashboard.types";
+
+// 14 — Consistency classification
+function consistencyRating(weeklyActiveDays: number): "Low" | "Moderate" | "Consistent" {
+    if (weeklyActiveDays >= 5) return "Consistent";
+    if (weeklyActiveDays >= 3) return "Moderate";
+    return "Low";
+}
 
 type DashboardService = {
     getDashboard(userId: string): Promise<DashboardResponse | null>;
@@ -34,6 +41,16 @@ export const dashboardService: DashboardService = {
 
         logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
+        // Count distinct active days in the current week for consistency rating
+        const now = new Date();
+        const weeklyActiveDays = await prisma.activity.count({
+            where: {
+                userId,
+                date: { gte: getWeekStart(now), lt: getWeekEnd(now) },
+                isActive: true,
+            },
+        });
+
         const stats: DashboardStats = {
             arenaScore: user.arenaScore,
             streak: user.streak,
@@ -44,6 +61,8 @@ export const dashboardService: DashboardService = {
             seasonStartDate: user.seasonStartDate,
             weeklyBonusClaimed: user.weeklyBonusClaimed,
             seasonBonusClaimed: user.seasonBonusClaimed,
+            weeklyActiveDays,
+            consistencyRating: consistencyRating(weeklyActiveDays),
         };
 
         return { stats, logs };
@@ -90,11 +109,11 @@ export const dashboardService: DashboardService = {
                 sourceType: "QUICK_LOG",
                 sourceId: id,
                 label: `Quick Log: ${text}`,
-                points: 5,
+                points: 0,
                 occurredAt,
             });
             await rebuildUserScoreState(tx, userId);
-            return { id, text, points: 5, createdAt: occurredAt };
+            return { id, text, points: 0, createdAt: occurredAt };
         });
     },
 

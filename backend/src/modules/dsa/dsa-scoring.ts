@@ -20,13 +20,16 @@ function roundPoint(value: number) {
 }
 
 export function dsaPointsForDailyOrdinal(difficulty: Difficulty, ordinal: number) {
-  if (difficulty === "Hard") return 10;
+  // 3.2 — Base progress values: Easy = 1, Medium = 3, Hard = 5
+  // 3.3 — Diminishing returns prevent farming without blocking activity
+  if (difficulty === "Hard") return 5;
   if (difficulty === "Medium") {
-    if (ordinal <= 5) return 4;
-    if (ordinal <= 10) return 3;
-    if (ordinal <= 15) return 2;
+    if (ordinal <= 5) return 3;
+    if (ordinal <= 10) return 2;
+    if (ordinal <= 15) return 1;
     return 0;
   }
+  // Easy
   if (ordinal <= 3) return 1;
   if (ordinal <= 7) return 0.5;
   if (ordinal <= 10) return 0.2;

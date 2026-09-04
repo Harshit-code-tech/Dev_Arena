@@ -58,7 +58,7 @@ export function validateEmailSignupInput(input: EmailSignupInput) {
   }
 
   if (!input.agreeTerms) {
-    return "Confirm that you are at least 18 and accept the Terms of Service and Privacy Policy.";
+    return "Please accept the Terms of Service and Privacy Policy.";
   }
 
   return "";

@@ -1,7 +1,9 @@
 import type { Prisma } from "@prisma/client";
+import type { MilestoneSize } from "@prisma/client";
 import { rebuildUserScoreState } from "../../shared/services/scoring.service";
+import { MILESTONE_POINTS } from "./project.types";
 
-export const PROJECT_SCORE_VERSION = "project-evidence-v2";
+export const PROJECT_SCORE_VERSION = "project-evidence-v3";
 
 function roundScore(value: number) {
   return Math.round(value * 10) / 10;
@@ -39,7 +41,7 @@ export function calculateProjectScore(project: {
   githubRepositorySizeKb: number | null;
   completionAwardedAt: Date | null;
   logs: Array<{ activityDate: Date }>;
-  milestones: Array<{ completionAwardedAt: Date | null }>;
+  milestones: Array<{ size: MilestoneSize; completionAwardedAt: Date | null }>;
 }): ProjectScoreBreakdown {
   const bytes = Math.max(0, Number(project.githubSourceBytes) || sourceBytes(project.githubLanguageBytes));
   const repositorySizeKb = Math.max(0, Number(project.githubRepositorySizeKb) || 0);
@@ -55,8 +57,12 @@ export function calculateProjectScore(project: {
   const codeSize = clamp(3.5 * Math.log10(1 + effectiveBytes / 1_000), 0, 15);
   const contribution = clamp(10 * weight * maturity, 0, 10);
   const workSessions = clamp(project.logs.length, 0, 10);
+  // 11 — Size-based milestone points: Minor = 2, Major = 5, Release = 8
+  const milestonePoints = project.milestones
+    .filter((item) => item.completionAwardedAt !== null)
+    .reduce((sum, item) => sum + (MILESTONE_POINTS[item.size] ?? 2), 0);
   const completedMilestones = project.milestones.filter((item) => item.completionAwardedAt !== null).length;
-  const milestones = clamp(completedMilestones * 3, 0, 15);
+  const milestones = clamp(milestonePoints, 0, 24);
   const hasSustainedEvidence = project.logs.length > 0 || completedMilestones > 0;
   const completion = project.completionAwardedAt && hasSustainedEvidence
     ? clamp(15 * completionMaturity, 0, 15)
@@ -81,7 +87,7 @@ export async function rebuildProjectScoreEvents(
     where: { id: projectId, userId },
     include: {
       logs: { select: { id: true, activityDate: true } },
-      milestones: { select: { id: true, completionAwardedAt: true, updatedAt: true } },
+      milestones: { select: { id: true, size: true, completionAwardedAt: true, updatedAt: true } },
     },
   });
   if (!project) return null;

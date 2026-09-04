@@ -45,7 +45,7 @@ function Signup() {
     try {
       setLoading(true);
 
-      const { token } = await signInWithSocialProvider(provider);
+      const { token } = await signInWithSocialProvider(provider, { acceptLegal: true });
 
       if (token) await loginWithToken(token);
 

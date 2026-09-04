@@ -43,7 +43,7 @@ function Signup() {
 
   const handleSocialSignup = async (provider: SocialAuthProvider) => {
     if (!agreeTerms) {
-      const legalMessage = "Confirm that you are at least 18 and accept the Terms of Service and Privacy Policy before creating an account.";
+      const legalMessage = "Please accept the Terms of Service and Privacy Policy before creating an account.";
       setError(legalMessage);
       toast.error(legalMessage);
       return;
