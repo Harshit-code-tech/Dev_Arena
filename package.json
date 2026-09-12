@@ -12,6 +12,7 @@
     "build:frontend": "npm run build --workspace @devarena/frontend",
     "build:backend": "npm run build --workspace @devarena/backend",
     "build": "npm run build:frontend && npm run build:backend",
+    "start": "npm run start --workspace @devarena/backend",
     "db:check": "npm run db:check --workspace @devarena/backend",
     "db:seed": "npm run db:seed --workspace @devarena/backend",
     "db:migrate": "npm run db:migrate --workspace @devarena/backend",

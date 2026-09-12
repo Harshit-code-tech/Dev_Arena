@@ -80,6 +80,7 @@ Dev_Arena/
 |   |   `-- main.tsx           React entry point
 |   |-- index.html             Vite HTML entry point
 |   |-- package.json           Frontend dependencies and scripts
+|   |-- vercel.json            Vercel SPA routing and /api proxy configuration
 |   `-- vite.config.ts         Vite client and API proxy config
 |-- backend/
 |   |-- prisma/
@@ -150,11 +151,10 @@ Dev_Arena/
 - `frontend/src/shared/layouts/DashboardLayout.tsx` is preserved as a legacy
   dashboard shell component.
 - `frontend/src/shared/components` contains reusable UI and app-shell components
-  such as `Header`, `Sidebar`, `TopBar`, `QuickLogModal`, `Pagination`,
+  such as `Header`, `Sidebar`, `TopBar`, `Pagination`,
   `NotificationPanel`, `RankBadge`, and `PageLoader`.
 - The authenticated application sidebar includes Dashboard, DSA, Projects,
-  Players, Leaderboard, Challenges, Tournaments, Player Hub, Profile, and
-  a bottom Quick Log action.
+  Players, Leaderboard, Challenges, Tournaments, Player Hub, and Profile.
 - `frontend/src/shared/styles/Global.css` contains global app CSS.
 - `frontend/src/shared/styles` also contains shared component CSS. The previously
   unused `frontend/src/styles/index.css` was preserved at
@@ -226,7 +226,7 @@ registered in `frontend/src/app/Router.tsx`. Links inside those pages refer to
 
 - Dashboard statistics are stored on the PostgreSQL `User` record.
 - Activity is assembled from auditable `ScoreEvent` records created by DSA,
-  full-stack, project, practice, challenge, and quick-log actions.
+  full-stack, project, practice, and challenge actions.
 - `frontend/src/services/DashboardService.ts` converts dashboard API responses
   into a UI-ready dashboard view model.
 - Dashboard API requests get the saved JWT through
@@ -327,7 +327,7 @@ Unless marked public, endpoints require the custom JWT bearer token.
 | --- | --- | --- |
 | `/` and `/health` | Service health checks | Implemented, public |
 | `/api/auth` | Register, login, social sync, current user, email OTP verification/resend, password reset | Implemented in `backend/src/modules/auth`; see known gaps |
-| `/api/dashboard` | `GET /me`, restricted `PUT /me`, `POST /quick-log` | Implemented in `backend/src/modules/dashboard` |
+| `/api/dashboard` | `GET /me`, restricted `PUT /me` | Implemented in `backend/src/modules/dashboard` |
 | `/api/blog` | Published list plus authenticated post/draft CRUD | Implemented in `backend/src/modules/blog` |
 | `/api/releases` | Public list, protected CRUD, secret-based automation | Implemented in `backend/src/modules/releases` |
 | `/api/dsa` | User DSA log CRUD, duplicate prevention, weekly summary | Implemented |
@@ -416,6 +416,7 @@ Run commands from the `Dev_Arena/` workspace root.
 | `npm run build:frontend` | Build the client for production |
 | `npm run build:backend` | Compile the Express TypeScript code |
 | `npm run build` | Build frontend and backend sequentially |
+| `npm start` | Start the compiled Express production server |
 | `npm run db:check` | Verify the database connection |
 | `npm run db:generate` | Generate Prisma Client |
 | `npm run db:migrate` | Create/apply a development migration |
