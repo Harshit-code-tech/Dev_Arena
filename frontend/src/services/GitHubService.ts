@@ -1,4 +1,4 @@
-import { getStoredAuthToken } from "../features/auth/api/AuthStorageService";
+import { apiRequest } from "./ApiClient";
 
 export type GitHubLanguage = {
   name: string;
@@ -46,29 +46,15 @@ export type VerifiedGitHubRepository = {
   isFork: boolean;
 };
 
-type Envelope<T> = { success: boolean; data: T; message?: string };
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getStoredAuthToken();
-  if (!token) throw new Error("Your session has expired. Please sign in again.");
-  let response: Response;
   try {
-    response = await fetch(path, {
-      ...init,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(init?.body ? { "Content-Type": "application/json" } : {}),
-        ...init?.headers,
-      },
-    });
-  } catch {
-    throw new Error("GitHub could not be reached. Check your internet connection and try again.");
+    return await apiRequest<T>(path, init);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error("GitHub could not be reached. Check the API URL and your internet connection, then try again.");
+    }
+    throw error;
   }
-  const payload = await response.json().catch(() => ({})) as Partial<Envelope<T>>;
-  if (!response.ok || payload.success === false) {
-    throw new Error(payload.message || "GitHub request failed.");
-  }
-  return payload.data as T;
 }
 
 export const GitHubApi = {

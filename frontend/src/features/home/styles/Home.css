@@ -1,494 +1,595 @@
-.home-page {
-  min-height: calc(100vh - 110px);
-}
+/* DevArena landing page.
+   Home-specific layout lives here so it does not compete with the shared theme. */
 
-.hero {
-  max-width: 1200px;
-  margin: 5px auto 0;
-  text-align: center;
-}
-
-.eyebrow {
-  display: inline-flex;
-  margin: 0 0 18px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(125, 211, 252, 0.1);
-  border: 1px solid rgba(125, 211, 252, 0.22);
-  color: #bae6fd;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.hero h1 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(45px, 7vw, 86px);
-  line-height: 1.03;
-  font-weight: 800;
-}
-
-.hero-copy {
-  max-width: 680px;
-  margin: 22px auto 0;
-  color: rgba(226, 232, 240, 0.76);
-  font-size: 17px;
-  line-height: 1.7;
-}
-
-.hero-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 32px;
-  flex-wrap: wrap;
-}
-
-.cta-btn {
-  border: 0;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: #07111f;
-  padding: 13px 28px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    background 0.2s;
-}
-
-.cta-btn:hover {
-  background: #ddf3ff;
-  transform: translateY(-2px);
-}
-
-.cta-btn.secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-}
-
-.cta-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.13);
-}
-
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 75px;
-  margin-top: 65px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 768px) {
-  .hero h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: clamp(25px, 7vw, 86px);
-    line-height: 1.03;
-    font-weight: 800;
-  }
-}
-
-.card h3 {
-  margin: 0 0 12px;
-  color: rgba(226, 232, 240, 0.64);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* =========================
-   CONSISTENCY CARD
-========================= */
-
-.consistency-card {
-  width: 340px;
-  height: 260px;
-  padding: 1.5rem;
-  border-radius: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(14, 14, 20, 0.96),
-      rgba(28, 28, 38, 0.94)
-    );
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.consistency-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(92, 92, 246, 0.35);
-}
-
-.consistency-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.consistency-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #f8fafc;
-}
-
-.streak {
-  font-size: 0.75rem;
-  color: #8d8bfa;
-  background: rgba(97, 92, 246, 0.12);
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-}
-
-/* =========================
-   HEATMAP
-========================= */
-
-.heatmap {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.heatmap-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.heat-cell {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.heat-cell:hover {
-  transform: scale(1.5);
-  box-shadow: 0 0 12px rgba(92, 92, 246, 0.65);
-}
-
-/* =========================
-   INTENSITY LEVELS
-========================= */
-
-.empty {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.low {
-  background: rgba(92, 95, 246, 0.28);
-}
-
-.medium {
-  background: rgba(100, 92, 246, 0.5);
-}
-
-.high {
-  background: rgba(97, 92, 246, 0.75);
-}
-
-.max {
-  background: #665cf6;
-
-  box-shadow: 0 0 10px rgba(95, 92, 246, 0.75);
-}
-
-/* =========================
-   FOOTER
-========================= */
-
-.heatmap-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-.legend {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.legend-box {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 768px) {
-  .heat-cell {
-    width: 14px;
-    height: 14px;
-  }
-
-  .heatmap {
-    gap: 0.35rem;
-  }
-
-  .heatmap-column {
-    gap: 0.35rem;
-  }
-}
-
-/* =========================
-   MOTIVATION CARD
-========================= */
-
-.motivation-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+body .home-page {
   width: 100%;
-  max-width: 340px;
-  height: 260px;
-  padding: 1.5rem;
-  border-radius: 24px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(18, 18, 28, 0.95),
-      rgba(28, 28, 40, 0.92)
-    );
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.motivation-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(92, 92, 246, 0.35);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--da-canvas-night, #000);
+  color: var(--da-on-primary, #fff);
+  --home-display: "Arial Narrow", "Liberation Sans Narrow", "Nimbus Sans Narrow", "DejaVu Sans Condensed", Arial, sans-serif;
 }
 
 /* =========================
-   TOP
+   HERO
 ========================= */
 
-.motivation-top {
+body .home-page .hero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100svh;
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 0;
+  padding: 124px max(32px, calc((100vw - 1200px) / 2)) 76px;
+  overflow-x: hidden;
+  text-align: left;
+  background: #000;
 }
 
-.motivation-dot {
+body .home-page .hero::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background-image: url("/image.png");
+  background-repeat: no-repeat;
+  background-position: 80% 52%;
+  background-size: min(48vw, 680px) auto;
+  /* Keep the full >// mark visible without making it overly bright. */
+  filter: brightness(0) invert(1);
+  opacity: 0.76;
+  pointer-events: none;
+}
+
+body .home-page .hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(0, 0, 0, 0.88) 35%,
+    rgba(0, 0, 0, 0.34) 62%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+body .home-page .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--da-on-primary-mute, #f0f0fa);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .home-page .hero h1 {
+  width: min(100%, 900px);
+  min-height: 1em;
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+  color: #fff;
+  font-family: var(--home-display);
+  /* Sized around the longest rotating line so every message stays on one row. */
+  font-size: clamp(38px, 4.6vw, 70px);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+body .home-page .typing-line {
+  width: 100%;
+  min-height: 1em;
+  display: block;
+  color: #fff;
+  white-space: nowrap;
+}
+
+body .home-page .hero-copy {
+  width: min(100%, 610px);
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+body .home-page .hero-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 28px;
+}
+
+body .home-page .hero .hero-underline-btn,
+body .home-page .consistency-card .feature-underline-btn {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 42px !important;
+  padding: 12px 2px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  overflow: visible;
+  transform: none !important;
+}
+
+body .home-page .hero .hero-underline-btn::after,
+body .home-page .consistency-card .feature-underline-btn::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+  left: 0;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+
+body .home-page .hero .hero-underline-btn:hover::after,
+body .home-page .hero .hero-underline-btn:focus-visible::after,
+body .home-page .consistency-card .feature-underline-btn:hover::after,
+body .home-page .consistency-card .feature-underline-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* =========================
+   HIGHLIGHT SECTIONS
+========================= */
+
+body .home-page .cards {
+  width: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+body .home-page .home-card-row {
+  width: 100%;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 24px;
+  margin: 0;
+  padding: clamp(84px, 10svh, 112px) max(32px, calc((100vw - 1200px) / 2));
+  border-top: 1px solid var(--da-hairline-dark, #3a3a3f);
+  background: var(--da-canvas-night-soft, #0a0a0a);
+}
+
+body .home-page .consistency-card,
+body .home-page .motivation-card {
+  min-width: 0;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0;
+  padding: clamp(30px, 3vw, 46px);
+  border: 1px solid var(--da-hairline-dark, #3a3a3f);
+  border-radius: 4px;
+  background: #000;
+  box-shadow: none;
+  overflow-x: hidden;
+}
+
+body .home-page .consistency-card:hover,
+body .home-page .motivation-card:hover {
+  border-color: #fff;
+}
+
+/* =========================
+   CONSISTENCY
+========================= */
+
+body .home-page .consistency-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+}
+
+body .home-page .consistency-header h3 {
+  flex: 1 1 280px;
+  min-width: 0;
+  margin: 0;
+  color: #fff;
+  font-family: var(--home-display);
+  font-size: clamp(32px, 3.25vw, 48px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+body .home-page .streak {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border: 1px solid var(--da-hairline-dark, #3a3a3f);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body .home-page .heatmap {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(22, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(2px, 0.28vw, 4px);
+  margin: clamp(32px, 5svh, 46px) 0 18px;
+}
+
+body .home-page .heatmap-column {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: repeat(7, auto);
+  gap: clamp(2px, 0.35vw, 4px);
+}
+
+body .home-page .heat-cell {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--da-hairline-dark, #3a3a3f);
+  border-radius: 2px;
+  background: #0a0a0a;
+  box-shadow: none;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+body .home-page .heat-cell:hover {
+  z-index: 1;
+  transform: scale(1.18);
+  border-color: #fff;
+}
+
+body .home-page .heat-cell.low,
+body .home-page .legend-box.low {
+  background: #3a3a3f;
+}
+
+body .home-page .heat-cell.medium,
+body .home-page .legend-box.medium {
+  background: #6f6f74;
+}
+
+body .home-page .heat-cell.high,
+body .home-page .legend-box.high {
+  background: #a8a8ad;
+}
+
+body .home-page .heat-cell.max,
+body .home-page .legend-box.max {
+  background: #fff;
+}
+
+body .home-page .heatmap-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  text-transform: none;
+}
+
+body .home-page .legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body .home-page .legend-box {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
-  background: #615cf6;
-  box-shadow: 0 0 10px rgba(95, 92, 246, 0.8);
+  border: 1px solid var(--da-hairline-dark, #3a3a3f);
+  border-radius: 2px;
+  background: #0a0a0a;
 }
 
-.motivation-label {
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+body .home-page .consistency-card .feature-underline-btn {
+  align-self: flex-start;
+  margin-top: 26px;
+}
+
+/* =========================
+   MOTIVATION
+========================= */
+
+body .home-page .motivation-quote {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  color: #fff;
+  font-family: var(--home-display);
+  font-size: clamp(34px, 3.5vw, 52px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: 0.025em;
   text-transform: uppercase;
-  color: #94a3b8;
+  overflow-wrap: break-word;
 }
 
-/* =========================
-   QUOTE
-========================= */
-
-.motivation-quote {
-  margin: 1.5rem 0;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  font-weight: 500;
-  color: #f8fafc;
-}
-
-/* =========================
-   FOOTER
-========================= */
-
-.motivation-footer {
-  display: flex;
+body .home-page .motivation-footer {
+  width: auto;
+  display: inline-flex;
+  align-self: flex-end;
   justify-content: flex-end;
-  font-size: 0.8rem;
-  color: #8b8bfa;
+  margin-top: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* =========================
-   MOBILE
+   DEVELOPER PULSE
 ========================= */
 
-@media (max-width: 768px) {
-  .motivation-card {
-    min-height: 180px;
-    padding: 1.2rem;
-  }
-
-  .motivation-quote {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
-}
-
-
-/* =========================
-   PULSE CARD
-========================= */
-
-.pulse-card {
-  width: 340px;
-  height: 260px;
-  padding: 1.5rem;
-  border-radius: 24px;
+body .home-page .pulse-card {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(14, 14, 20, 0.96),
-      rgba(28, 28, 38, 0.94)
-    );
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.pulse-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(92, 92, 246, 0.35);
-}
-
-/* =========================
-   TOP
-========================= */
-
-.pulse-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.pulse-label {
-  font-size: 0.78rem;
-
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  color: #94a3b8;
-}
-
-.pulse-live {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-
-  font-size: 0.78rem;
-
-  color: #8f8bfa;
-}
-
-.pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #665cf6;
-  animation: pulseGlow 1.8s infinite;
-}
-
-/* =========================
-   STATS
-========================= */
-
-.pulse-stats {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.pulse-stat h2 {
-  font-size: 1.4rem;
-  color: #f8fafc;
-}
-
-.pulse-stat span {
-  font-size: 0.72rem;
-  color: #94a3b8;
-}
-
-
-/* =========================
-   FOOTER
-========================= */
-
-.pulse-footer {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #cbd5e1;
-}
-
-
-.inner {
-  min-height: 112px;
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(2, 6, 23, 0.56);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.inner p {
-  margin: 0 0 4px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 20px;
-}
-
-.inner h2 {
+  justify-content: center;
   margin: 0;
-  color: #ffffff;
-  font-size: 26px;
+  padding: 96px max(32px, calc((100vw - 1200px) / 2));
+  border: 0;
+  border-top: 1px solid var(--da-hairline-dark, #3a3a3f);
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+  overflow-x: hidden;
 }
 
-.quote {
-  line-height: 1.5;
+body .home-page .pulse-top,
+body .home-page .pulse-stats,
+body .home-page .pulse-footer {
+  width: min(100%, 1200px);
+  margin-right: auto;
+  margin-left: auto;
 }
 
-.new-btn {
+body .home-page .pulse-label {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .home-page .pulse-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 42px;
+  margin-bottom: 42px;
+  border: 1px solid var(--da-hairline-dark, #3a3a3f);
+  background: var(--da-hairline-dark, #3a3a3f);
+}
+
+body .home-page .pulse-stat {
+  min-width: 0;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px;
+  background: #000;
+}
+
+body .home-page .pulse-stat h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--home-display);
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1;
+}
+
+body .home-page .pulse-stat span,
+body .home-page .pulse-footer {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+body .home-page .pulse-stat span {
   margin-top: 12px;
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: transparent;
-  color: #f8fafc;
-  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.new-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+body .home-page .pulse-footer {
+  font-size: 15px;
+  line-height: 1.65;
 }
 
-@media (max-width: 850px) {
-  .hero {
-    margin-top: 90px;
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1100px) {
+  body .home-page .hero::before {
+    background-position: 90% 48%;
+    background-size: min(55vw, 610px) auto;
+    opacity: 0.72;
   }
 
-  .cards {
-    gap: 20px;
-    margin-top: 90px;
+  body .home-page .consistency-header h3 {
+    font-size: clamp(30px, 4vw, 42px);
+  }
+
+  body .home-page .motivation-quote {
+    font-size: clamp(31px, 4vw, 44px);
+  }
+}
+
+@media (max-width: 830px) {
+  body .home-page .hero {
+    min-height: 100svh;
+    justify-content: flex-end;
+    padding: 116px 22px 58px;
+  }
+
+  body .home-page .hero::before {
+    background-position: 72% 24%;
+    background-size: 94vw auto;
+    opacity: 0.24;
+  }
+
+  body .home-page .hero::after {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.14) 0%,
+      rgba(0, 0, 0, 0.42) 34%,
+      rgba(0, 0, 0, 0.96) 68%,
+      #000 100%
+    );
+  }
+
+  body .home-page .hero h1 {
+    width: 100%;
+    font-size: clamp(30px, 7.4vw, 48px);
+  }
+
+  body .home-page .hero-copy {
+    width: min(100%, 560px);
+  }
+
+  body .home-page .home-card-row {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 64px 20px;
+  }
+
+  body .home-page .consistency-card,
+  body .home-page .motivation-card {
+    min-height: 430px;
+    padding: 28px;
+  }
+
+  body .home-page .consistency-header h3 {
+    flex-basis: 220px;
+    font-size: clamp(30px, 8vw, 42px);
+  }
+
+  body .home-page .motivation-quote {
+    font-size: clamp(30px, 8vw, 42px);
+  }
+
+  body .home-page .pulse-card {
+    min-height: 0;
+    padding: 72px 20px;
+  }
+
+  body .home-page .pulse-stats {
+    grid-template-columns: 1fr;
+  }
+
+  body .home-page .pulse-stat {
+    min-height: 132px;
+  }
+}
+
+@media (max-width: 480px) {
+  body .home-page .hero {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  body .home-page .eyebrow {
+    font-size: 12px;
+  }
+
+  body .home-page .hero h1 {
+    font-size: clamp(26px, 7.1vw, 34px);
+  }
+
+  body .home-page .hero-copy {
+    font-size: 14px;
+  }
+
+  body .home-page .home-card-row {
+    padding: 54px 14px;
+  }
+
+  body .home-page .consistency-card,
+  body .home-page .motivation-card {
+    min-height: 390px;
+    padding: 22px;
+  }
+
+  body .home-page .consistency-header {
+    align-items: flex-start;
+  }
+
+  body .home-page .consistency-header h3 {
+    flex-basis: 100%;
+    font-size: clamp(29px, 9vw, 38px);
+  }
+
+  body .home-page .streak {
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+
+  body .home-page .heatmap {
+    gap: 2px;
+    margin: 28px 0 16px;
+  }
+
+  body .home-page .heatmap-column {
+    gap: 2px;
+  }
+
+  body .home-page .motivation-quote {
+    font-size: clamp(28px, 8.8vw, 38px);
+  }
+}
+
+@media (max-width: 380px) {
+  body .home-page .hero h1 {
+    font-size: 24px;
+    letter-spacing: 0.01em;
   }
 }

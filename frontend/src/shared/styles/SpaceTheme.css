@@ -47,7 +47,7 @@ body {
   letter-spacing: 0.32px;
 }
 
-body::before,
+body::before,  
 body::after {
   display: none !important;
 }
@@ -77,29 +77,29 @@ body::after {
   color: var(--da-ink);
 }
 
-button,
-input,
-textarea,
+button,  
+input,  
+textarea,  
 select {
   font-family: var(--da-body) !important;
 }
 
-button,
+button,  
 a {
   -webkit-tap-highlight-color: transparent;
 }
 
-button:focus-visible,
+button:focus-visible,  
 a:focus-visible {
   outline: 2px solid var(--da-on-primary) !important;
   outline-offset: 3px;
 }
 
-input:focus,
-input:focus-visible,
-textarea:focus,
-textarea:focus-visible,
-select:focus,
+input:focus,  
+input:focus-visible,  
+textarea:focus,  
+textarea:focus-visible,  
+select:focus,  
 select:focus-visible {
   outline: 0 !important;
   outline-offset: 0 !important;
@@ -107,11 +107,11 @@ select:focus-visible {
   border-color: rgba(255, 255, 255, 0.38) !important;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
+h1,  
+h2,  
+h3,  
+h4,  
+h5,  
 h6 {
   font-family: var(--da-display) !important;
   color: var(--da-on-primary) !important;
@@ -119,11 +119,11 @@ h6 {
   letter-spacing: 0.96px;
 }
 
-p,
-li,
-span,
-label,
-small,
+p,  
+li,  
+span,  
+label,  
+small,  
 blockquote {
   color: inherit;
 }
@@ -137,7 +137,7 @@ a {
    ROOT / PUBLIC SHELL
 ========================================================= */
 
-#root,
+#root,  
 .app {
   width: 100% !important;
   max-width: none !important;
@@ -147,7 +147,7 @@ a {
   background: var(--da-canvas-night) !important;
 }
 
-.page,
+.page,  
 .placeholder-page {
   min-height: 100vh;
   padding: 160px 32px 96px !important;
@@ -201,7 +201,7 @@ body .header::after {
   background: var(--da-hairline-dark);
 }
 
-body .header .logo,
+body .header .logo,  
 body .header .logo-accent {
   color: var(--da-on-primary) !important;
   font-family: var(--da-display) !important;
@@ -216,14 +216,14 @@ body .header .logo {
   padding: 10px 0 !important;
 }
 
-body .header .nav-links,
+body .header .nav-links,  
 body .header .auth-buttons {
   align-items: center !important;
   gap: 6px !important;
 }
 
-body .header .nav-links button,
-body .header .auth-buttons button,
+body .header .nav-links button,  
+body .header .auth-buttons button,  
 body .header .auth-btn {
   min-height: 42px !important;
   padding: 12px 16px !important;
@@ -240,20 +240,20 @@ body .header .auth-btn {
   transform: none !important;
 }
 
-body .header .nav-links button:hover,
-body .header .nav-links button.active-nav,
+body .header .nav-links button:hover,  
+body .header .nav-links button.active-nav,  
 body .header .auth-buttons button:hover {
   border-color: var(--da-on-primary) !important;
   background: var(--da-canvas-night) !important;
   color: var(--da-on-primary) !important;
 }
 
-body .header .auth-buttons .auth-btn,
+body .header .auth-buttons .auth-btn,  
 body .header .auth-buttons .signup-btn {
   border-color: var(--da-on-primary) !important;
 }
 
-body .header .signup-btn:hover,
+body .header .signup-btn:hover,  
 body .header .auth-btn:hover {
   background: var(--da-on-primary) !important;
   color: var(--da-ink) !important;
@@ -272,7 +272,7 @@ body .header .menu-btn {
   box-shadow: none !important;
 }
 
-body .header .notification-btn,
+body .header .notification-btn,  
 body .header .profile-btn {
   border-color: var(--da-hairline-dark) !important;
   background: var(--da-canvas-night) !important;
@@ -300,15 +300,15 @@ body .mobile-drawer .drawer-header {
   border-bottom: 1px solid var(--da-hairline-dark) !important;
 }
 
-body .mobile-drawer .drawer-header h2,
-body .mobile-drawer .drawer-links button,
+body .mobile-drawer .drawer-header h2,  
+body .mobile-drawer .drawer-links button,  
 body .mobile-drawer .drawer-auth button {
   color: var(--da-on-primary) !important;
   text-transform: uppercase;
   letter-spacing: 1.17px;
 }
 
-body .mobile-drawer .drawer-links button,
+body .mobile-drawer .drawer-links button,  
 body .mobile-drawer .drawer-auth button {
   border: 1px solid var(--da-hairline-dark) !important;
   border-radius: var(--da-pill) !important;
@@ -316,78 +316,22 @@ body .mobile-drawer .drawer-auth button {
   box-shadow: none !important;
 }
 
-body .mobile-drawer .drawer-links button:hover,
-body .mobile-drawer .drawer-links button.active-nav,
+body .mobile-drawer .drawer-links button:hover,  
+body .mobile-drawer .drawer-links button.active-nav,  
 body .mobile-drawer .drawer-auth button:hover {
   border-color: var(--da-on-primary) !important;
   background: var(--da-on-primary) !important;
   color: var(--da-ink) !important;
 }
 
-/* =========================================================
-   MARKETING HOME — FULL-BLEED BANDS
-========================================================= */
-
-body .home-page {
-  width: 100% !important;
-  min-height: 100vh !important;
-  margin: 0 !important;
-  background: var(--da-canvas-night) !important;
-}
-
-body .home-page .hero {
-  position: relative !important;
-  isolation: isolate;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 100svh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: flex-end !important;
-  margin: 0 !important;
-  padding: 148px max(32px, calc((100vw - 1200px) / 2)) 84px !important;
-  overflow: hidden;
-  text-align: left !important;
-  background: #000 !important;
-}
-
-body .home-page .hero::before {
-  content: "";
-  position: absolute;
-  z-index: -2;
-  inset: 0;
-  background-image: url("/image.png");
-  background-position: 80% 50%;
-  background-repeat: no-repeat;
-  background-size: min(62vw, 920px) auto;
-  filter: grayscale(1) contrast(1.35) brightness(0.45);
-  opacity: 0.78;
-}
-
-body .home-page .hero::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.32);
-}
-
-body .home-page .hero > div:first-child {
-  display: none !important;
-}
-
-body .home-page .eyebrow,
-body .about-page .eyebrow,
-body .updates-page .eyebrow,
-body .support-page .eyebrow,
-body .dashboard-label,
-body .dashboard h3,
-body .profile-page h3,
-body .blog-tag,
-body .timeline-meta,
-body .pulse-label,
-body .motivation-label {
+body .about-page .eyebrow,  
+body .updates-page .eyebrow,  
+body .support-page .eyebrow,  
+body .dashboard-label,  
+body .dashboard h3,  
+body .profile-page h3,  
+body .blog-tag,  
+body .timeline-meta{
   display: inline-flex !important;
   align-items: center;
   margin: 0 0 18px !important;
@@ -404,51 +348,20 @@ body .motivation-label {
   text-transform: uppercase !important;
 }
 
-body .home-page .hero h1 {
-  max-width: 960px !important;
-  margin: 0 !important;
-  color: var(--da-on-primary) !important;
-  font-family: var(--da-display) !important;
-  font-size: clamp(56px, 7vw, 80px) !important;
-  font-weight: 700 !important;
-  line-height: 0.95 !important;
-  letter-spacing: 1.6px !important;
-  text-transform: uppercase !important;
-}
-
-body .home-page .typing-line {
-  color: var(--da-on-primary) !important;
-}
-
-body .home-page .hero-copy {
-  max-width: 660px !important;
-  margin: 24px 0 0 !important;
-  color: var(--da-on-primary-mute) !important;
-  font-size: 16px !important;
-  line-height: 1.7 !important;
-  letter-spacing: 0.32px !important;
-}
-
-body .home-page .hero-actions {
-  justify-content: flex-start !important;
-  margin-top: 32px !important;
-}
-
-body .cta-btn,
-body .support-btn,
-body .auth-submit,
-body .social-btn,
-body .publish-btn,
-body .cancel-btn,
-body .new-post-btn,
-body .drafts-btn,
-body .draft-edit-btn,
-body .draft-delete-btn,
-body .save-btn,
-body .save-log-btn,
-body .pagination button,
-body .year-selector button,
-body .contact-actions button,
+body .support-btn,  
+body .auth-submit,  
+body .social-btn,  
+body .publish-btn,  
+body .cancel-btn,  
+body .new-post-btn,  
+body .drafts-btn,  
+body .draft-edit-btn,  
+body .draft-delete-btn,  
+body .save-btn,  
+body .save-log-btn,  
+body .pagination button,  
+body .year-selector button,  
+body .contact-actions button,  
 body .blog-actions button {
   min-height: 50px !important;
   padding: 17px 24px !important;
@@ -467,21 +380,20 @@ body .blog-actions button {
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease !important;
 }
 
-body .cta-btn:hover,
-body .support-btn:hover,
-body .auth-submit:hover,
-body .social-btn:hover,
-body .publish-btn:hover,
-body .cancel-btn:hover,
-body .new-post-btn:hover,
-body .drafts-btn:hover,
-body .draft-edit-btn:hover,
-body .draft-delete-btn:hover,
-body .save-btn:hover,
-body .save-log-btn:hover,
-body .pagination button:hover,
-body .year-selector button:hover,
-body .contact-actions button:hover,
+body .support-btn:hover,  
+body .auth-submit:hover,  
+body .social-btn:hover,  
+body .publish-btn:hover,  
+body .cancel-btn:hover,  
+body .new-post-btn:hover,  
+body .drafts-btn:hover,  
+body .draft-edit-btn:hover,  
+body .draft-delete-btn:hover,  
+body .save-btn:hover,  
+body .save-log-btn:hover,  
+body .pagination button:hover,  
+body .year-selector button:hover,  
+body .contact-actions button:hover,  
 body .blog-actions button:hover {
   border-color: var(--da-on-primary) !important;
   background: var(--da-on-primary) !important;
@@ -490,157 +402,7 @@ body .blog-actions button:hover {
   transform: none !important;
 }
 
-body .cta-btn.secondary {
-  display: none !important;
-}
-
-body .home-page .cards {
-  width: 100% !important;
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-body .home-page .cards > article,
-body .home-page .cards > .card {
-  position: relative !important;
-  isolation: isolate;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: min(820px, 92svh) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  padding: 96px max(32px, calc((100vw - 1200px) / 2)) !important;
-  border: 0 !important;
-  border-top: 1px solid var(--da-hairline-dark) !important;
-  border-radius: 0 !important;
-  background: var(--da-canvas-night-soft) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  overflow: hidden !important;
-  transform: none !important;
-}
-
-body .home-page .cards > article:nth-child(even) {
-  background: var(--da-canvas-night) !important;
-}
-
-body .home-page .consistency-card,
-body .home-page .motivation-card,
-body .home-page .pulse-card {
-  width: min(100%, 1200px) !important;
-  max-width: 1200px !important;
-  height: auto !important;
-  min-height: 520px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  padding: 48px !important;
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-radius-xs) !important;
-  background: var(--da-canvas-night) !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-  transform: none !important;
-}
-
-body .home-page .consistency-card:hover,
-body .home-page .motivation-card:hover,
-body .home-page .pulse-card:hover {
-  border-color: var(--da-on-primary) !important;
-  transform: none !important;
-}
-
-body .home-page .consistency-header h3,
-body .home-page .pulse-stat h2 {
-  margin: 0 !important;
-  color: var(--da-on-primary) !important;
-  font-family: var(--da-display) !important;
-  font-size: clamp(38px, 5vw, 60px) !important;
-  line-height: 1.05 !important;
-  letter-spacing: 1.2px !important;
-  text-transform: uppercase !important;
-}
-
-body .home-page .streak,
-body .home-page .pulse-live,
-body .home-page .motivation-footer {
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-pill) !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  font-size: 12px !important;
-  letter-spacing: 0.96px !important;
-  text-transform: uppercase;
-}
-
-body .home-page .streak,
-body .home-page .pulse-live {
-  padding: 10px 14px !important;
-}
-
-body .home-page .motivation-quote {
-  max-width: 900px;
-  margin: 48px 0 !important;
-  color: var(--da-on-primary) !important;
-  font-family: var(--da-display) !important;
-  font-size: clamp(40px, 5vw, 60px) !important;
-  font-weight: 700 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 1.2px !important;
-  text-transform: uppercase;
-}
-
-body .home-page .motivation-dot,
-body .home-page .pulse-dot {
-  background: var(--da-on-primary) !important;
-  box-shadow: none !important;
-}
-
-body .home-page .pulse-stats {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 1px !important;
-  margin: 48px 0 !important;
-  border: 1px solid var(--da-hairline-dark) !important;
-  background: var(--da-hairline-dark) !important;
-}
-
-body .home-page .pulse-stat {
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 24px !important;
-  background: var(--da-canvas-night) !important;
-}
-
-body .home-page .pulse-stat span,
-body .home-page .pulse-footer,
-body .home-page .motivation-footer,
-body .home-page .heatmap-footer {
-  color: var(--da-on-primary-mute) !important;
-}
-
-body .home-page .heatmap {
-  width: 100%;
-  justify-content: space-between;
-  gap: 8px !important;
-  margin: 52px 0 !important;
-}
-
-body .home-page .heatmap-column {
-  flex: 1;
-  gap: 8px !important;
-}
-
-body .home-page .heat-cell,
-body .legend-box,
-body .heat-cell-dashboard,
+body .heat-cell-dashboard,  
 body .profile-heat-cell {
   border: 1px solid var(--da-hairline-dark) !important;
   border-radius: 2px !important;
@@ -648,41 +410,27 @@ body .profile-heat-cell {
   box-shadow: none !important;
 }
 
-body .home-page .heat-cell {
-  width: 100% !important;
-  height: 14px !important;
-}
-
-body .heat-cell.low,
-body .heat-cell-dashboard.low,
-body .profile-heat-cell.low,
-body .legend-box.low {
+body .heat-cell-dashboard.low,  
+body .profile-heat-cell.low{
   background: #3a3a3f !important;
 }
 
-body .heat-cell.medium,
-body .heat-cell-dashboard.medium,
-body .profile-heat-cell.medium,
-body .legend-box.medium {
+body .heat-cell-dashboard.medium,  
+body .profile-heat-cell.medium{
   background: #6f6f74 !important;
 }
 
-body .heat-cell.high,
-body .heat-cell-dashboard.high,
-body .profile-heat-cell.high,
-body .legend-box.high {
+body .heat-cell-dashboard.high,  
+body .profile-heat-cell.high{
   background: #b8b8bd !important;
 }
 
-body .heat-cell.max,
-body .heat-cell-dashboard.max,
-body .profile-heat-cell.max,
-body .legend-box.max {
+body .heat-cell-dashboard.max,  
+body .profile-heat-cell.max{
   background: var(--da-on-primary) !important;
 }
 
-body .heat-cell:hover,
-body .heat-cell-dashboard:hover,
+body .heat-cell-dashboard:hover,  
 body .profile-heat-cell:hover {
   transform: none !important;
   box-shadow: none !important;
@@ -694,10 +442,10 @@ body .profile-heat-cell:hover {
    PUBLIC CONTENT PAGES
 ========================================================= */
 
-body .about-page,
-body .updates-page,
-body .support-page,
-body .drafts-page,
+body .about-page,  
+body .updates-page,  
+body .support-page,  
+body .drafts-page,  
 body .blog-page {
   width: 100% !important;
   min-height: 100vh !important;
@@ -707,11 +455,11 @@ body .blog-page {
   color: var(--da-on-primary) !important;
 }
 
-body .about-wrap,
-body .updates-page > *,
-body .support-wrap,
-body .drafts-wrap,
-body .blog-wrap,
+body .about-wrap,  
+body .updates-page > *,  
+body .support-wrap,  
+body .drafts-wrap,  
+body .blog-wrap,  
 body .blog-feed {
   width: min(100%, 1200px) !important;
   max-width: 1200px !important;
@@ -719,11 +467,11 @@ body .blog-feed {
   margin-left: auto !important;
 }
 
-body .about-hero,
-body .hero-updates,
-body .support-header,
-body .drafts-header,
-body .blog-header,
+body .about-hero,  
+body .hero-updates,  
+body .support-header,  
+body .drafts-header,  
+body .blog-header,  
 body .blog-top {
   margin: 0 0 72px !important;
   padding: 0 0 48px !important;
@@ -732,13 +480,13 @@ body .blog-top {
   text-align: left !important;
 }
 
-body .about-hero h1,
-body .hero-updates h1,
-body .support-header h1,
-body .drafts-header h1,
-body .blog-header h1,
-body .blog-top h1,
-body .profile-header h1,
+body .about-hero h1,  
+body .hero-updates h1,  
+body .support-header h1,  
+body .drafts-header h1,  
+body .blog-header h1,  
+body .blog-top h1,  
+body .profile-header h1,  
 body .dashboard-hero h1 {
   max-width: 1000px;
   margin: 0 0 24px !important;
@@ -751,12 +499,12 @@ body .dashboard-hero h1 {
   text-transform: uppercase !important;
 }
 
-body .about-hero p,
-body .hero-updates p,
-body .support-header p,
-body .drafts-header p,
-body .blog-header p,
-body .dashboard-subtitle,
+body .about-hero p,  
+body .hero-updates p,  
+body .support-header p,  
+body .drafts-header p,  
+body .blog-header p,  
+body .dashboard-subtitle,  
 body .profile-info p {
   max-width: 760px !important;
   color: var(--da-on-primary-mute) !important;
@@ -803,11 +551,11 @@ body .about-feature .icon {
   box-shadow: none !important;
 }
 
-body .about-feature h3,
-body .support-banner h3,
-body .faq-question,
-body .timeline-card .card-title,
-body .draft-card h2,
+body .about-feature h3,  
+body .support-banner h3,  
+body .faq-question,  
+body .timeline-card .card-title,  
+body .draft-card h2,  
 body .blog-post h2 {
   margin: 0 0 16px !important;
   color: var(--da-on-primary) !important;
@@ -818,17 +566,17 @@ body .blog-post h2 {
   text-transform: uppercase !important;
 }
 
-body .about-feature p,
-body .support-banner p,
-body .faq-content,
-body .timeline-card .card-summary,
-body .draft-card p,
+body .about-feature p,  
+body .support-banner p,  
+body .faq-content,  
+body .timeline-card .card-summary,  
+body .draft-card p,  
 body .blog-post p {
   color: var(--da-on-primary-mute) !important;
   line-height: 1.7 !important;
 }
 
-body .support-banner,
+body .support-banner,  
 body .contact-box {
   padding: 48px !important;
   border: 1px solid var(--da-hairline-dark) !important;
@@ -866,8 +614,8 @@ body .faq-icon {
 }
 
 /* Updates timeline */
-body .updates-timeline,
-body .timeline-item,
+body .updates-timeline,  
+body .timeline-item,  
 body .timeline-card {
   background: transparent !important;
 }
@@ -876,7 +624,7 @@ body .timeline-track {
   background: var(--da-hairline-dark) !important;
 }
 
-body .timeline-dot,
+body .timeline-dot,  
 body .timeline-pulse {
   border-color: var(--da-on-primary) !important;
   background: var(--da-canvas-night) !important;
@@ -890,15 +638,15 @@ body .timeline-card {
   transform: none !important;
 }
 
-body .timeline-card:hover,
+body .timeline-card:hover,  
 body .timeline-item.expanded .timeline-card {
   border-color: var(--da-on-primary) !important;
   box-shadow: none !important;
   transform: none !important;
 }
 
-body .timeline-tag,
-body .meta-latest,
+body .timeline-tag,  
+body .meta-latest,  
 body .specs-badge {
   border: 1px solid var(--da-hairline-dark) !important;
   border-radius: var(--da-pill) !important;
@@ -908,8 +656,8 @@ body .specs-badge {
   text-transform: uppercase;
 }
 
-body .details-divider,
-body .specs-block,
+body .details-divider,  
+body .specs-block,  
 body .specs-item {
   border-color: var(--da-hairline-dark) !important;
 }
@@ -921,15 +669,15 @@ body .media-asset {
 }
 
 /* Blog / drafts */
-body .drafts-list,
+body .drafts-list,  
 body .blog-feed {
   display: grid !important;
   gap: 16px !important;
 }
 
-body .draft-card,
-body .blog-post,
-body .blog-editor,
+body .draft-card,  
+body .blog-post,  
+body .blog-editor,  
 body .drafts-empty {
   padding: 32px !important;
   border: 1px solid var(--da-hairline-dark) !important;
@@ -939,15 +687,15 @@ body .drafts-empty {
   transform: none !important;
 }
 
-body .draft-card:hover,
+body .draft-card:hover,  
 body .blog-post:hover {
   border-color: var(--da-on-primary) !important;
   transform: none !important;
 }
 
-body .blog-editor input,
-body .blog-editor textarea,
-body .contact-box input,
+body .blog-editor input,  
+body .blog-editor textarea,  
+body .contact-box input,  
 body .contact-box textarea {
   width: 100% !important;
   min-height: 48px !important;
@@ -959,7 +707,7 @@ body .contact-box textarea {
   color: var(--da-ink) !important;
 }
 
-body .blog-editor textarea,
+body .blog-editor textarea,  
 body .contact-box textarea {
   min-height: 280px !important;
   resize: vertical;
@@ -998,7 +746,7 @@ body .sidebar {
   box-shadow: none !important;
 }
 
-body .sidebar-logo,
+body .sidebar-logo,  
 body .sidebar-logo span {
   color: var(--da-on-primary) !important;
   font-family: var(--da-display) !important;
@@ -1012,7 +760,7 @@ body .sidebar-links {
   gap: 8px !important;
 }
 
-body .sidebar-links button,
+body .sidebar-links button,  
 body .sidebar-link {
   width: 100% !important;
   min-height: 48px !important;
@@ -1030,8 +778,8 @@ body .sidebar-link {
   transform: none !important;
 }
 
-body .sidebar-links button:hover,
-body .sidebar-link:hover,
+body .sidebar-links button:hover,  
+body .sidebar-link:hover,  
 body .sidebar-link.active {
   border-color: var(--da-on-primary) !important;
   background: var(--da-on-primary) !important;
@@ -1062,7 +810,7 @@ body .topbar {
   backdrop-filter: none !important;
 }
 
-body .topbar .notification-btn,
+body .topbar .notification-btn,  
 body .topbar .profile-btn {
   min-height: 46px !important;
   border: 1px solid var(--da-hairline-dark) !important;
@@ -1083,7 +831,7 @@ body .topbar .profile-btn {
   letter-spacing: 0.96px;
 }
 
-body .topbar .profile-btn:hover,
+body .topbar .profile-btn:hover,  
 body .topbar .notification-btn:hover {
   border-color: var(--da-on-primary) !important;
 }
@@ -1097,7 +845,7 @@ body .topbar .profile-btn img {
    DASHBOARD / PROFILE
 ========================================================= */
 
-body .dashboard,
+body .dashboard,  
 body .profile-page {
   width: 100% !important;
   min-height: calc(100vh - 76px) !important;
@@ -1107,14 +855,14 @@ body .profile-page {
   color: var(--da-on-primary) !important;
 }
 
-body .dashboard > *,
+body .dashboard > *,  
 body .profile-page > * {
   width: min(100%, 1400px) !important;
   margin-right: auto !important;
   margin-left: auto !important;
 }
 
-body .dashboard-hero,
+body .dashboard-hero,  
 body .profile-header {
   min-height: 320px !important;
   display: flex !important;
@@ -1141,9 +889,9 @@ body .stats-grid {
   background: var(--da-hairline-dark) !important;
 }
 
-body .stat-card,
-body .dashboard-card,
-body .profile-card,
+body .stat-card,  
+body .dashboard-card,  
+body .profile-card,  
 body .profile-stat {
   border: 0 !important;
   border-radius: 0 !important;
@@ -1157,16 +905,16 @@ body .stat-card {
   padding: 28px !important;
 }
 
-body .stat-card:hover,
-body .dashboard-card:hover,
+body .stat-card:hover,  
+body .dashboard-card:hover,  
 body .profile-card:hover {
   background: var(--da-canvas-night-soft) !important;
   transform: none !important;
 }
 
-body .stat-card h2,
-body .profile-stat h2,
-body .consistency-stats span,
+body .stat-card h2,  
+body .profile-stat h2,  
+body .consistency-stats span,  
 body .contribution-summary strong {
   margin: 18px 0 10px !important;
   color: var(--da-on-primary) !important;
@@ -1177,12 +925,12 @@ body .contribution-summary strong {
   text-transform: uppercase !important;
 }
 
-body .stat-card p,
-body .profile-stat p,
-body .activity-list,
-body .leaderboard-row,
-body .contribution-summary p,
-body .consistency-stats p,
+body .stat-card p,  
+body .profile-stat p,  
+body .activity-list,  
+body .leaderboard-row,  
+body .contribution-summary p,  
+body .consistency-stats p,  
 body .next-rank-label {
   color: var(--da-on-primary-mute) !important;
 }
@@ -1203,7 +951,7 @@ body .rank-progress-fill {
   box-shadow: none !important;
 }
 
-body .dashboard-card,
+body .dashboard-card,  
 body .profile-card {
   margin-bottom: 32px !important;
   padding: 40px !important;
@@ -1211,24 +959,24 @@ body .profile-card {
   border-radius: var(--da-radius-xs) !important;
 }
 
-body .dashboard-bottom-grid,
+body .dashboard-bottom-grid,  
 body .profile-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 32px !important;
 }
 
-body .dashboard-card .card-header,
-body .heatmap-title-row,
+body .dashboard-card .card-header,  
+body .heatmap-title-row,  
 body .profile-heatmap-header {
   padding-bottom: 20px !important;
   border-bottom: 1px solid var(--da-hairline-dark) !important;
 }
 
-body .dashboard-card .card-header h2,
-body .consistency-header h2,
-body .heatmap-title-row h3,
-body .profile-card h2,
+body .dashboard-card .card-header h2,  
+body .consistency-header h2,  
+body .heatmap-title-row h3,  
+body .profile-card h2,  
 body .profile-heatmap-header h2 {
   color: var(--da-on-primary) !important;
   font-family: var(--da-display) !important;
@@ -1238,7 +986,7 @@ body .profile-heatmap-header h2 {
   text-transform: uppercase !important;
 }
 
-body .activity-list li,
+body .activity-list li,  
 body .leaderboard-row {
   padding: 18px 0 !important;
   border-bottom: 1px solid var(--da-hairline-dark) !important;
@@ -1254,17 +1002,17 @@ body .leaderboard-row.active-user span {
   color: var(--da-ink) !important;
 }
 
-body .dev-heatmap-wrapper,
+body .dev-heatmap-wrapper,  
 body .profile-heatmap-wrapper {
   overflow-x: auto !important;
 }
 
-body .heatmap-dashboard-inside,
+body .heatmap-dashboard-inside,  
 body .profile-heatmap-grid {
   gap: 4px !important;
 }
 
-body .heat-cell-dashboard,
+body .heat-cell-dashboard,  
 body .profile-heat-cell {
   width: 12px !important;
   height: 12px !important;
@@ -1308,8 +1056,8 @@ body .draft-modal-backdrop {
   backdrop-filter: none !important;
 }
 
-body .draft-modal,
-body .profile-dropdown,
+body .draft-modal,  
+body .profile-dropdown,  
 body .notification-panel {
   border: 1px solid var(--da-hairline-dark) !important;
   border-radius: var(--da-radius-xs) !important;
@@ -1318,15 +1066,15 @@ body .notification-panel {
   color: var(--da-on-primary) !important;
 }
 
-body .draft-modal h2,
-body .profile-dropdown h3,
+body .draft-modal h2,  
+body .profile-dropdown h3,  
 body .notification-panel h3 {
   color: var(--da-on-primary) !important;
   text-transform: uppercase;
   letter-spacing: 0.96px;
 }
 
-body .draft-modal input,
+body .draft-modal input,  
 body .draft-modal textarea {
   width: 100% !important;
   min-height: 48px !important;
@@ -1338,7 +1086,7 @@ body .draft-modal textarea {
   box-shadow: none !important;
 }
 
-body .profile-dropdown button,
+body .profile-dropdown button,  
 body .notification-item {
   border: 0 !important;
   border-top: 1px solid var(--da-hairline-dark) !important;
@@ -1347,7 +1095,7 @@ body .notification-item {
   color: var(--da-on-primary) !important;
 }
 
-body .profile-dropdown button:hover,
+body .profile-dropdown button:hover,  
 body .notification-item:hover {
   background: var(--da-canvas-night-soft) !important;
 }
@@ -1360,7 +1108,7 @@ body .profile-dropdown .logout-btn {
    AUTH PAGES
 ========================================================= */
 
-body .auth-page,
+body .auth-page,  
 body .auth-wrap {
   width: 100% !important;
   min-height: 100svh !important;
@@ -1441,8 +1189,8 @@ body .auth-badge {
   letter-spacing: 0.96px;
 }
 
-body .auth-form-panel h1,
-body .auth-card h1,
+body .auth-form-panel h1,  
+body .auth-card h1,  
 body .auth-card h2 {
   margin: 16px 0 !important;
   background: none !important;
@@ -1455,23 +1203,23 @@ body .auth-card h2 {
   text-transform: uppercase !important;
 }
 
-body .auth-subtitle,
-body .auth-card .sub,
-body .tagline,
-body .auth-footer,
-body .auth-switch,
+body .auth-subtitle,  
+body .auth-card .sub,  
+body .tagline,  
+body .auth-footer,  
+body .auth-switch,  
 body .divider {
   color: var(--da-on-primary-mute) !important;
 }
 
-body .auth-form,
+body .auth-form,  
 body .auth-card {
   background: transparent !important;
 }
 
-body .input-group label,
-body .remember-me,
-body .terms-check,
+body .input-group label,  
+body .remember-me,  
+body .terms-check,  
 body .terms-wrap {
   color: var(--da-on-primary-mute) !important;
   font-size: 12px !important;
@@ -1479,14 +1227,14 @@ body .terms-wrap {
   text-transform: uppercase;
 }
 
-body .input-wrapper,
+body .input-wrapper,  
 body .password-wrap {
   background: transparent !important;
 }
 
-body .input-wrapper input,
-body .auth-input,
-body .auth-form input,
+body .input-wrapper input,  
+body .auth-input,  
+body .auth-form input,  
 body .auth-form textarea {
   width: 100% !important;
   min-height: 48px !important;
@@ -1499,36 +1247,36 @@ body .auth-form textarea {
   font-size: 16px !important;
 }
 
-body .input-wrapper input::placeholder,
-body .auth-input::placeholder,
-body .auth-form input::placeholder,
+body .input-wrapper input::placeholder,  
+body .auth-input::placeholder,  
+body .auth-form input::placeholder,  
 body .auth-form textarea::placeholder {
   color: var(--da-ink-mute) !important;
 }
 
-body .input-wrapper input:focus,
-body .auth-input:focus,
-body .auth-form input:focus,
+body .input-wrapper input:focus,  
+body .auth-input:focus,  
+body .auth-form input:focus,  
 body .auth-form textarea:focus {
   border-color: var(--da-ink) !important;
   background: var(--da-canvas-light) !important;
   box-shadow: 0 0 0 2px var(--da-on-primary) !important;
 }
 
-body .input-wrapper i,
-body .password-toggle,
-body .show-pass,
-body .forgot-link,
-body .forgot-wrap span,
-body .auth-footer button,
-body .auth-switch a,
-body .terms-check button,
+body .input-wrapper i,  
+body .password-toggle,  
+body .show-pass,  
+body .forgot-link,  
+body .forgot-wrap span,  
+body .auth-footer button,  
+body .auth-switch a,  
+body .terms-check button,  
 body .terms-wrap span {
   color: var(--da-on-primary) !important;
   text-shadow: none !important;
 }
 
-body .social-buttons,
+body .social-buttons,  
 body .social-btns {
   gap: 12px !important;
 }
@@ -1537,15 +1285,15 @@ body .social-btn {
   justify-content: center !important;
 }
 
-body .social-btn i,
-body .g-icon,
+body .social-btn i,  
+body .g-icon,  
 body .gh-icon {
   color: inherit !important;
 }
 
-body .divider::before,
-body .divider::after,
-body .auth-divider::before,
+body .divider::before,  
+body .divider::after,  
+body .auth-divider::before,  
 body .auth-divider::after {
   background: var(--da-hairline-dark) !important;
 }
@@ -1558,18 +1306,18 @@ body .auth-error {
   box-shadow: none !important;
 }
 
-body .password-strength,
+body .password-strength,  
 body .strength-label {
   color: var(--da-on-primary) !important;
 }
 
-body .strength-bar,
+body .strength-bar,  
 body .strength-bar > * {
   background: var(--da-on-primary) !important;
   box-shadow: none !important;
 }
 
-body .auth-wrap .blob,
+body .auth-wrap .blob,  
 body .logo-circle {
   display: none !important;
 }
@@ -1653,7 +1401,7 @@ body .site-footer-brand {
 body .site-footer-brand-dev { color: var(--da-brand-dev); }
 body .site-footer-brand-arena { color: var(--da-brand-arena); }
 
-body .site-footer-copy,
+body .site-footer-copy,  
 body .site-footer-legal {
   color: var(--da-on-primary-mute);
   font-size: 13px;
@@ -1691,7 +1439,6 @@ body .site-footer button {
 body .site-footer button:hover {
   border-bottom-color: var(--da-on-primary);
 }
-
 
 body .site-footer-legal-links {
   display: inline-flex;
@@ -1731,7 +1478,7 @@ body .site-footer .site-footer-legal-link:hover {
   color: var(--da-on-primary);
 }
 
-body .site-footer .site-footer-legal-link:hover::after,
+body .site-footer .site-footer-legal-link:hover::after,  
 body .site-footer .site-footer-legal-link:focus-visible::after {
   transform: scaleX(1);
 }
@@ -1755,7 +1502,7 @@ body .page-loader {
   background: var(--da-canvas-night) !important;
 }
 
-body .loader-title,
+body .loader-title,  
 body .loader-card {
   border: 1px solid var(--da-hairline-dark) !important;
   border-radius: var(--da-radius-xs) !important;
@@ -1763,7 +1510,7 @@ body .loader-card {
   box-shadow: none !important;
 }
 
-body .loader-title::after,
+body .loader-title::after,  
 body .loader-card::after {
   background: var(--da-hairline-dark) !important;
 }
@@ -1779,14 +1526,14 @@ body .loader-card::after {
 }
 
 @media (max-width: 960px) {
-  body .home-page .hero h1,
-  body .about-hero h1,
-  body .hero-updates h1,
-  body .support-header h1,
-  body .drafts-header h1,
-  body .blog-header h1,
-  body .blog-top h1,
-  body .profile-header h1,
+  
+  body .about-hero h1,  
+  body .hero-updates h1,  
+  body .support-header h1,  
+  body .drafts-header h1,  
+  body .blog-header h1,  
+  body .blog-top h1,  
+  body .profile-header h1,  
   body .dashboard-hero h1 {
     font-size: clamp(48px, 7vw, 60px) !important;
   }
@@ -1826,7 +1573,7 @@ body .loader-card::after {
     left: 20px;
   }
 
-  body .header .desktop-nav,
+  body .header .desktop-nav,  
   body .header .desktop-auth {
     display: none !important;
   }
@@ -1835,73 +1582,26 @@ body .loader-card::after {
     display: inline-flex !important;
   }
 
-  body .home-page .hero {
-    min-height: 100svh !important;
-    padding: 120px 24px 56px !important;
-  }
-
-  body .home-page .hero::before {
-    background-position: 100% 35%;
-    background-size: 120vw auto;
-    opacity: 0.5;
-  }
-
-  body .home-page .hero h1 {
-    font-size: clamp(40px, 12vw, 48px) !important;
-  }
-
-  body .home-page .cards > article,
-  body .home-page .cards > .card {
-    min-height: auto !important;
-    padding: 72px 24px !important;
-  }
-
-  body .home-page .consistency-card,
-  body .home-page .motivation-card,
-  body .home-page .pulse-card {
-    min-height: auto !important;
-    padding: 28px !important;
-  }
-
-  body .home-page .consistency-header {
-    align-items: flex-start !important;
-    flex-direction: column !important;
-    gap: 20px !important;
-  }
-
-  body .home-page .motivation-quote {
-    margin: 36px 0 !important;
-    font-size: 40px !important;
-  }
-
-  body .home-page .pulse-stats {
-    grid-template-columns: 1fr !important;
-  }
-
-  body .home-page .pulse-stat {
-    min-height: 130px;
-  }
-
-  body .about-page,
-  body .updates-page,
-  body .support-page,
-  body .drafts-page,
+  body .about-page,  
+  body .updates-page,  
+  body .support-page,  
+  body .drafts-page,  
   body .blog-page {
     padding: 120px 24px 72px !important;
   }
 
-  body .about-grid,
-  body .dashboard-bottom-grid,
+  body .about-grid,  
+  body .dashboard-bottom-grid,  
   body .profile-grid {
     grid-template-columns: 1fr !important;
   }
 
-  body .support-banner,
-  body .contact-box,
-  body .about-feature,
-  body .timeline-card,
-  body .draft-card,
-  body .blog-post,
+  body .support-banner,  
+  body .contact-box,  
+  body .about-feature,  
+  body .timeline-card,  
+  body .draft-card,  
+  body .blog-post,  
   body .blog-editor {
     padding: 28px !important;
   }
@@ -1930,7 +1630,7 @@ body .loader-card::after {
     overflow-x: auto;
   }
 
-  body .sidebar-links button,
+  body .sidebar-links button,  
   body .sidebar-link {
     width: auto !important;
     min-width: max-content !important;
@@ -1949,14 +1649,14 @@ body .loader-card::after {
     padding: 10px 20px !important;
   }
 
-  body .dashboard,
+  body .dashboard,  
   body .profile-page {
     padding: 32px 20px 72px !important;
   }
 
-  body .dashboard-hero,
-  body .profile-header,
-  body .dashboard-card,
+  body .dashboard-hero,  
+  body .profile-header,  
+  body .dashboard-card,  
   body .profile-card {
     padding: 28px !important;
   }
@@ -1978,7 +1678,7 @@ body .loader-card::after {
     grid-template-columns: 1fr !important;
   }
 
-  body .auth-page,
+  body .auth-page,  
   body .auth-wrap {
     padding: 96px 16px 32px !important;
   }
@@ -1991,7 +1691,7 @@ body .loader-card::after {
     display: none !important;
   }
 
-  body .auth-form-panel,
+  body .auth-form-panel,  
   body .auth-card {
     padding: 28px !important;
   }
@@ -2008,24 +1708,16 @@ body .loader-card::after {
 }
 
 @media (max-width: 599px) {
-  body .home-page .hero h1,
-  body .about-hero h1,
-  body .hero-updates h1,
-  body .support-header h1,
-  body .drafts-header h1,
-  body .blog-header h1,
-  body .blog-top h1,
-  body .profile-header h1,
+  
+  body .about-hero h1,  
+  body .hero-updates h1,  
+  body .support-header h1,  
+  body .drafts-header h1,  
+  body .blog-header h1,  
+  body .blog-top h1,  
+  body .profile-header h1,  
   body .dashboard-hero h1 {
     font-size: 40px !important;
-  }
-
-  body .home-page .heatmap {
-    gap: 4px !important;
-  }
-
-  body .home-page .heatmap-column {
-    gap: 4px !important;
   }
 
   body .topbar .profile-btn span {
@@ -2039,8 +1731,8 @@ body .loader-card::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
+  *,  
+  *::before,  
   *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
@@ -2050,10 +1742,10 @@ body .loader-card::after {
 }
 
 /* Native form controls keep their original functionality and compact geometry. */
-body .auth-form input[type="checkbox"],
-body .auth-form input[type="radio"],
-body .remember-me input,
-body .terms-check input,
+body .auth-form input[type="checkbox"],  
+body .auth-form input[type="radio"],  
+body .remember-me input,  
+body .terms-check input,  
 body .terms-wrap input {
   width: 16px !important;
   min-width: 16px !important;
@@ -2068,9 +1760,6 @@ body .terms-wrap input {
 }
 
 /* The hero visual is deliberately graded instead of covered by a gradient/scrim. */
-body .home-page .hero::after {
-  display: none !important;
-}
 
 body .site-footer a {
   width: fit-content;
@@ -2104,15 +1793,15 @@ body .auth-illustration svg {
   filter: grayscale(1) contrast(1.15) brightness(0.92);
 }
 
-body .auth-container,
-body .auth-form-panel,
+body .auth-container,  
+body .auth-form-panel,  
 body .auth-card {
   animation: none !important;
   opacity: 1 !important;
   transform: none !important;
 }
 
-body .pulse-dot,
+body .pulse-dot,  
 body .timeline-pulse {
   animation: none !important;
 }
@@ -2132,7 +1821,7 @@ body .header .auth-buttons {
 }
 
 /* Login and signup use a left-to-right underline instead of a pill/ellipse. */
-body .header .auth-buttons .auth-btn,
+body .header .auth-buttons .auth-btn,  
 body .header .auth-buttons .signup-btn {
   position: relative !important;
   min-height: 42px !important;
@@ -2144,7 +1833,7 @@ body .header .auth-buttons .signup-btn {
   overflow: visible !important;
 }
 
-body .header .auth-buttons .auth-btn::after,
+body .header .auth-buttons .auth-btn::after,  
 body .header .auth-buttons .signup-btn::after {
   content: "";
   position: absolute;
@@ -2158,9 +1847,9 @@ body .header .auth-buttons .signup-btn::after {
   transition: transform 220ms ease;
 }
 
-body .header .auth-buttons .auth-btn:hover,
-body .header .auth-buttons .auth-btn:focus-visible,
-body .header .auth-buttons .signup-btn:hover,
+body .header .auth-buttons .auth-btn:hover,  
+body .header .auth-buttons .auth-btn:focus-visible,  
+body .header .auth-buttons .signup-btn:hover,  
 body .header .auth-buttons .signup-btn:focus-visible {
   border: 0 !important;
   border-radius: 0 !important;
@@ -2170,15 +1859,15 @@ body .header .auth-buttons .signup-btn:focus-visible {
   transform: none !important;
 }
 
-body .header .auth-buttons .auth-btn:hover::after,
-body .header .auth-buttons .auth-btn:focus-visible::after,
-body .header .auth-buttons .signup-btn:hover::after,
+body .header .auth-buttons .auth-btn:hover::after,  
+body .header .auth-buttons .auth-btn:focus-visible::after,  
+body .header .auth-buttons .signup-btn:hover::after,  
 body .header .auth-buttons .signup-btn:focus-visible::after {
   transform: scaleX(1);
 }
 
 /* Auth routes are isolated full-screen views: no site chrome and no scrolling. */
-html:has(.app.auth-route),
+html:has(.app.auth-route),  
 body:has(.app.auth-route) {
   width: 100%;
   height: 100%;
@@ -2194,12 +1883,12 @@ body .app.auth-route {
   overflow: hidden !important;
 }
 
-body .app.auth-route > .header,
+body .app.auth-route > .header,  
 body .app.auth-route > .site-footer {
   display: none !important;
 }
 
-body .app.auth-route .auth-page,
+body .app.auth-route .auth-page,  
 body .app.auth-route .auth-wrap {
   width: 100% !important;
   height: 100dvh !important;
@@ -2240,12 +1929,12 @@ body .app.auth-route .input-group label {
   margin-bottom: 4px !important;
 }
 
-body .app.auth-route .input-wrapper input,
+body .app.auth-route .input-wrapper input,  
 body .app.auth-route .auth-input {
   min-height: 44px !important;
 }
 
-body .app.auth-route .auth-submit,
+body .app.auth-route .auth-submit,  
 body .app.auth-route .social-btn {
   min-height: 44px !important;
   height: 44px !important;
@@ -2299,7 +1988,7 @@ body .app.auth-route .terms-check {
     gap: 14px !important;
   }
 
-  body .header .auth-buttons .auth-btn,
+  body .header .auth-buttons .auth-btn,  
   body .header .auth-buttons .signup-btn {
     min-height: 38px !important;
     padding: 10px 0 !important;
@@ -2370,7 +2059,7 @@ body .app.auth-route .terms-check {
     font-size: 10px !important;
   }
 
-  body .app.auth-route .input-wrapper input,
+  body .app.auth-route .input-wrapper input,  
   body .app.auth-route .auth-input {
     min-height: 38px !important;
     height: 38px !important;
@@ -2417,7 +2106,7 @@ body .app.auth-route .terms-check {
 }
 
 @media (max-height: 700px) and (max-width: 830px) {
-  body .app.auth-route .brand,
+  body .app.auth-route .brand,  
   body .app.auth-route .auth-card .sub {
     display: none !important;
   }
@@ -2435,7 +2124,7 @@ body .app.auth-route .terms-check {
     margin: 5px 0 !important;
   }
 
-  body .app.auth-route .input-wrapper input,
+  body .app.auth-route .input-wrapper input,  
   body .app.auth-route .auth-input {
     min-height: 34px !important;
     height: 34px !important;
@@ -2447,107 +2136,11 @@ body .app.auth-route .terms-check {
   }
 }
 
-html.auth-view-active,
+html.auth-view-active,  
 body.auth-view-active {
   width: 100%;
   height: 100%;
   overflow: hidden !important;
-}
-
-/* =========================================================
-   APPROVED HOME + AUTH FOLLOW-UP REFINEMENTS
-========================================================= */
-
-/* Keep the animated headline's footprint stable while its text is deleted. */
-body .home-page .hero h1 {
-  width: 100% !important;
-  min-height: 0.95em !important;
-  display: flex !important;
-  align-items: flex-end !important;
-}
-
-body .home-page .typing-line {
-  width: 100%;
-  min-height: 0.95em;
-  display: block;
-}
-
-/* Match the landing auth links with a clean left-to-right underline. */
-body .home-page .hero .hero-underline-btn {
-  position: relative !important;
-  min-height: 42px !important;
-  padding: 12px 2px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  overflow: visible !important;
-}
-
-body .home-page .hero .hero-underline-btn::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 5px;
-  left: 0;
-  height: 1px;
-  background: var(--da-on-primary);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 220ms ease;
-}
-
-body .home-page .hero .hero-underline-btn:hover,
-body .home-page .hero .hero-underline-btn:focus-visible {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-body .home-page .hero .hero-underline-btn:hover::after,
-body .home-page .hero .hero-underline-btn:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* Consistency and Daily Motivation now share one full-width home band. */
-body .home-page .home-card-row {
-  width: 100% !important;
-  min-height: min(820px, 92svh) !important;
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  align-items: stretch !important;
-  gap: 24px !important;
-  margin: 0 !important;
-  padding: 96px max(32px, calc((100vw - 1200px) / 2)) !important;
-  border-top: 1px solid var(--da-hairline-dark) !important;
-  background: var(--da-canvas-night-soft) !important;
-}
-
-body .home-page .home-card-row > article,
-body .home-page .home-card-row > .card {
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  overflow: visible !important;
-  transform: none !important;
-}
-
-body .home-page .home-card-row .consistency-card,
-body .home-page .home-card-row .motivation-card {
-  width: 100% !important;
-  max-width: none !important;
-  height: 100% !important;
-  min-height: 560px !important;
 }
 
 /* Back control shared by desktop and mobile authentication views. */
@@ -2585,13 +2178,13 @@ body .auth-back-btn::after {
   transition: transform 220ms ease;
 }
 
-body .auth-back-btn:hover::after,
+body .auth-back-btn:hover::after,  
 body .auth-back-btn:focus-visible::after {
   transform: scaleX(1);
 }
 
 /* The auth canvas itself, not an inset card, occupies the complete viewport. */
-body .app.auth-route .auth-page,
+body .app.auth-route .auth-page,  
 body .app.auth-route .auth-wrap {
   width: 100vw !important;
   height: 100dvh !important;
@@ -2611,23 +2204,13 @@ body .app.auth-route .auth-container {
   border-radius: 0 !important;
 }
 
-body .app.auth-route .auth-illustration,
+body .app.auth-route .auth-illustration,  
 body .app.auth-route .auth-form-panel {
   height: 100% !important;
   min-height: 0 !important;
 }
 
 @media (max-width: 830px) {
-  body .home-page .home-card-row {
-    min-height: 0 !important;
-    grid-template-columns: 1fr !important;
-    padding: 64px 20px !important;
-  }
-
-  body .home-page .home-card-row .consistency-card,
-  body .home-page .home-card-row .motivation-card {
-    min-height: 420px !important;
-  }
 
   body .app.auth-route .auth-wrap {
     align-items: stretch !important;
@@ -2651,239 +2234,18 @@ body .app.auth-route .auth-form-panel {
   }
 }
 
-@media (max-width: 830px) {
-  body .home-page .hero h1,
-  body .home-page .typing-line {
-    height: 1.9em !important;
-    min-height: 1.9em !important;
-    overflow: hidden !important;
-  }
-}
-
-/* =========================================================
-   HOME VIEWPORT + CONSISTENCY REFINEMENTS
-========================================================= */
-
-/* Each primary landing band occupies a complete viewport on desktop. */
-body .home-page .hero,
-body .home-page .home-card-row,
-body .home-page .cards > .pulse-card {
-  min-height: 100svh !important;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
-}
-
-body .home-page .home-card-row {
-  box-sizing: border-box !important;
-  padding-top: clamp(86px, 10svh, 112px) !important;
-  padding-bottom: clamp(54px, 7svh, 84px) !important;
-}
-
-/* Explore Features uses the same clean underline interaction as the auth links. */
-body .home-page .consistency-card .feature-underline-btn {
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  align-self: flex-start !important;
-  min-height: 42px !important;
-  margin-top: 28px !important;
-  padding: 12px 2px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-  transform: none !important;
-}
-
-body .home-page .consistency-card .feature-underline-btn::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 5px;
-  left: 0;
-  height: 1px;
-  background: var(--da-on-primary);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 220ms ease;
-}
-
-body .home-page .consistency-card .feature-underline-btn:hover,
-body .home-page .consistency-card .feature-underline-btn:focus-visible {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-body .home-page .consistency-card .feature-underline-btn:hover::after,
-body .home-page .consistency-card .feature-underline-btn:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* Prevent the shared CTA hover rule from adding a white fill. */
-body .home-page .consistency-card .cta-btn.secondary.feature-underline-btn:hover,
-body .home-page .consistency-card .cta-btn.secondary.feature-underline-btn:focus-visible {
-  border: 0 !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-}
-
-/* Keep the streak badge compact and on one line at every desktop width. */
-body .home-page .streak {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  line-height: 1 !important;
-}
-
-/* The landing heatmap is a true 22-week grid of small square cells. */
-body .home-page .heatmap {
-  display: grid !important;
-  grid-template-columns: repeat(22, minmax(7px, 10px)) !important;
-  justify-content: space-between !important;
-  align-items: start !important;
-  column-gap: clamp(2px, 0.28vw, 5px) !important;
-  width: 100% !important;
-  margin: clamp(30px, 5svh, 48px) 0 !important;
-}
-
-body .home-page .heatmap-column {
-  width: auto !important;
-  min-width: 0 !important;
-  display: grid !important;
-  grid-template-rows: repeat(7, minmax(7px, 10px)) !important;
-  gap: clamp(3px, 0.42svh, 5px) !important;
-}
-
-body .home-page .heat-cell {
-  width: 16px !important;
-  height: auto !important;
-}
-
-/* Remove the inherited full-width bordered track; retain only the label. */
-body .home-page .motivation-footer {
-  width: auto !important;
-  align-self: flex-end !important;
-  display: inline-flex !important;
-  justify-content: flex-end !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  white-space: nowrap !important;
-}
-
-@media (min-width: 831px) and (max-height: 760px) {
-  body .home-page .home-card-row {
-    padding-top: 82px !important;
-    padding-bottom: 38px !important;
-  }
-
-  body .home-page .home-card-row .consistency-card,
-  body .home-page .home-card-row .motivation-card {
-    min-height: 0 !important;
-    height: calc(100svh - 120px) !important;
-    padding: 34px !important;
-  }
-
-  body .home-page .motivation-quote {
-    margin: 28px 0 !important;
-    font-size: clamp(34px, 4.6vw, 52px) !important;
-  }
-
-  body .home-page .heatmap {
-    margin: 24px 0 !important;
-  }
-}
-
-@media (max-width: 830px) {
-  body .home-page .home-card-row {
-    min-height: 100svh !important;
-    height: auto !important;
-  }
-
-  body .home-page .heatmap {
-    grid-template-columns: repeat(22, minmax(5px, 8px)) !important;
-    column-gap: 2px !important;
-  }
-
-  body .home-page .heatmap-column {
-    grid-template-rows: repeat(7, minmax(5px, 8px)) !important;
-    gap: 3px !important;
-  }
-
-  body .home-page .heat-cell {
-    width: clamp(5px, 1.55vw, 8px) !important;
-  }
-}
-
-@media (max-width: 430px) {
-  body .home-page .consistency-header {
-    align-items: flex-start !important;
-    gap: 14px !important;
-  }
-
-  body .home-page .streak {
-    padding: 8px 10px !important;
-    font-size: 10px !important;
-    letter-spacing: 0.65px !important;
-  }
-}
-
-@media (min-width: 831px) and (max-width: 1180px) {
-  body .home-page .home-card-row {
-    gap: 18px !important;
-    padding-right: 28px !important;
-    padding-left: 28px !important;
-  }
-
-  body .home-page .home-card-row .consistency-card,
-  body .home-page .home-card-row .motivation-card {
-    padding: 32px !important;
-  }
-
-  body .home-page .consistency-header h3 {
-    font-size: clamp(34px, 4.1vw, 44px) !important;
-  }
-
-  body .home-page .streak {
-    padding: 8px 10px !important;
-    font-size: 10px !important;
-    letter-spacing: 0.7px !important;
-  }
-
-  body .home-page .motivation-quote {
-    font-size: clamp(34px, 4.3vw, 48px) !important;
-  }
-}
-
-/* Modern browsers gently settle wheel/trackpad scrolling on each full-screen home band. */
-html:has(body .home-page) {
-  scroll-snap-type: y proximity;
-}
-
 /* Final form-focus rule: keep animated underlines, but never draw a white box around fields. */
-html body #root input:focus,
-html body #root input:focus-visible,
-html body #root textarea:focus,
-html body #root textarea:focus-visible,
-html body #root select:focus,
+html body #root input:focus,  
+html body #root input:focus-visible,  
+html body #root textarea:focus,  
+html body #root textarea:focus-visible,  
+html body #root select:focus,  
 html body #root select:focus-visible {
   outline: 0 !important;
   outline-offset: 0 !important;
   box-shadow: none !important;
   border-color: rgba(255, 255, 255, 0.38) !important;
 }
-
 
 /* Shared DevArena page-level back action. Widget navigation arrows (calendar/year controls) intentionally do not use this class. */
 body .dev-back-button {
@@ -2932,7 +2294,7 @@ body .dev-back-button::after {
   transition: transform 220ms ease !important;
 }
 
-body .dev-back-button:hover::after,
+body .dev-back-button:hover::after,  
 body .dev-back-button:focus-visible::after {
   transform: scaleX(1) !important;
 }

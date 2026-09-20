@@ -466,9 +466,11 @@
    ============================================================ */
 body .updates-page .updates-layout {
   display: grid !important;
-  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.38fr) !important;
+  /* A predictable left column prevents the large changelog title from
+     intruding into the release cards on wide desktop screens. */
+  grid-template-columns: 380px minmax(0, 1fr) !important;
   align-items: start !important;
-  gap: clamp(48px, 6vw, 96px) !important;
+  gap: clamp(40px, 4vw, 64px) !important;
 }
 
 body .updates-page .hero-updates {
@@ -482,12 +484,21 @@ body .updates-page .hero-updates {
 }
 
 body .updates-page .hero-updates h1 {
-  max-width: 540px;
+  width: 100%;
+  max-width: 100% !important;
+  margin-right: 0 !important;
   background: none !important;
   color: var(--da-on-primary) !important;
   -webkit-background-clip: border-box !important;
   background-clip: border-box !important;
   -webkit-text-fill-color: currentColor !important;
+  /* SpaceTheme intentionally uses a large public-page heading. The changelog
+     has a split layout, so cap it to the width of its own column. */
+  font-size: clamp(46px, 3.6vw, 64px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: 1px !important;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 body .updates-page .hero-updates .eyebrow,
@@ -599,7 +610,7 @@ body .updates-page .pagination .pagination-nav:disabled {
   opacity: 0.42;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1040px) {
   body .updates-page .updates-layout {
     grid-template-columns: 1fr !important;
     gap: 48px !important;
@@ -611,12 +622,21 @@ body .updates-page .pagination .pagination-nav:disabled {
     border-bottom: 1px solid var(--da-hairline-dark) !important;
   }
 
+  body .updates-page .hero-updates h1 {
+    max-width: 720px !important;
+    font-size: clamp(44px, 7vw, 60px) !important;
+  }
+
   body .updates-page .updates-scroll-window {
     height: 620px;
   }
 }
 
 @media (max-width: 640px) {
+  body .updates-page .hero-updates h1 {
+    font-size: clamp(38px, 12vw, 50px) !important;
+  }
+
   body .updates-page .updates-scroll-window {
     height: 570px;
     padding-right: 8px;
