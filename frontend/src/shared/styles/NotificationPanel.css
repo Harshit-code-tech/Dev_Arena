@@ -481,3 +481,39 @@
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* Keep the profile header/actions fixed while the notification list scrolls independently. */
+.profile-sidebar {
+  overflow: hidden;
+}
+
+.profile-sidebar-notifications {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.profile-sidebar-notification-list {
+  min-width: 0;
+}
+
+.profile-sidebar-notifications::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profile-sidebar-notifications::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-sidebar-notifications::-webkit-scrollbar-thumb {
+  border: 2px solid #050505;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.profile-sidebar-notifications::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.42);
+}
