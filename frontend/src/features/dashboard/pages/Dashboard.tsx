@@ -180,11 +180,22 @@ function Dashboard() {
         </div>
 
         <aside className="dashboard-leaderboard-pane" aria-labelledby="leaderboard-preview-title">
-          <div className="card-header">
-            <h2 id="leaderboard-preview-title">Leaderboard Preview</h2>
+          <div className="card-header dashboard-leaderboard-header">
+            <div>
+              <p className="dashboard-stat-label">Arena standings</p>
+              <h2 id="leaderboard-preview-title">Leaderboard Preview</h2>
+            </div>
           </div>
 
           <div className="leaderboard" aria-live="polite">
+            {leaderboardPreview.length > 0 && (
+              <div className="leaderboard-columns" aria-hidden="true">
+                <span>Rank</span>
+                <span>Player</span>
+                <span>Score</span>
+              </div>
+            )}
+
             {leaderboardPreview.map((entry) => (
               <div
                 className={`leaderboard-row${entry.isCurrentUser ? " active-user" : ""}`}
@@ -195,8 +206,13 @@ function Dashboard() {
                 <span data-private-value="true">{entry.competitionScore}</span>
               </div>
             ))}
+
             {leaderboardPreview.length === 0 && (
-              <p className="leaderboard-empty">Your live arena position will appear here.</p>
+              <div className="leaderboard-empty">
+                <span className="leaderboard-empty-mark" aria-hidden="true">#</span>
+                <strong>No ranking yet</strong>
+                <span>Your live arena position will appear here once you start earning season points.</span>
+              </div>
             )}
           </div>
         </aside>
