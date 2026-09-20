@@ -101,10 +101,6 @@ function Home() {
   return (
     <main className="home-page">
       <section className="hero">
-        <div>
-          <img src="/img.png" alt="DevArena logo" className="logo_da" />
-        </div>
-
         <p className="eyebrow">Developer growth platform</p>
 
         <h1>
@@ -129,8 +125,7 @@ function Home() {
       </section>
       <section className="cards" aria-label="DevArena highlights">
         <div className="home-card-row">
-          <article className="card">
-          <div className="consistency-card">
+          <article className="consistency-card">
             <div className="consistency-header">
               <h3>Consistency</h3>
               <span className="streak">22 week streak</span>
@@ -180,17 +175,16 @@ function Home() {
             >
               Explore features
             </button>
-          </div>
-        </article>
+          </article>
 
-        <article className="motivation-card">
-          <blockquote className="motivation-quote">
-            “{motivations[Math.floor(Math.random() * motivations.length)]}”
-          </blockquote>
+          <article className="motivation-card">
+            <blockquote className="motivation-quote">
+              “{motivations[Math.floor(Math.random() * motivations.length)]}”
+            </blockquote>
 
-          <div className="motivation-footer">
-            <span>Keep building</span>
-          </div>
+            <div className="motivation-footer">
+              <span>Keep building</span>
+            </div>
           </article>
         </div>
 

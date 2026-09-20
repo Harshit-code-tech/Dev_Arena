@@ -137,15 +137,58 @@ function requiredEnv(name: string) {
 }
 
 function frontendUrl() {
-  return (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+  return (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/$/, "");
+}
+
+function backendPublicUrl() {
+  const configured = process.env.BACKEND_PUBLIC_URL?.trim();
+  if (configured) return configured.replace(/\/$/, "");
+
+  // Backward-compatible fallback for deployments that already configured only
+  // the OAuth callback URL. New deployments should set BACKEND_PUBLIC_URL.
+  const configuredCallback = process.env.GITHUB_APP_CALLBACK_URL?.trim();
+  if (configuredCallback) {
+    try {
+      return new URL(configuredCallback).origin;
+    } catch {
+      // The explicit callback will still be surfaced below for a useful error.
+    }
+  }
+
+  return "http://localhost:4000";
+}
+
+function githubEndpointUrl(envName: "GITHUB_APP_CALLBACK_URL" | "GITHUB_APP_SETUP_URL" | "GITHUB_WEBHOOK_URL", path: string) {
+  const explicit = process.env[envName]?.trim();
+  return explicit || `${backendPublicUrl()}${path}`;
 }
 
 function callbackUrl() {
-  return process.env.GITHUB_APP_CALLBACK_URL || "http://localhost:4000/api/github/callback";
+  return githubEndpointUrl("GITHUB_APP_CALLBACK_URL", "/api/github/callback");
 }
 
 function setupUrl() {
-  return process.env.GITHUB_APP_SETUP_URL || "http://localhost:4000/api/github/setup";
+  return githubEndpointUrl("GITHUB_APP_SETUP_URL", "/api/github/setup");
+}
+
+function webhookUrl() {
+  return githubEndpointUrl("GITHUB_WEBHOOK_URL", "/api/github/webhook");
+}
+
+function assertProductionGitHubUrls() {
+  if (process.env.NODE_ENV !== "production") return;
+
+  for (const [label, value] of [["callback", callbackUrl()], ["setup", setupUrl()]] as const) {
+    let parsed: URL;
+    try {
+      parsed = new URL(value);
+    } catch {
+      throw githubError(`GitHub ${label} URL is invalid: ${value}`, 503);
+    }
+    if (parsed.protocol !== "https:" || parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+      throw githubError(`GitHub ${label} URL must use the deployed HTTPS backend in production. Current value: ${value}`, 503);
+    }
+  }
 }
 
 function installUrl() {
@@ -155,12 +198,16 @@ function installUrl() {
 
 function integrationConfigStatus() {
   const required = ["GITHUB_APP_CLIENT_ID", "GITHUB_APP_CLIENT_SECRET", "GITHUB_APP_SLUG"];
+  const missing = required.filter((name) => !process.env[name]?.trim());
+  if (process.env.NODE_ENV === "production" && !process.env.BACKEND_PUBLIC_URL?.trim() && !process.env.GITHUB_APP_CALLBACK_URL?.trim()) {
+    missing.push("BACKEND_PUBLIC_URL");
+  }
   return {
-    ready: required.every((name) => Boolean(process.env[name]?.trim())),
-    missing: required.filter((name) => !process.env[name]?.trim()),
+    ready: missing.length === 0,
+    missing,
     callbackUrl: callbackUrl(),
     setupUrl: setupUrl(),
-    webhookUrl: process.env.GITHUB_WEBHOOK_URL || null,
+    webhookUrl: webhookUrl(),
   };
 }
 
@@ -782,6 +829,7 @@ export const githubService = {
   },
 
   async startConnection(userId: string) {
+    assertProductionGitHubUrls();
     requiredEnv("GITHUB_APP_CLIENT_ID");
     requiredEnv("GITHUB_APP_CLIENT_SECRET");
     const state = randomBytes(32).toString("base64url");
@@ -805,6 +853,7 @@ export const githubService = {
   },
 
   async startInstallation(userId: string) {
+    assertProductionGitHubUrls();
     const base = installUrl();
     if (!base) throw githubError("GITHUB_APP_SLUG is missing.", 503);
     const connection = await prisma.gitHubConnection.findUnique({ where: { userId } });

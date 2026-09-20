@@ -32,7 +32,7 @@ function About() {
             Our support team is available 24/7. Browse our FAQs, send us a
             message, or chat live.
           </p>
-          <button className="support-btn" onClick={() => navigate("/Support")}>
+          <button className="support-btn" onClick={() => navigate("/support")}>
             Go to support →
           </button>
         </div>
