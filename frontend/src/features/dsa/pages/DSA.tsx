@@ -8,6 +8,7 @@ import { useAuth } from "../../auth/context/AuthContext";
 import { downloadHistoryPdf } from "../../../services/PdfExportService";
 import TrackingModal from "../../../shared/components/TrackingModal";
 import AnimatedSelect from "../../../shared/components/AnimatedSelect";
+import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import {
   canEdit,
   displayActivityDateTime,
@@ -189,27 +190,35 @@ export default function DSA() {
     }
   }
 
-  async function deleteDsa(id: string) {
-    if (!window.confirm("Delete this DSA entry? Its points will be removed.")) return;
-    try {
-      await trackingApi.deleteDsa(id);
-      toast.success("DSA entry deleted.");
-      await loadData();
-      window.dispatchEvent(new Event("devarena:activity-updated"));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete the entry.");
-    }
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "dsa" | "practice"; id: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  function deleteDsa(id: string) {
+    setDeleteTarget({ type: "dsa", id });
   }
 
-  async function deletePractice(id: string) {
-    if (!window.confirm("Delete this practice entry? Its points will be removed.")) return;
+  function deletePractice(id: string) {
+    setDeleteTarget({ type: "practice", id });
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await trackingApi.deletePractice(id);
-      toast.success("Practice entry deleted.");
+      if (deleteTarget.type === "dsa") {
+        await trackingApi.deleteDsa(deleteTarget.id);
+        toast.success("DSA entry deleted.");
+      } else {
+        await trackingApi.deletePractice(deleteTarget.id);
+        toast.success("Practice entry deleted.");
+      }
       await loadData();
       window.dispatchEvent(new Event("devarena:activity-updated"));
+      setDeleteTarget(null);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not delete the entry.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -384,6 +393,20 @@ export default function DSA() {
           )}
         </div>
       </section>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title={deleteTarget?.type === "dsa" ? "Delete DSA Entry?" : "Delete Practice Entry?"}
+        message="Are you sure you want to delete this entry? Its points will be removed."
+        confirmLabel="Delete Entry"
+        cancelLabel="Keep Entry"
+        isDestructive={true}
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          if (!isDeleting) setDeleteTarget(null);
+        }}
+      />
     </main>
   );
 }

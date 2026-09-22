@@ -22,6 +22,7 @@ type BlogListResult = {
 
 type BlogService = {
     getPublishedPosts(query: BlogListQuery): Promise<BlogListResult>;
+    getPostById(id: string): Promise<PublishedPost | null>;
     getUserDrafts(userId: string): Promise<DraftPost[]>;
     createPost(userId: string, input: BlogPostInput): Promise<CreatedPost>;
     updatePost(userId: string, id: string, input: BlogPostUpdateInput): Promise<BlogMutationResult<UpdatedPost>>;
@@ -43,6 +44,10 @@ export const blogService: BlogService = {
                 totalPages: Math.ceil(total / limit),
             },
         };
+    },
+
+    getPostById(id: string): Promise<PublishedPost | null> {
+        return blogRepository.getPostById(id);
     },
 
     getUserDrafts(userId: string): Promise<DraftPost[]> {

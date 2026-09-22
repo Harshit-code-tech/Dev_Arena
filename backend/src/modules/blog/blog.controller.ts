@@ -51,6 +51,22 @@ export const getPublishedPosts = async (req: Request, res: Response): Promise<vo
     }
 };
 
+export const getPostById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const post = await blogService.getPostById(req.params.id as string);
+
+        if (!post) {
+            res.status(404).json({ success: false, message: "Post not found" });
+            return;
+        }
+
+        res.status(200).json({ success: true, data: post });
+    } catch (error: unknown) {
+        console.error("getPostById error:", getErrorMessage(error));
+        res.status(500).json({ success: false, message: "Failed to fetch post" });
+    }
+};
+
 // Auth required
 
 export const getUserDrafts = async (req: Request, res: Response): Promise<void> => {

@@ -18,6 +18,7 @@ type BlogRepository = {
     listDraftsByUser(userId: string): Promise<DraftPost[]>;
     createPost(userId: string, input: BlogPostInput): Promise<CreatedPost>;
     findPostById(id: string): Promise<BlogPost | null>;
+    getPostById(id: string): Promise<PublishedPost | null>;
     updatePost(id: string, input: BlogPostUpdateInput): Promise<UpdatedPost>;
     deletePost(id: string): Promise<void>;
     publishPost(id: string): Promise<CreatedPost>;
@@ -59,6 +60,13 @@ export const blogRepository: BlogRepository = {
 
     findPostById(id: string): Promise<BlogPost | null> {
         return prisma.blogPost.findUnique({ where: { id } });
+    },
+
+    getPostById(id: string): Promise<PublishedPost | null> {
+        return prisma.blogPost.findUnique({
+            where: { id },
+            select: publishedPostSelect,
+        });
     },
 
     updatePost(id: string, input: BlogPostUpdateInput): Promise<UpdatedPost> {

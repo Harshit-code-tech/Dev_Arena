@@ -351,18 +351,10 @@ body .timeline-meta{
 body .support-btn,  
 body .auth-submit,  
 body .social-btn,  
-body .publish-btn,  
-body .cancel-btn,  
-body .new-post-btn,  
-body .drafts-btn,  
-body .draft-edit-btn,  
-body .draft-delete-btn,  
-body .save-btn,  
 body .save-log-btn,  
 body .pagination button,  
 body .year-selector button,  
-body .contact-actions button,  
-body .blog-actions button {
+body .contact-actions button {
   min-height: 50px !important;
   padding: 17px 24px !important;
   border: 1px solid var(--da-on-primary) !important;
@@ -383,18 +375,10 @@ body .blog-actions button {
 body .support-btn:hover,  
 body .auth-submit:hover,  
 body .social-btn:hover,  
-body .publish-btn:hover,  
-body .cancel-btn:hover,  
-body .new-post-btn:hover,  
-body .drafts-btn:hover,  
-body .draft-edit-btn:hover,  
-body .draft-delete-btn:hover,  
-body .save-btn:hover,  
 body .save-log-btn:hover,  
 body .pagination button:hover,  
 body .year-selector button:hover,  
-body .contact-actions button:hover,  
-body .blog-actions button:hover {
+body .contact-actions button:hover {
   border-color: var(--da-on-primary) !important;
   background: var(--da-on-primary) !important;
   color: var(--da-ink) !important;
@@ -443,10 +427,7 @@ body .profile-heat-cell:hover {
 ========================================================= */
 
 body .about-page,  
-body .updates-page,  
-body .support-page,  
-body .drafts-page,  
-body .blog-page {
+body .support-page {
   width: 100% !important;
   min-height: 100vh !important;
   margin: 0 !important;
@@ -456,11 +437,7 @@ body .blog-page {
 }
 
 body .about-wrap,  
-body .updates-page > *,  
-body .support-wrap,  
-body .drafts-wrap,  
-body .blog-wrap,  
-body .blog-feed {
+body .support-wrap {
   width: min(100%, 1200px) !important;
   max-width: 1200px !important;
   margin-right: auto !important;
@@ -468,11 +445,7 @@ body .blog-feed {
 }
 
 body .about-hero,  
-body .hero-updates,  
-body .support-header,  
-body .drafts-header,  
-body .blog-header,  
-body .blog-top {
+body .support-header {
   margin: 0 0 72px !important;
   padding: 0 0 48px !important;
   border-bottom: 1px solid var(--da-hairline-dark) !important;
@@ -481,11 +454,7 @@ body .blog-top {
 }
 
 body .about-hero h1,  
-body .hero-updates h1,  
 body .support-header h1,  
-body .drafts-header h1,  
-body .blog-header h1,  
-body .blog-top h1,  
 body .profile-header h1,  
 body .dashboard-hero h1 {
   max-width: 1000px;
@@ -500,10 +469,7 @@ body .dashboard-hero h1 {
 }
 
 body .about-hero p,  
-body .hero-updates p,  
 body .support-header p,  
-body .drafts-header p,  
-body .blog-header p,  
 body .dashboard-subtitle,  
 body .profile-info p {
   max-width: 760px !important;
@@ -613,102 +579,45 @@ body .faq-icon {
   color: var(--da-on-primary) !important;
 }
 
-/* Updates timeline */
-body .updates-timeline,  
-body .timeline-item,  
-body .timeline-card {
-  background: transparent !important;
-}
-
-body .timeline-track {
-  background: var(--da-hairline-dark) !important;
-}
-
-body .timeline-dot,  
-body .timeline-pulse {
-  border-color: var(--da-on-primary) !important;
-  background: var(--da-canvas-night) !important;
-  box-shadow: none !important;
-}
-
-body .timeline-card {
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-radius-xs) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-body .timeline-card:hover,  
-body .timeline-item.expanded .timeline-card {
-  border-color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-body .timeline-tag,  
-body .meta-latest,  
-body .specs-badge {
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-pill) !important;
-  background: transparent !important;
-  color: var(--da-on-primary) !important;
-  box-shadow: none !important;
-  text-transform: uppercase;
-}
-
-body .details-divider,  
-body .specs-block,  
-body .specs-item {
-  border-color: var(--da-hairline-dark) !important;
-}
-
-body .media-asset {
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-radius-sm) !important;
-  filter: grayscale(1);
-}
-
-/* Blog / drafts */
-body .drafts-list,  
-body .blog-feed {
-  display: grid !important;
-  gap: 16px !important;
-}
-
-body .draft-card,  
-body .blog-post,  
-body .blog-editor,  
-body .drafts-empty {
-  padding: 32px !important;
-  border: 1px solid var(--da-hairline-dark) !important;
-  border-radius: var(--da-radius-xs) !important;
-  background: var(--da-canvas-night-soft) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-body .draft-card:hover,  
-body .blog-post:hover {
-  border-color: var(--da-on-primary) !important;
-  transform: none !important;
-}
-
-body .blog-editor input,  
-body .blog-editor textarea,  
+/* Contact box inputs (dark-styled) */
 body .contact-box input,  
 body .contact-box textarea {
   width: 100% !important;
   min-height: 48px !important;
   padding: 12px 16px !important;
-  border: 1px solid var(--da-hairline-light) !important;
+  border: 1px solid var(--da-hairline-dark) !important;
   border-radius: var(--da-radius-xs) !important;
-  background: var(--da-canvas-light) !important;
+  background: var(--da-canvas-night-soft) !important;
   box-shadow: none !important;
-  color: var(--da-ink) !important;
+  color: var(--da-on-primary) !important;
 }
 
-body .blog-editor textarea,  
 body .contact-box textarea {
+  min-height: 280px !important;
+  resize: vertical;
+}
+
+/* Blog editor inputs — aerospace dark */
+body .blog-editor input,  
+body .blog-editor textarea {
+  width: 100% !important;
+  min-height: 48px !important;
+  padding: 12px 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  background: rgba(12, 20, 36, 0.8) !important;
+  box-shadow: none !important;
+  color: #f8fafc !important;
+}
+
+body .blog-editor input:focus,
+body .blog-editor textarea:focus {
+  border-color: #7dd3fc !important;
+  background: rgba(14, 24, 44, 0.92) !important;
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.15) !important;
+}
+
+body .blog-editor textarea {
   min-height: 280px !important;
   resize: vertical;
 }
@@ -735,7 +644,7 @@ body .app-content {
 body .sidebar {
   position: fixed !important;
   inset: 0 auto 0 0 !important;
-  z-index: 700 !important;
+  z-index: 1200 !important;
   width: 260px !important;
   height: 100vh !important;
   padding: 28px 20px !important;
@@ -1079,10 +988,10 @@ body .draft-modal textarea {
   width: 100% !important;
   min-height: 48px !important;
   padding: 12px 16px !important;
-  border: 1px solid var(--da-hairline-light) !important;
-  border-radius: var(--da-radius-xs) !important;
-  background: var(--da-canvas-light) !important;
-  color: var(--da-ink) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  background: rgba(12, 20, 36, 0.85) !important;
+  color: #f8fafc !important;
   box-shadow: none !important;
 }
 
@@ -1528,11 +1437,7 @@ body .loader-card::after {
 @media (max-width: 960px) {
   
   body .about-hero h1,  
-  body .hero-updates h1,  
   body .support-header h1,  
-  body .drafts-header h1,  
-  body .blog-header h1,  
-  body .blog-top h1,  
   body .profile-header h1,  
   body .dashboard-hero h1 {
     font-size: clamp(48px, 7vw, 60px) !important;
@@ -1583,10 +1488,7 @@ body .loader-card::after {
   }
 
   body .about-page,  
-  body .updates-page,  
-  body .support-page,  
-  body .drafts-page,  
-  body .blog-page {
+  body .support-page {
     padding: 120px 24px 72px !important;
   }
 
@@ -1598,42 +1500,8 @@ body .loader-card::after {
 
   body .support-banner,  
   body .contact-box,  
-  body .about-feature,  
-  body .timeline-card,  
-  body .draft-card,  
-  body .blog-post,  
-  body .blog-editor {
+  body .about-feature {
     padding: 28px !important;
-  }
-
-  body .sidebar {
-    position: static !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-    padding: 16px 20px !important;
-    border-right: 0 !important;
-    border-bottom: 1px solid var(--da-hairline-dark) !important;
-  }
-
-  body .sidebar-top {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 20px !important;
-  }
-
-  body .sidebar-links {
-    display: flex !important;
-    max-width: calc(100vw - 170px);
-    margin: 0 !important;
-    overflow-x: auto;
-  }
-
-  body .sidebar-links button,  
-  body .sidebar-link {
-    width: auto !important;
-    min-width: max-content !important;
   }
 
   body .app-layout {
@@ -1708,13 +1576,8 @@ body .loader-card::after {
 }
 
 @media (max-width: 599px) {
-  
   body .about-hero h1,  
-  body .hero-updates h1,  
   body .support-header h1,  
-  body .drafts-header h1,  
-  body .blog-header h1,  
-  body .blog-top h1,  
   body .profile-header h1,  
   body .dashboard-hero h1 {
     font-size: 40px !important;
@@ -1801,8 +1664,7 @@ body .auth-card {
   transform: none !important;
 }
 
-body .pulse-dot,  
-body .timeline-pulse {
+body .pulse-dot {
   animation: none !important;
 }
 

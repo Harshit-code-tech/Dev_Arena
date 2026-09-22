@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/Drafts.css";
+import toast from "react-hot-toast";
+import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import {
     deleteBlogPost,
     getDraftPosts,
@@ -11,6 +13,8 @@ import {
 function Drafts() {
     const navigate = useNavigate();
     const [drafts, setDrafts] = useState<DraftPostViewModel[]>([]);
+    const [draftToDelete, setDraftToDelete] = useState<{ id: string; title: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         getDraftPosts()
@@ -18,12 +22,19 @@ function Drafts() {
             .catch(console.error);
     }, []);
 
-    async function deleteDraft(id: string) {
+    async function confirmDeleteDraft() {
+        if (!draftToDelete) return;
+        setIsDeleting(true);
         try {
-            await deleteBlogPost(id);
-            setDrafts((prev) => prev.filter((draft) => draft.id !== id));
+            await deleteBlogPost(draftToDelete.id);
+            setDrafts((prev) => prev.filter((draft) => draft.id !== draftToDelete.id));
+            toast.success("Draft deleted.");
+            setDraftToDelete(null);
         } catch (error) {
             console.error("Failed to delete draft:", error);
+            toast.error("Failed to delete draft.");
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -73,7 +84,7 @@ function Drafts() {
                                     <button
                                         type="button"
                                         className="draft-delete-btn"
-                                        onClick={() => deleteDraft(draft.id)}
+                                        onClick={() => setDraftToDelete({ id: draft.id, title: draft.title })}
                                     >
                                         Delete
                                     </button>
@@ -83,6 +94,20 @@ function Drafts() {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog
+                isOpen={Boolean(draftToDelete)}
+                title="Discard Draft?"
+                message={`Are you sure you want to delete "${draftToDelete?.title || "this draft"}"? This action cannot be undone.`}
+                confirmLabel="Delete Draft"
+                cancelLabel="Keep Draft"
+                isDestructive={true}
+                isLoading={isDeleting}
+                onConfirm={confirmDeleteDraft}
+                onCancel={() => {
+                    if (!isDeleting) setDraftToDelete(null);
+                }}
+            />
         </div>
     );
 }

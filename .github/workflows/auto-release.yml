@@ -17,6 +17,17 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           AUTOMATION_SECRET: ${{ secrets.AUTOMATION_SECRET }}
         run: |
+          set -euo pipefail
+
+          test -n "$API_URL" || {
+            echo "::error::API_URL is not configured"
+            exit 1
+          }
+
+          test -n "$AUTOMATION_SECRET" || {
+            echo "::error::AUTOMATION_SECRET is not configured"
+            exit 1
+          }
           # Extract the latest commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
           SHORT_HASH=$(git rev-parse --short HEAD)

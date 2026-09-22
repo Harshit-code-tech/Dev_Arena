@@ -5,8 +5,8 @@ import { protect } from "../../middleware/auth.middleware";
 const router = Router();
 
 router.get("/", blogController.getPublishedPosts);
-
 router.get("/drafts", protect, blogController.getUserDrafts);
+router.get("/:id", blogController.getPostById);
 router.post("/", protect, blogController.createPost);
 router.put("/:id", protect, blogController.updatePost);
 router.delete("/:id", protect, blogController.deletePost);

@@ -12,6 +12,7 @@ type BlogPostPayload = {
 };
 
 type BackendBlogAuthor = {
+  id?: string;
   name?: string | null;
 };
 
@@ -38,6 +39,7 @@ type BackendListResponse<T> = {
 };
 
 export type BlogPostViewModel = {
+  authorId?: string;
   authorName: string;
   content: string;
   formattedDate: string;
@@ -87,6 +89,24 @@ export async function getDraftEditorViewModel(draftId: string): Promise<DraftEdi
   };
 }
 
+export async function getBlogPostById(id: string): Promise<BlogPostViewModel | null> {
+  try {
+    const response = await fetch(`/api/blog/${id}`);
+    const result = await response.json();
+    if (!result.success || !result.data) {
+      return null;
+    }
+    return mapPublishedPost(result.data);
+  } catch (err) {
+    console.error("Failed to fetch blog post by id:", err);
+    return null;
+  }
+}
+
+export async function updatePublishedPost(id: string, payload: BlogPostPayload): Promise<void> {
+  await updateBlogPost(id, payload);
+}
+
 export async function deleteBlogPost(id: string): Promise<void> {
   await apiRequest<void>(`/api/blog/${id}`, { method: "DELETE" });
 }
@@ -123,6 +143,7 @@ function mapPublishedPosts(posts: BackendBlogPost[]) {
 
 function mapPublishedPost(post: BackendBlogPost): BlogPostViewModel {
   return {
+    authorId: post.author?.id,
     authorName: getAuthorName(post.author),
     content: post.content,
     formattedDate: formatBlogDate(post.createdAt),

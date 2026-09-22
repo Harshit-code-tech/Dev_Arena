@@ -8,6 +8,7 @@ import { downloadHistoryPdf } from "../../../services/PdfExportService";
 import { GitHubApi, type VerifiedGitHubRepository } from "../../../services/GitHubService";
 import TrackingModal from "../../../shared/components/TrackingModal";
 import AnimatedSelect from "../../../shared/components/AnimatedSelect";
+import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import {
   canEdit,
   displayActivityDateTime,
@@ -365,27 +366,37 @@ export default function Projects() {
     }
   }
 
-  async function deleteSession(projectId: string, logId: string) {
-    if (!window.confirm("Delete this work session? The evidence-based project score will be recalculated.")) return;
-    try {
-      await trackingApi.deleteProjectLog(projectId, logId);
-      toast.success("Work session deleted.");
-      await loadData();
-      window.dispatchEvent(new Event("devarena:activity-updated"));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete the session.");
-    }
+  const [deleteTarget, setDeleteTarget] = useState<
+    { type: "session"; projectId: string; logId: string } | { type: "fullstack"; logId: string } | null
+  >(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  function deleteSession(projectId: string, logId: string) {
+    setDeleteTarget({ type: "session", projectId, logId });
   }
 
-  async function deleteFullstack(logId: string) {
-    if (!window.confirm("Delete this fullstack entry? Its points will be removed.")) return;
+  function deleteFullstack(logId: string) {
+    setDeleteTarget({ type: "fullstack", logId });
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await trackingApi.deleteFullstack(logId);
-      toast.success("Fullstack entry deleted.");
+      if (deleteTarget.type === "session") {
+        await trackingApi.deleteProjectLog(deleteTarget.projectId, deleteTarget.logId);
+        toast.success("Work session deleted.");
+      } else {
+        await trackingApi.deleteFullstack(deleteTarget.logId);
+        toast.success("Fullstack entry deleted.");
+      }
       await loadData();
       window.dispatchEvent(new Event("devarena:activity-updated"));
+      setDeleteTarget(null);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not delete the entry.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -696,6 +707,24 @@ export default function Projects() {
           </section>
         </>
       )}
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title={deleteTarget?.type === "session" ? "Delete Work Session?" : "Delete Fullstack Entry?"}
+        message={
+          deleteTarget?.type === "session"
+            ? "Delete this work session? The evidence-based project score will be recalculated."
+            : "Delete this fullstack entry? Its points will be removed."
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        isDestructive={true}
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          if (!isDeleting) setDeleteTarget(null);
+        }}
+      />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import { useAuth } from "../../auth/context/AuthContext";
 import PageLoader from "../../../shared/components/Skeletons/PageLoader";
 import LiveDateTime from "../../../shared/components/LiveDateTime";
 import ProfilePhotoCropper from "../components/ProfilePhotoCropper";
+import ConfirmDialog from "../../../shared/components/ConfirmDialog";
 import {
   confirmIdentityChange,
   deleteAccount,
@@ -84,6 +85,7 @@ export default function Settings() {
   const [friendQuery, setFriendQuery] = useState("");
   const [removingFriendId, setRemovingFriendId] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
   const identityChanged = Boolean(
     settings && (
@@ -267,12 +269,12 @@ export default function Settings() {
   }
 
   async function disconnectGitHub() {
-    if (!window.confirm("Disconnect GitHub from DevArena? Existing language evidence remains, but it cannot be refreshed.")) return;
     try {
       setSavingKey("github-disconnect");
       await GitHubApi.disconnect();
       setGithubStatus(await GitHubApi.status());
       toast.success("GitHub disconnected.");
+      setShowDisconnectConfirm(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub could not be disconnected.");
     } finally {
@@ -445,7 +447,7 @@ export default function Settings() {
             <UnderlineButton loading={savingKey === "github-connect"} onClick={() => void connectGitHub()}>{githubStatus?.connected ? "Reconnect GitHub" : "Connect GitHub for private repos"}</UnderlineButton>
             {githubStatus?.connected && <UnderlineButton loading={savingKey === "github-install"} onClick={() => void installGitHubApp()}>Install or manage private repo access</UnderlineButton>}
             {githubStatus?.connected && <UnderlineButton loading={savingKey === "github-refresh"} onClick={() => void refreshGitHubStatus()}>Check connection</UnderlineButton>}
-            {githubStatus?.connected && <UnderlineButton danger loading={savingKey === "github-disconnect"} onClick={() => void disconnectGitHub()}>Disconnect GitHub</UnderlineButton>}
+            {githubStatus?.connected && <UnderlineButton danger loading={savingKey === "github-disconnect"} onClick={() => setShowDisconnectConfirm(true)}>Disconnect GitHub</UnderlineButton>}
           </div>
         </section>
 
@@ -514,6 +516,18 @@ export default function Settings() {
           onConfirm={(imageData) => void uploadProfilePhoto({ imageData })}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={showDisconnectConfirm}
+        title="Disconnect GitHub?"
+        message="Disconnect GitHub from DevArena? Existing language evidence remains, but it cannot be refreshed."
+        confirmLabel="Disconnect"
+        cancelLabel="Keep Connected"
+        isDestructive={true}
+        isLoading={savingKey === "github-disconnect"}
+        onConfirm={disconnectGitHub}
+        onCancel={() => setShowDisconnectConfirm(false)}
+      />
     </main>
   );
 }
