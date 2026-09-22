@@ -1,6 +1,13 @@
 import jwt from "jsonwebtoken";
 
-export const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+const _jwtSecret = process.env.JWT_SECRET;
+if (!_jwtSecret) {
+  throw new Error(
+    "[FATAL] JWT_SECRET environment variable is not set. " +
+    "Set it to a long random string before starting the server.",
+  );
+}
+export const JWT_SECRET: string = _jwtSecret;
 
 export type AuthOtpPurpose = "Signup" | "Login";
 

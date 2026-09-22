@@ -24,7 +24,13 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
       return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret") as {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      res.status(503).json({ message: "Server configuration error. Please contact support." });
+      return;
+    }
+
+    const decoded = jwt.verify(token, jwtSecret) as {
       userId?: string;
       isAuthOtpPending?: boolean;
       isPasswordReset?: boolean;

@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { Request, Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 
 /** Helper to normalize origins by trimming whitespace and trailing slashes */
 function normalizeOrigin(url: string): string {
@@ -64,6 +65,17 @@ export function createApp(port: number) {
   const app = express();
 
   // ── Global middleware ─────────────────────────────────────────
+  // Global rate limit: 500 requests per 15 minutes per IP.
+  // Prevents DDoS and scraping of all API endpoints.
+  // Per-route limiters on auth paths are stricter on top of this.
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 500,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "Too many requests. Please slow down and try again later." },
+    skip: (req) => req.method === "GET" && req.path === "/health", // never limit health checks
+  }));
   app.use(helmet({
     // Enforce HTTPS for 1 year in production (tells browsers to never use HTTP)
     hsts: process.env.NODE_ENV === "production"
