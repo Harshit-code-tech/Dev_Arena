@@ -4,6 +4,7 @@ import { createApp } from "./app";
 import { testDatabaseConnection } from "./database/prisma";
 import { githubService } from "./modules/github/github.service";
 import { tournamentService } from "./modules/tournaments/tournament.service";
+import { startInactivityWorker, startWeeklySummaryWorker } from "./shared/services/notification-workers";
 
 // ── Start ─────────────────────────────────────────────────────
 async function startServer(): Promise<void> {
@@ -40,6 +41,10 @@ async function startServer(): Promise<void> {
                 });
             }, 30 * 1000);
             webhookWorker.unref();
+
+            // Notification workers
+            startInactivityWorker();
+            startWeeklySummaryWorker();
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);

@@ -11,74 +11,96 @@ const faqs: FaqItem[] = [
   {
     question: "How do I update my profile information?",
     answer:
-      "Open your profile from the account menu, update the available fields, and save the changes. Your updated information will appear across DevArena after the save completes.",
+      "Head to your profile from the account menu, polish up your bio, and hit save. Just don't claim you're a 10x engineer with 20 years of Rust experience if you just learned console.log.",
   },
   {
     question: "How is my activity streak calculated?",
     answer:
-      "Your streak increases when qualifying development activity is recorded on consecutive days. Missing a qualifying day ends the active streak and begins a new one the next time activity is logged.",
+      "Show up every single day and log real code or problem solving. Miss a day? Your streak resets to zero. No exceptions, no mercy, no backdating to save face.",
   },
   {
     question: "How can I improve the security of my account?",
     answer:
-      "Use a unique password, protect your email account, and never share the one-time code required for email-password signup or login.",
+      "Use a real password, don't use 'password123', and never ever share your OTP verification code with anyone — not even if they claim they're Linus Torvalds.",
   },
   {
     question: "Why is recent activity not appearing on my dashboard?",
     answer:
-      "Refresh the dashboard and confirm that the activity was saved successfully. A slow connection can delay synchronization. Include the activity type and time in a support message if it remains missing.",
+      "First, hit refresh and check your internet connection before accusing our database of theft. If you actually logged real work and it vanished, scream at us through the contact form.",
   },
   {
     question: "How do I report inappropriate community activity?",
     answer:
-      "Use the support form and include the relevant username, page, and a clear description of the issue. Avoid sharing passwords, private keys, or other sensitive credentials.",
+      "Use the report button on the offending player's profile or post. We tolerate friendly trash talk and healthy rivalries, but real toxicity gets booted out of the Arena real fast.",
   },
   {
-    question: "What information should I include when reporting a problem?",
+    question: "What should I include when reporting a bug?",
     answer:
-      "Include the page name, the steps that caused the issue, what you expected, what actually happened, and the browser or device you were using. Screenshots can also help the team reproduce the problem.",
+      "Don't just say 'it's broken'. Tell us what page you were on, what you clicked, what exploded, and what browser you're using. Help us help you!",
   },
 ];
+
+type FormStatus = "idle" | "loading" | "success" | "error";
 
 function Support() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [formStatus, setFormStatus] = useState<FormStatus>("idle");
   const [statusMessage, setStatusMessage] = useState("");
 
-  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
     if (!name.trim() || !email.trim() || !message.trim()) {
-      setStatusMessage("Please fill in every field before sending.");
+      setFormStatus("error");
+      setStatusMessage("Fill in every field first! We can't read your mind (yet).");
       return;
     }
 
-    setName("");
-    setEmail("");
-    setMessage("");
-    setStatusMessage(
-      "✅ Your message has been received. Our team will review it shortly.",
-    );
+    setFormStatus("loading");
+    setStatusMessage("");
+
+    try {
+      const response = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as { success: boolean; message?: string } | null;
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || "Failed to send your message. Please try again.");
+      }
+
+      setName("");
+      setEmail("");
+      setMessage("");
+      setFormStatus("success");
+      setStatusMessage("Message launched into our inbox! We'll look into it before you can say 'it worked on my machine'.");
+    } catch (error: unknown) {
+      setFormStatus("error");
+      setStatusMessage(error instanceof Error ? error.message : "Something exploded on our end. Try again in a second!");
+    }
   };
 
   return (
     <main className="support-page">
       <div className="support-wrap">
         <header className="support-header">
-          <h1>How can we help?</h1>
+          <h1>Stuck? Broken code? Skill issue? We got you.</h1>
           <p>
-            Browse frequently asked questions or contact the DevArena team
-            directly.
+            Browse the FAQs below or contact the DevArena crew directly.
           </p>
         </header>
 
         <div className="support-content-grid">
           <section className="support-faq-panel" aria-labelledby="faq-heading">
             <div className="support-panel-heading">
-              <span className="eyebrow">Frequently asked questions</span>
-              <h2 id="faq-heading">Find an answer</h2>
+              <span className="eyebrow">Frequently asked (and occasionally dumb) questions</span>
+              <h2 id="faq-heading">Answers to your existential questions</h2>
             </div>
 
             <div className="faq-list">
@@ -121,11 +143,11 @@ function Support() {
 
           <form className="contact-box" onSubmit={handleSubmit}>
             <div>
-              <span className="eyebrow">Direct support</span>
-              <h2>Contact DevArena Support</h2>
-              <p>Our team usually responds within 24 hours.</p>
+              <span className="eyebrow">Direct Line</span>
+              <h2>Roast us, complain, or report bugs</h2>
+              <p>Our crew usually responds within 24 hours (or whenever we finish debugging).</p>
               <p>
-                Share the issue, feature request, or question you want help with.
+                Drop your bug, feature request, or rant below.
               </p>
             </div>
 
@@ -133,9 +155,10 @@ function Support() {
               <span>Your name</span>
               <input
                 type="text"
-                placeholder="Enter your name"
+                placeholder="e.g. Linus Torvalds"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
+                disabled={formStatus === "loading" || formStatus === "success"}
               />
             </label>
 
@@ -143,9 +166,10 @@ function Support() {
               <span>Your email</span>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="your.actual@email.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                disabled={formStatus === "loading" || formStatus === "success"}
               />
             </label>
 
@@ -153,9 +177,10 @@ function Support() {
               <span>How can we help?</span>
               <textarea
                 maxLength={1000}
-                placeholder="Describe your issue..."
+                placeholder="Tell us what broke, who hurt you, or what feature we need to build..."
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
+                disabled={formStatus === "loading" || formStatus === "success"}
               />
             </label>
 
@@ -164,8 +189,28 @@ function Support() {
             </div>
 
             <div className="contact-actions">
-              <button type="submit">Send message</button>
-              {statusMessage && <span>{statusMessage}</span>}
+              {formStatus !== "success" && (
+                <button
+                  type="submit"
+                  disabled={formStatus === "loading"}
+                  aria-busy={formStatus === "loading"}
+                >
+                  {formStatus === "loading" ? "Firing message…" : "Launch message 🚀"}
+                </button>
+              )}
+              {statusMessage && (
+                <span
+                  className={
+                    formStatus === "success"
+                      ? "support-status support-status--success"
+                      : "support-status support-status--error"
+                  }
+                  role="status"
+                >
+                  {formStatus === "success" ? "✅ " : "⚠ "}
+                  {statusMessage}
+                </span>
+              )}
             </div>
           </form>
         </div>

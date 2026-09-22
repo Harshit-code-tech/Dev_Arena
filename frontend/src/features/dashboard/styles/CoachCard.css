@@ -1,0 +1,103 @@
+.coach-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(4px);
+  transition: border-color 0.2s ease;
+}
+
+.coach-card--motivational {
+  border-color: rgba(99, 220, 150, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 220, 150, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.coach-card--roast {
+  border-color: rgba(255, 160, 80, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 160, 80, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.coach-card--strong {
+  border-color: rgba(130, 160, 255, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(130, 160, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.coach-card-icon {
+  flex-shrink: 0;
+  font-size: 28px;
+  line-height: 1;
+  margin-top: 2px;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
+}
+
+.coach-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.coach-card-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.coach-card--motivational .coach-card-label {
+  color: rgba(99, 220, 150, 0.7);
+}
+
+.coach-card--roast .coach-card-label {
+  color: rgba(255, 160, 80, 0.7);
+}
+
+.coach-card--strong .coach-card-label {
+  color: rgba(130, 160, 255, 0.75);
+}
+
+.coach-card-days {
+  opacity: 0.6;
+  font-weight: 600;
+}
+
+.coach-card-message {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .coach-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .coach-card-icon {
+    font-size: 22px;
+  }
+
+  .coach-card-message {
+    font-size: 14px;
+  }
+}

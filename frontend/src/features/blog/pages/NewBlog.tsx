@@ -64,24 +64,24 @@ function NewBlog() {
         <div className="blog-page">
             <div className="blog-wrap">
                 <div className="blog-top">
-                    <h1>Write a new post</h1>
+                    <h1>Cook up a post</h1>
                 </div>
                 <form className="blog-editor">
                     <input
                         type="text"
-                        placeholder="Post title..."
+                        placeholder="Something catchy (e.g. 'Why my code works on my machine')"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                     />
 
                     <textarea
-                        placeholder="Share your thoughts, tutorial, or lesson learned..."
+                        placeholder="Drop your wisdom, rant about a bug, or write a tutorial that future you will copy-paste..."
                         value={content}
                         onChange={(event) => setContent(event.target.value)}
                     />
                     <div className="editor-actions">
                         <button type="button" className="publish-btn" onClick={publishPost}>
-                            Publish
+                            Ship to the World 🚀
                         </button>
                         <button
                             type="button"

@@ -3,6 +3,7 @@ import {
   BLOG_FALLBACK_AUTHOR_NAME,
   BLOG_POSTS_LIMIT,
 } from "./BlogConstants";
+import { apiRequest } from "./ApiClient";
 
 type BlogPostPayload = {
   content: string;
@@ -59,18 +60,17 @@ export type DraftEditorViewModel = {
   title: string;
 };
 
+// Public — no auth needed
 export async function getPublishedBlogPosts(): Promise<BlogPostViewModel[]> {
   const response = await fetch(`/api/blog?limit=${BLOG_POSTS_LIMIT}`);
   const data: BackendListResponse<BackendBlogPost> = await response.json();
-
   return buildPublishedBlogPostsViewModel(data);
 }
 
+// Authenticated operations — all use apiRequest which attaches the JWT
 export async function getDraftPosts(): Promise<DraftPostViewModel[]> {
-  const response = await fetch("/api/blog/drafts");
-  const data: BackendListResponse<BackendDraftPost> = await response.json();
-
-  return buildDraftPostsViewModel(data);
+  const data = await apiRequest<BackendDraftPost[]>("/api/blog/drafts");
+  return mapDraftPosts(data);
 }
 
 export async function getDraftEditorViewModel(draftId: string): Promise<DraftEditorViewModel | null> {
@@ -87,32 +87,24 @@ export async function getDraftEditorViewModel(draftId: string): Promise<DraftEdi
   };
 }
 
-export async function deleteBlogPost(id: string) {
-  const response = await fetch(`/api/blog/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to delete draft");
-  }
+export async function deleteBlogPost(id: string): Promise<void> {
+  await apiRequest<void>(`/api/blog/${id}`, { method: "DELETE" });
 }
 
-export async function saveDraftPost(draftId: string | null, payload: BlogPostPayload) {
+export async function saveDraftPost(draftId: string | null, payload: BlogPostPayload): Promise<void> {
   if (draftId) {
     await updateBlogPost(draftId, payload);
     return;
   }
-
   await createBlogPost(payload);
 }
 
-export async function publishBlogPost(draftId: string | null, payload: BlogPostPayload) {
+export async function publishBlogPost(draftId: string | null, payload: BlogPostPayload): Promise<void> {
   if (draftId) {
     await updateBlogPost(draftId, payload);
     await publishDraft(draftId);
     return;
   }
-
   await createBlogPost(payload);
 }
 
@@ -122,18 +114,7 @@ function buildPublishedBlogPostsViewModel(
   if (!response.success) {
     return [];
   }
-
   return mapPublishedPosts(response.data || []);
-}
-
-function buildDraftPostsViewModel(
-  response: BackendListResponse<BackendDraftPost>,
-): DraftPostViewModel[] {
-  if (!response.success) {
-    return [];
-  }
-
-  return mapDraftPosts(response.data || []);
 }
 
 function mapPublishedPosts(posts: BackendBlogPost[]) {
@@ -178,24 +159,20 @@ function formatBlogDate(date: string) {
   return new Date(date).toLocaleDateString("en-GB", BLOG_DATE_FORMAT_OPTIONS);
 }
 
-async function createBlogPost(payload: BlogPostPayload) {
-  await fetch("/api/blog", {
+async function createBlogPost(payload: BlogPostPayload): Promise<void> {
+  await apiRequest<void>("/api/blog", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-async function updateBlogPost(id: string, payload: BlogPostPayload) {
-  await fetch(`/api/blog/${id}`, {
+async function updateBlogPost(id: string, payload: BlogPostPayload): Promise<void> {
+  await apiRequest<void>(`/api/blog/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-async function publishDraft(id: string) {
-  await fetch(`/api/blog/${id}/publish`, {
-    method: "PUT",
-  });
+async function publishDraft(id: string): Promise<void> {
+  await apiRequest<void>(`/api/blog/${id}/publish`, { method: "PUT" });
 }

@@ -13,6 +13,7 @@ const links = [
   { name: "Challenges", path: "/challenges", icon: "bx-target-lock" },
   { name: "Tournaments", path: "/tournaments", icon: "bx-trophy" },
   { name: "Player Hub", path: "/player-hub", icon: "bx-network-chart" },
+  { name: "Blog", path: "/blog", icon: "bx-news" },
   { name: "Profile", path: "/profile", icon: "bx-user" },
 ] as const;
 
@@ -49,7 +50,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
             <span className="sidebar-logo-primary">Dev</span>
             <span className="sidebar-logo-secondary">Arena</span>
           </NavLink>
-          <p className="sidebar-logo-caption">Developer growth system</p>
+          <p className="sidebar-logo-caption">Where devs compete &amp; excuses die</p>
 
           <nav className="sidebar-links">
             {visibleLinks.map((link) => (
@@ -68,9 +69,9 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
 
         <div className="sidebar-footer">
           <div className="sidebar-mission" aria-label="How DevArena works">
-            <span>Arena loop</span>
-            <strong>Learn · Log · Build · Rank</strong>
-            <p>Meaningful evidence moves your score, consistency, and position.</p>
+            <span>The Daily Ritual</span>
+            <strong>Code · Flex · Roast · Repeat</strong>
+            <p>Fake commits won't save you. Ship real code or get left behind.</p>
           </div>
         </div>
       </aside>

@@ -32,8 +32,8 @@ function Drafts() {
             <div className="drafts-wrap">
                 <div className="drafts-header">
                     <div>
-                        <h1>Draft collection</h1>
-                        <p>Saved blog ideas you can come back to later.</p>
+                        <h1>Graveyard of Half-Finished Thoughts</h1>
+                        <p>Where brilliant 2 AM epiphanies come to gather dust.</p>
                     </div>
 
                     <button
@@ -47,8 +47,8 @@ function Drafts() {
 
                 {drafts.length === 0 ? (
                     <div className="drafts-empty">
-                        <h2>No drafts yet</h2>
-                        <p>Your unsaved posts will show up here.</p>
+                        <h2>Zero unfinished drafts</h2>
+                        <p>You either finish everything you start, or you haven't started anything at all. We suspect the latter.</p>
                     </div>
                 ) : (
                     <div className="drafts-list">

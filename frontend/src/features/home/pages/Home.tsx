@@ -89,27 +89,28 @@ function Home() {
   };
 
   const motivations = [
-    "Push yourself, because no one else will.",
-    "Great things never come from comfort zones.",
-    "Dream it. Wish it. Do it.",
-    "Stay focused and never give up.",
-    "Success doesn't just find you — you create it.",
-    "Discipline beats motivation every time.",
-    "Small, consistent commits beat occasional bursts of effort.",
+    "Talk is cheap. Show me the code. Or at least a passing test.",
+    "Your code works on your machine? Cool, we're not shipping your laptop.",
+    "There are two hard things in CS: cache invalidation, naming things, and getting you to log code.",
+    "Git commit -m 'fixed stuff' is not an architecture, bro.",
+    "If you spent as much time coding as you do tweaking your VS Code theme, you'd be #1.",
+    "Eat, sleep, leetcode, repeat. (Okay maybe take a shower too).",
+    "Rome wasn't built in a day, but at least their engineers pushed to main.",
+    "99 little bugs in the code, fix one bug, 127 little bugs in the code.",
   ];
 
   return (
     <main className="home-page">
       <section className="hero">
-        <p className="eyebrow">Developer growth platform</p>
+        <p className="eyebrow">Where Code Talks &amp; Excuses Die</p>
 
         <h1>
           <TypingLines />
         </h1>
 
         <p className="hero-copy">
-          DevArena helps developers practice, showcase projects, write better
-          technical content, and grow with a community built around progress.
+          DevArena is where competitive developers build real projects, grind DSA,
+          roast their friends' streaks, and settle who's actually shipping code.
         </p>
 
         <div className="hero-actions">
@@ -118,7 +119,7 @@ function Home() {
             type="button"
             onClick={() => navigate("/signup")}
           >
-            Start building
+            Enter the Arena ⚔️
           </button>
 
         </div>

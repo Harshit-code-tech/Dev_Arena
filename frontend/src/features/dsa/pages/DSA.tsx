@@ -267,7 +267,7 @@ export default function DSA() {
     <main className="tracking-page dsa-page animated-page">
       <header className="tracking-hero page-reveal">
         <div>
-          <p className="tracking-eyebrow">Structured Skill Tracking</p>
+          <p className="tracking-eyebrow">Algorithm Battlefield</p>
           <h1>DSA</h1>
           <p>{activeDescription}</p>
         </div>
@@ -377,7 +377,10 @@ export default function DSA() {
           ))}
 
           {activeTotal === 0 && (
-            <div className="tracking-empty"><strong>No entries yet.</strong><span>Start with one specific, meaningful activity.</span></div>
+            <div className="tracking-empty">
+              <strong>No entries yet.</strong>
+              <span>LeetCode isn't gonna solve itself. Go grind a problem before your friends leave you in Bronze.</span>
+            </div>
           )}
         </div>
       </section>

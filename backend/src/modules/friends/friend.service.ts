@@ -157,7 +157,7 @@ async function relationshipState(userId: string, otherId: string) {
 }
 
 async function createFriendRequest(senderId: string, receiverId: string) {
-  if (senderId === receiverId) throw httpError("You cannot send a player request to yourself.");
+  if (senderId === receiverId) throw httpError("You cannot send a player request to yourself. We know you love yourself, but find real rivals!");
   const block = await prisma.playerBlock.findFirst({
     where: {
       OR: [
@@ -174,9 +174,9 @@ async function createFriendRequest(senderId: string, receiverId: string) {
     403,
   );
   const state = await relationshipState(senderId, receiverId);
-  if (state === "friends") throw httpError("You are already connected as players.", 409);
-  if (state === "outgoing") throw httpError("A player request is already pending.", 409);
-  if (state === "incoming") throw httpError("This player already sent you a request. Accept it from Incoming Requests.", 409);
+  if (state === "friends") throw httpError("You two are already connected as players. Go compete instead of spamming requests!", 409);
+  if (state === "outgoing") throw httpError("You already sent a request to this player. Give them time to be intimidated.", 409);
+  if (state === "incoming") throw httpError("This player already requested you! Go accept it from Incoming Requests.", 409);
 
   const [sender, receiver] = await Promise.all([
     prisma.user.findUnique({ where: { id: senderId }, select: PERSON_SELECT }),
@@ -333,7 +333,7 @@ export const friendService = {
 
     const sender = await prisma.user.findUnique({ where: { id: userId }, select: PERSON_SELECT });
     if (!sender) throw httpError("User not found.", 404);
-    if (sender.email === email) throw httpError("You cannot invite your own email address.");
+    if (sender.email === email) throw httpError("You can't invite yourself, bro. Go touch grass and recruit actual friends.");
 
     const registered = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (registered) {
@@ -386,7 +386,7 @@ export const friendService = {
     if (recipient.email.toLowerCase() !== invite.email.toLowerCase()) {
       throw httpError("This invitation belongs to a different email address.", 403);
     }
-    if (invite.senderId === userId) throw httpError("You cannot accept your own invitation.");
+    if (invite.senderId === userId) throw httpError("Nice try accepting your own invite, sneaky.");
 
     const ids = pair(invite.senderId, userId);
     await prisma.$transaction(async (tx) => {

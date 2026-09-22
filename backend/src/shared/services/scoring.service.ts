@@ -1,5 +1,6 @@
 import type { Prisma, ScoreCategory } from "@prisma/client";
 import { formatDateKey, getWeekStart } from "../utils/tracking";
+import { checkAndUnlock } from "./achievement.service";
 
 const RANKS = [
     { name: "Unranked", points: 0 },
@@ -142,6 +143,9 @@ export async function rebuildUserScoreState(
             },
         ],
     });
+
+    // Check and award achievements after all score state is committed
+    await checkAndUnlock(tx, userId);
 }
 
 async function rebuildWeeklyScores(

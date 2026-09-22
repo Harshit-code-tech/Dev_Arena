@@ -17,7 +17,7 @@ export default function Feedback() {
     try {
       setSending(true);
       await submitFeedback({ feature, feedback: feedback.trim() });
-      toast.success("Feedback submitted. Thank you for improving DevArena.");
+      toast.success("Feedback launched! Thanks for keeping us honest (or roasting our bugs).");
       setFeedback("");
       setFeature("");
     } catch (reason) {
@@ -31,13 +31,13 @@ export default function Feedback() {
     <main className="feedback-page animated-page">
       <button type="button" className="feedback-back dev-back-button" onClick={() => navigate(-1)}><span aria-hidden="true">←</span><span>Back</span></button>
       <header className="feedback-hero page-reveal">
-        <p>Support &amp; feedback</p>
-        <h1>Tell us what went wrong.</h1>
-        <span>Your report is linked to your signed-in account so the DevArena team can investigate it.</span>
+        <p>Bug Reports &amp; Petty Complaints</p>
+        <h1>Did something break, or is it user error?</h1>
+        <span>Don't worry, we won't judge your code. Much.</span>
       </header>
       <form className="feedback-card page-reveal" style={{ "--reveal-order": 1 } as CSSProperties} onSubmit={submit}>
         <div className="feedback-field">
-          <label>What feature went wrong?</label>
+          <label>Which feature decided to misbehave?</label>
           <AnimatedSelect
             value={feature}
             onChange={setFeature}
@@ -47,12 +47,12 @@ export default function Feedback() {
           />
         </div>
         <label className="feedback-textarea">
-          <span>Your feedback</span>
-          <textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={4000} placeholder="Describe what happened, what you expected, and any steps that reproduce the issue." />
+          <span>Spill the tea</span>
+          <textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={4000} placeholder="Describe what broke, what exploded, or how we ruined your day. Don't hold back..." />
           <small>{feedback.length}/4000</small>
         </label>
         <button className="feedback-submit" type="submit" disabled={sending || !feature || feedback.trim().length < 10}>
-          {sending ? "Submitting…" : "Submit feedback"}
+          {sending ? "Launching into the void…" : "Launch feedback 🚀"}
         </button>
       </form>
     </main>

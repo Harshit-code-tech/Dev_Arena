@@ -615,7 +615,7 @@ export default function Projects() {
                       <div className="project-details">
                         <div>
                           <h4>Milestones</h4>
-                          {recentMilestones.length === 0 && <p className="project-empty-copy">No milestones yet.</p>}
+                          {recentMilestones.length === 0 && <p className="project-empty-copy">No milestones yet. Rome wasn't built in a day, but at least they laid bricks.</p>}
                           <div className="project-detail-scroll">
                             {recentMilestones.map((milestone) => (
                               <div className="project-detail-row" key={milestone.id}>
@@ -627,7 +627,7 @@ export default function Projects() {
                         </div>
                         <div>
                           <h4>Work Sessions</h4>
-                          {recentSessions.length === 0 && <p className="project-empty-copy">No work sessions yet.</p>}
+                          {recentSessions.length === 0 && <p className="project-empty-copy">Zero work logged. Procrastination is undefeated, but you can change that.</p>}
                           <div className="project-detail-scroll">
                             {recentSessions.map((log) => (
                               <div className="project-detail-row" key={log.id}>
@@ -645,7 +645,12 @@ export default function Projects() {
                   </article>
                 );
               })}
-              {projectsData.projects.length === 0 && <div className="tracking-empty"><strong>No projects yet.</strong><span>Create a real build and track meaningful progress.</span></div>}
+              {projectsData.projects.length === 0 && (
+                <div className="tracking-empty">
+                  <strong>No projects yet.</strong>
+                  <span>What are you even building, imaginary startups in your head? Create a repo and start committing!</span>
+                </div>
+              )}
             </div>
           </section>
         </>
@@ -681,7 +686,12 @@ export default function Projects() {
                   </div>
                 </article>
               ))}
-              {fullstackData.logs.length === 0 && <div className="tracking-empty"><strong>No fullstack entries yet.</strong><span>Log one section or one implementation task.</span></div>}
+              {fullstackData.logs.length === 0 && (
+                <div className="tracking-empty">
+                  <strong>No fullstack entries yet.</strong>
+                  <span>Stop watching 40-hour tutorials at 2x speed without typing a single line of code. Build something!</span>
+                </div>
+              )}
             </div>
           </section>
         </>

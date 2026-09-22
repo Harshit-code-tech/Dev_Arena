@@ -182,7 +182,7 @@ export default function Players() {
                 ))}
               </div>
             ) : (
-              <div className="friends-empty pending-email-empty">No pending email invitations.</div>
+              <div className="friends-empty pending-email-empty">No pending email invitations. Did you forget to peer pressure your friends into joining?</div>
             )}
           </div>
         </article>
@@ -192,7 +192,7 @@ export default function Players() {
           <label className="friends-line-field"><span>Name, @username, or email</span><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder=" " aria-label="Name, username, or email" /></label>
           <div className="global-search-results" aria-live="polite">
             {searching && <div className="friends-inline-loader"><span /> Loading players…</div>}
-            {!searching && searchResults.length === 0 && <div className="friends-empty">No matching players found.</div>}
+            {!searching && searchResults.length === 0 && <div className="friends-empty">Nobody found. Either they don't exist, or they're hiding from the grind.</div>}
             {searchResults.map((result) => (
               <article className="developer-result" key={result.id}>
                 <Person person={result} showTechStack />
@@ -222,7 +222,7 @@ export default function Players() {
                 </div>
               </article>
             ))}
-            {overview.incomingRequests.length === 0 && <div className="friends-empty">No incoming requests.</div>}
+            {overview.incomingRequests.length === 0 && <div className="friends-empty">Zero incoming requests. Inbox dryer than your git graph on weekends.</div>}
           </div>
         </article>
 
@@ -235,7 +235,7 @@ export default function Players() {
                 <ActionButton danger loading={workingId === `cancel-${request.id}`} onClick={() => void runAction(`cancel-${request.id}`, () => cancelFriendRequest(request.id), "Player request cancelled.")}>Cancel</ActionButton>
               </article>
             ))}
-            {overview.outgoingRequests.length === 0 && <div className="friends-empty">No outgoing requests.</div>}
+            {overview.outgoingRequests.length === 0 && <div className="friends-empty">No outgoing requests. Go challenge someone, don't be shy!</div>}
           </div>
         </article>
       </section>
@@ -253,7 +253,7 @@ export default function Players() {
               <ActionButton danger loading={workingId === `remove-${friend.id}`} onClick={() => void handleRemove(friend.id)}>{confirmRemove === friend.id ? "Confirm remove" : "Remove"}</ActionButton>
             </article>
           ))}
-          {filteredFriends.length === 0 && <div className="friends-empty friends-empty-large">No players match this search yet.</div>}
+          {filteredFriends.length === 0 && <div className="friends-empty friends-empty-large">No rivals found. Go add someone so you have someone to flex on.</div>}
         </div>
       </section>
     </main>
@@ -272,7 +272,7 @@ function Person({ person, compact = false, showTechStack = false }: { person: Fr
           <div className="player-tech-stack" aria-label="Live Top Tech Stack">
             {(person.topTechStack || []).length > 0
               ? (person.topTechStack || []).slice(0, 3).map((technology) => <span key={technology.name}>{technology.name}</span>)
-              : <span>No verified project technologies</span>}
+              : <span>No verified tech stack (HTML doesn't count, bro)</span>}
           </div>
         )}
       </div>

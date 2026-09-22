@@ -37,10 +37,10 @@ export const feedbackService = {
     const feature = String(input.feature || "").trim();
     const feedback = String(input.feedback || "").trim();
     if (!FEEDBACK_FEATURES.includes(feature as (typeof FEEDBACK_FEATURES)[number])) {
-      throw feedbackError("Choose the DevArena feature that needs attention.");
+      throw feedbackError("Pick a real feature from the list, don't invent new ones just yet!");
     }
-    if (feedback.length < 10) throw feedbackError("Feedback must contain at least 10 characters.");
-    if (feedback.length > 4000) throw feedbackError("Feedback cannot exceed 4,000 characters.");
+    if (feedback.length < 10) throw feedbackError("Feedback too short! Give us at least 10 characters of constructive (or unhinged) critique.");
+    if (feedback.length > 4000) throw feedbackError("Whoa, that's a whole manifesto! Keep it under 4,000 characters.");
     return prisma.feedbackSubmission.create({
       data: { userId, feature, feedback },
       select: { id: true, feature: true, status: true, createdAt: true },

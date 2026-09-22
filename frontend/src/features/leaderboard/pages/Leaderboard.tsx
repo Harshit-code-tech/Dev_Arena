@@ -69,18 +69,18 @@ export default function Leaderboard() {
     <main className="leaderboard-page animated-page">
       <header className="leaderboard-hero page-reveal">
         <div>
-          <p>Arena Intelligence / Live ranking</p>
+          <p>The Wall of Fame &amp; Shame / Live Ranking</p>
           <h1>Leaderboard</h1>
-          <span>Real scores, stable tie-breaking, and the top ten performers across DevArena.</span>
+          <span>Where your code either speaks for itself or gets completely exposed. Top 10 tryhards below.</span>
         </div>
-        <strong>{data.totalDevelopers.toLocaleString("en-IN")} Developers</strong>
+        <strong>{data.totalDevelopers.toLocaleString("en-IN")} Competitors</strong>
       </header>
 
       <section className="leaderboard-self page-reveal" aria-labelledby="your-arena-position">
         <div className="leaderboard-self-identity">
           <ArenaAvatar entry={currentUser} large />
           <div>
-            <p>Your account</p>
+            <p>Your standing</p>
             <h2 id="your-arena-position">{currentUser.name}</h2>
             <span>@{currentUser.username}{currentUser.email ? ` · ${currentUser.email}` : ""}</span>
           </div>
@@ -96,7 +96,7 @@ export default function Leaderboard() {
 
       <section className="leaderboard-top-ten page-reveal" aria-labelledby="top-ten-title">
         <div className="leaderboard-section-heading">
-          <div><p>Arena standings</p><h2 id="top-ten-title">Top 10 Performers</h2></div>
+          <div><p>Tryhard Zone</p><h2 id="top-ten-title">Top 10 Performers</h2></div>
           <span>Score · Season · Activity · Rank</span>
         </div>
 

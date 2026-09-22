@@ -11,6 +11,8 @@ const Login = lazy(() => import("../features/auth/pages/desktop/Login"));
 const Signup = lazy(() => import("../features/auth/pages/desktop/Signup"));
 const ChooseUsername = lazy(() => import("../features/auth/pages/ChooseUsername"));
 const Drafts = lazy(() => import("../features/blog/pages/Drafts"));
+const Blog = lazy(() => import("../features/blog/pages/Blog"));
+const NewBlog = lazy(() => import("../features/blog/pages/NewBlog"));
 const Support = lazy(() => import("../features/support/pages/Support"));
 const Feedback = lazy(() => import("../features/feedback/pages/Feedback"));
 const Updates = lazy(() => import("../features/releases/pages/Updates"));
@@ -94,7 +96,6 @@ export function AppRouter() {
         <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About />} />
-        <Route path="/drafts" element={<Drafts />} />
         <Route path="/updates" element={<Updates />} />
         <Route path="/support" element={<Support />} />
         <Route path="/login" element={<Login />} />
@@ -128,6 +129,9 @@ export function AppRouter() {
           <Route path="settings" element={<Settings />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="activity/:date" element={<ActivityDay />} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="blog/new" element={<NewBlog />} />
+          <Route path="blog/drafts" element={<Drafts />} />
         </Route>
         </Routes>
       </Suspense>

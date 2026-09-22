@@ -9,6 +9,7 @@ import {
   getDashboardViewModel,
   type DashboardViewModel,
 } from "../../../services/DashboardService";
+import CoachCard from "../components/CoachCard";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -74,14 +75,16 @@ function Dashboard() {
     <main className="dashboard">
       <section className="dashboard-hero">
         <div>
-          <p className="dashboard-label">Developer Growth Platform</p>
+          <p className="dashboard-label">The Developer Arena · Where Code Talks &amp; Excuses Die</p>
           <h1 className="dashboard-welcome-title">
             <span className="dashboard-welcome-copy">Welcome back,</span>
             <span className="dashboard-welcome-name">{userName}</span>
           </h1>
-          <p className="dashboard-subtitle">Keep building. Keep shipping.</p>
+          <p className="dashboard-subtitle">Touch code, stack points, humiliate your friends.</p>
         </div>
       </section>
+
+      <CoachCard />
 
       <div className="dashboard-overview-row">
         <section
@@ -100,7 +103,7 @@ function Dashboard() {
 
           <article className="dashboard-summary-line">
             <div><span>Current Streak</span><b aria-hidden="true">:</b><strong data-private-value="true">{streak} {streak === 1 ? "Day" : "Days"}</strong></div>
-            <p><i aria-hidden="true">←</i> {streak === 0 ? "Start building" : "Consistent"}</p>
+            <p><i aria-hidden="true">←</i> {streak === 0 ? "Zero streak. Yikes. Go write code." : "On fire 🔥"}</p>
           </article>
         </section>
 
@@ -210,8 +213,8 @@ function Dashboard() {
             {leaderboardPreview.length === 0 && (
               <div className="leaderboard-empty">
                 <span className="leaderboard-empty-mark" aria-hidden="true">#</span>
-                <strong>No ranking yet</strong>
-                <span>Your live arena position will appear here once you start earning season points.</span>
+                <strong>Ghost town on the leaderboard</strong>
+                <span>Go write some code before your rivals start clowning you. Points put you on the board!</span>
               </div>
             )}
           </div>

@@ -27,6 +27,8 @@ import playerHubRoutes from "./modules/player-hub/player-hub.routes";
 import githubRoutes from "./modules/github/github.routes";
 import feedbackRoutes from "./modules/feedback/feedback.routes";
 import challengeRoutes from "./modules/challenges/challenge.routes";
+import supportRoutes from "./modules/support/support.routes";
+import coachRoutes from "./modules/coach/coach.routes";
 
 export function createApp(port: number) {
     const app = express();
@@ -81,6 +83,8 @@ export function createApp(port: number) {
     app.use("/api/player-hub", playerHubRoutes);
     app.use("/api/github", githubRoutes);
     app.use("/api/feedback", feedbackRoutes);
+    app.use("/api/support", supportRoutes);
+    app.use("/api/coach", coachRoutes);
 
     // ── 404 fallback ──────────────────────────────────────────────
     app.use((_req: Request, res: Response) => {

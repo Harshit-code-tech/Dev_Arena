@@ -57,14 +57,14 @@ function TaskCard({
 
   const handleSubmit = async () => {
     if (!code.trim()) {
-      toast.error("Please enter your code before submitting.");
+      toast.error("You can't submit invisible code, genius. Type something in first!");
       return;
     }
 
     try {
       setSubmitting(true);
       const submission = await submitCode(task.id, code, language);
-      toast.success("Code submitted successfully!");
+      toast.success("Code flung into the grader! Praying for your test cases... 🙏");
       onSubmitted(task.id, submission);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Submission failed.");
@@ -227,18 +227,17 @@ export default function Challenges() {
       <main className="challenges-page animated-page">
         <header className="challenges-hero page-reveal">
           <div>
-            <p>Weekly Competition / Challenge Engine</p>
+            <p>Gladiator Arena / Speed &amp; Brains</p>
             <h1>Challenges</h1>
-            <span>Compete weekly with objective, standardized tasks.</span>
+            <span>Where algorithms fight, memory limits destroy dreams, and only the fastest survive.</span>
           </div>
         </header>
 
         <section className="challenges-empty page-reveal">
-          <span className="challenges-empty-icon" aria-hidden="true">⚡</span>
-          <h2>No Active Competition</h2>
+          <span className="challenges-empty-icon" aria-hidden="true">⚔️</span>
+          <h2>The Arena is Quiet... Too Quiet.</h2>
           <p>
-            There is no competition running this week. Competitions are published weekly
-            and contain DSA, Development, and Debugging tasks. Check back soon!
+            No live wars this week. Sharpen your algorithms, hydrate, and prep your fingers for the next bloodbath. Check back soon!
           </p>
         </section>
       </main>
@@ -251,7 +250,7 @@ export default function Challenges() {
     <main className="challenges-page animated-page">
       <header className="challenges-hero page-reveal">
         <div>
-          <p>Weekly Competition / Challenge Engine</p>
+          <p>Gladiator Arena / Speed &amp; Brains</p>
           <h1>{competition.title}</h1>
           <span>Compete with objective, standardized tasks. Your rank is determined by correctness, efficiency, and speed.</span>
         </div>
