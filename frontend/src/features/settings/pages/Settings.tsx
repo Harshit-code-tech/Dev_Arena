@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../../auth/context/AuthContext";
+import { deleteFirebaseUser } from "../../auth/api/AuthSessionService";
 import PageLoader from "../../../shared/components/Skeletons/PageLoader";
 import LiveDateTime from "../../../shared/components/LiveDateTime";
 import ProfilePhotoCropper from "../components/ProfilePhotoCropper";
@@ -236,9 +237,11 @@ export default function Settings() {
     try {
       setSavingKey("github-connect");
       const result = await GitHubApi.startConnection();
-      window.location.assign(result.authorizationUrl);
+      // Open in a new tab so the DevArena session stays intact
+      window.open(result.authorizationUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub connection could not start.");
+    } finally {
       setSavingKey(null);
     }
   }
@@ -247,9 +250,11 @@ export default function Settings() {
     try {
       setSavingKey("github-install");
       const result = await GitHubApi.startInstallation();
-      window.location.assign(result.installationUrl);
+      // Open in a new tab so the DevArena session stays intact
+      window.open(result.installationUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub App installation could not start.");
+    } finally {
       setSavingKey(null);
     }
   }
@@ -310,7 +315,11 @@ export default function Settings() {
   async function permanentlyDeleteAccount() {
     try {
       setSavingKey("delete");
+      // Delete from Neon DB first (requires valid JWT)
       await deleteAccount(deleteConfirmation);
+      // Then remove the Firebase Auth identity so the email cannot be re-used
+      // by a silent Google re-login re-creating the Neon account.
+      await deleteFirebaseUser();
       logout();
       navigate("/", { replace: true });
       toast.success("Account deleted.");

@@ -7,6 +7,27 @@ export async function signOutFirebaseUser() {
   await auth.signOut();
 }
 
+/**
+ * Permanently deletes the Firebase Auth account for the currently signed-in user.
+ * Should be called when the user deletes their DevArena account so that the
+ * Firebase identity is fully removed and cannot silently re-create a Neon record.
+ * Falls back gracefully if there is no Firebase session (manual email/password users).
+ */
+export async function deleteFirebaseUser(): Promise<void> {
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    try {
+      await currentUser.delete();
+    } catch (error) {
+      // "auth/requires-recent-login" means the user's session is too old for
+      // a destructive action. We still sign them out so the DevArena session ends.
+      console.warn("Firebase user deletion failed (will sign out instead):", error);
+      await auth.signOut();
+    }
+  }
+}
+
+
 export async function getCurrentBackendUser(token: string): Promise<BackendAuthUser> {
   const response = await fetch(AUTH_ENDPOINTS.currentUser, {
     headers: { Authorization: `Bearer ${token}` },

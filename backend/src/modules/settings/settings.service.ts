@@ -371,7 +371,33 @@ export const settingsService = {
     if (confirmation.trim().toUpperCase() !== "DELETE") {
       throw httpError('Type "DELETE" to permanently remove the account.');
     }
-    await prisma.user.delete({ where: { id: userId } });
-    return { message: "Account permanently deleted." };
+    if (!userId) {
+      throw httpError("Could not determine which account to delete. Please sign in and try again.", 401);
+    }
+    try {
+      // All child tables have ON DELETE CASCADE in the DB, so a single user
+      // delete will cascade everywhere. Wrapped in a transaction so a partial
+      // failure is fully rolled back instead of leaving an orphaned user.
+      await prisma.$transaction(async (tx) => {
+        await tx.user.delete({ where: { id: userId } });
+      });
+      return { message: "Account permanently deleted." };
+    } catch (error: unknown) {
+      const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+      const meta = error && typeof error === "object" && "meta" in error ? (error as { meta?: unknown }).meta : undefined;
+      console.error("deleteAccount failed:", { userId, code, meta, error });
+      if (code === "P2025") {
+        // Record not found — already deleted or ID mismatch
+        throw httpError("Account not found. It may have already been deleted.", 404);
+      }
+      if (code === "P2003" || code === "P2014") {
+        // FK constraint — a child table is missing its CASCADE (schema/migration drift)
+        throw httpError(
+          "Account deletion failed due to a database constraint. Please contact support with error code DA-DELETE-FK.",
+          500,
+        );
+      }
+      throw httpError("Account could not be deleted. Please try again or contact support.", 500);
+    }
   },
 };
