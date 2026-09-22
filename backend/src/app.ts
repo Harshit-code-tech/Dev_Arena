@@ -3,6 +3,14 @@ import express, { Request, Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 
+/** Origins allowed to call the API */
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  // Production domain — set FRONTEND_URL in .env
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+];
+
 import errorHandler from "./middleware/errorHandler";
 
 // ── Routes ────────────────────────────────────────────────────
@@ -34,8 +42,23 @@ export function createApp(port: number) {
     const app = express();
 
     // ── Global middleware ─────────────────────────────────────────
-    app.use(helmet());
-    app.use(cors());
+    app.use(helmet({
+      // Enforce HTTPS for 1 year in production (tells browsers to never use HTTP)
+      hsts: process.env.NODE_ENV === "production"
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false,
+    }));
+    app.use(cors({
+      origin: (origin, callback) => {
+        // Allow server-to-server requests (no Origin header) and allowlisted origins
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin '${origin}' is not allowed`));
+        }
+      },
+      credentials: true,
+    }));
     app.use(express.json({
         limit: "8mb",
         verify: (req, _res, buffer) => {

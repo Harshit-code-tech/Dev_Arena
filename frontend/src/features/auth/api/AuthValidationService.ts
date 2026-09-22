@@ -49,12 +49,22 @@ export function validateEmailSignupInput(input: EmailSignupInput) {
     return "Please enter a valid email address.";
   }
 
+  // Mirror the backend validatePasswordStrength rules exactly so the frontend
+  // always rejects what the backend would reject — no surprises for the user.
   if (input.password.length < 8) {
-    return "Password must contain at least 8 characters.";
+    return "Password must be at least 8 characters.";
   }
-
-  if (input.passwordStrength.score < 2) {
-    return "Password is too weak. Use uppercase letters, numbers, and symbols.";
+  if (input.password.length > 128) {
+    return "Password must be 128 characters or fewer.";
+  }
+  if (!/[A-Z]/.test(input.password)) {
+    return "Password must contain at least one uppercase letter.";
+  }
+  if (!/[0-9]/.test(input.password)) {
+    return "Password must contain at least one number.";
+  }
+  if (!/[^A-Za-z0-9]/.test(input.password)) {
+    return "Password must contain at least one special character (e.g. !@#$%).";
   }
 
   if (!input.agreeTerms) {

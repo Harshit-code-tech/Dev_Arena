@@ -82,12 +82,23 @@ function Login() {
 
     try {
       setLoading(true);
-      // Step 1: backend verifies credentials and sends OTP — no Firebase
-      const pending = await requestEmailLogin({ email, password, remember });
+      const result = await requestEmailLogin({ email, password, remember });
+
+      if (!result.requiresOtp) {
+        // 15-day grace period: backend skipped OTP, returned session directly
+        await loginWithToken(result.token);
+        const needsSetup = result.user?.requiresUsername || result.user?.requiresOnboarding;
+        transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
+        toast.success(needsSetup ? "Complete your DevArena account setup." : "Welcome back!");
+        beginDashboardTransition();
+        return;
+      }
+
+      // OTP required — show challenge screen
       setOtpPending({
-        tempToken: pending.tempToken,
-        email: pending.email,
-        resendAfterSeconds: pending.resendAfterSeconds ?? 60,
+        tempToken: result.tempToken,
+        email: result.email,
+        resendAfterSeconds: result.resendAfterSeconds ?? 60,
       });
     } catch (loginError: unknown) {
       console.error(loginError);

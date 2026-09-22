@@ -3,6 +3,7 @@ import type {
   AuthOtpPendingResult,
   AuthOtpVerificationResult,
   AuthOtpResendResult,
+  EmailLoginDirectResult,
 } from "./AuthTypes";
 
 /**
@@ -44,7 +45,7 @@ export async function requestEmailLogin(input: {
   email: string;
   password: string;
   remember?: boolean;
-}): Promise<AuthOtpPendingResult> {
+}): Promise<AuthOtpPendingResult | EmailLoginDirectResult> {
   const response = await fetch(AUTH_ENDPOINTS.emailLogin, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -60,7 +61,7 @@ export async function requestEmailLogin(input: {
     throw new Error((data as { message?: string }).message || "Login failed.");
   }
 
-  return data as AuthOtpPendingResult;
+  return data as AuthOtpPendingResult | EmailLoginDirectResult;
 }
 
 /**

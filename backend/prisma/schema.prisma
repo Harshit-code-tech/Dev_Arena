@@ -214,6 +214,11 @@ model User {
   emailOtpExpiresAt      DateTime? @map("email_otp_expires_at")
   passwordResetToken     String?   @map("password_reset_token")
   passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+  // 15-day OTP grace period: skip OTP if verified recently
+  lastOtpVerifiedAt      DateTime? @map("last_otp_verified_at")
+  // Per-account brute-force protection
+  failedLoginAttempts    Int       @default(0) @map("failed_login_attempts")
+  failedLoginLockedUntil DateTime? @map("failed_login_locked_until")
 
   // ── Legal acceptance ─────────────────────────────────────
   termsAcceptedAt DateTime? @map("terms_accepted_at")

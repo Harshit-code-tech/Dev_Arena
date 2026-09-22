@@ -34,7 +34,7 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false); // Must be explicitly opted in — GDPR/CCPA requires active consent
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(null);
@@ -227,6 +227,7 @@ function Signup() {
                       name="firstName"
                       placeholder=" "
                       autoComplete="given-name"
+                      maxLength={50}
                       value={firstName}
                       onChange={(event) => setFirstName(event.target.value)}
                     />
@@ -240,6 +241,7 @@ function Signup() {
                       name="lastName"
                       placeholder=" "
                       autoComplete="family-name"
+                      maxLength={50}
                       value={lastName}
                       onChange={(event) => setLastName(event.target.value)}
                     />
@@ -256,6 +258,7 @@ function Signup() {
                     name="email"
                     placeholder=" "
                     autoComplete="email"
+                    maxLength={254}
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                   />

@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { timingSafeEqual } from "crypto";
 import type { AuthOtpPurpose } from "@prisma/client";
 import { prisma } from "../../database/prisma";
 import { sendAuthOtpEmail } from "../../shared/utils/email";
@@ -47,10 +48,24 @@ function normalizeUsername(value: unknown) {
   return String(value || "").trim().replace(/^@/, "");
 }
 
-function validateUsername(username: string) {
-  if (!/^[a-z0-9._]{3,24}$/.test(username) || username.startsWith(PENDING_USERNAME_PREFIX)) {
-    return "Username must contain 3–24 lowercase letters, numbers, dots, or underscores";
-  }
+/** Bcrypt cost factor — 12 is the 2025 recommended minimum (Firebase uses 8–10) */
+const BCRYPT_COST = 12;
+
+/** OTP grace period: if user verified OTP within this window, skip OTP on next login */
+const OTP_GRACE_PERIOD_DAYS = 15;
+
+/**
+ * A dummy hash used for constant-time comparison when the user is not found.
+ * This prevents timing attacks that could enumerate valid email addresses.
+ */
+const DUMMY_HASH = "$2b$12$Gv9Rf2KXxiKf9hBoRSSSxuHbqPalL8bNRJTgGMVIKBmrJq3M7cHiC";
+
+function validatePasswordStrength(password: string): string | null {
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter";
+  if (!/[0-9]/.test(password)) return "Password must contain at least one number";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Password must contain at least one special character (e.g. !@#$%)"; 
+  if (password.length > 128) return "Password must be 128 characters or fewer";
   return null;
 }
 
@@ -76,6 +91,13 @@ function createUserPayload(user: {
     role: user.role || "User",
     isAdmin,
   };
+}
+
+function validateUsername(username: string) {
+  if (!/^[a-z0-9._]{3,24}$/.test(username) || username.startsWith(PENDING_USERNAME_PREFIX)) {
+    return "Username must contain 3–24 lowercase letters, numbers, dots, or underscores";
+  }
+  return null;
 }
 
 async function nextPendingUsername() {
@@ -183,14 +205,15 @@ export const authService = {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
         return { statusCode: 400, body: { message: "Invalid email format" } };
       }
-      if (password.length < 8) {
-        return { statusCode: 400, body: { message: "Password must be at least 8 characters long" } };
+      const strengthError = validatePasswordStrength(password);
+      if (strengthError) {
+        return { statusCode: 400, body: { message: strengthError } };
       }
       if (await authRepository.findUserByEmail(trimmedEmail)) {
         return { statusCode: 409, body: { message: "An account with this email already exists" } };
       }
 
-      const passwordHash = await bcrypt.hash(password, 10);
+      const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
       const { challenge, tempToken } = await createOtpChallenge({
         purpose: "Signup",
         email: trimmedEmail,
@@ -218,11 +241,67 @@ export const authService = {
 
       const identifier = email.trim().toLowerCase();
       const user = await authRepository.findUserByLoginIdentifier(identifier);
-      if (!user || !user.passwordHash) {
+
+      // ── Timing-safe comparison ──────────────────────────────────────
+      // Always run bcrypt.compare regardless of whether the user exists.
+      // This prevents timing attacks that can enumerate valid email addresses
+      // by measuring response time differences.
+      const hashToCheck = user?.passwordHash ?? DUMMY_HASH;
+      const passwordMatch = await bcrypt.compare(password, hashToCheck);
+
+      if (!user || !user.passwordHash || !passwordMatch) {
+        // Increment failed attempt counter on the real user if they exist
+        if (user) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: { increment: 1 },
+              // Lock the account for 15 minutes after 10 consecutive failures
+              ...(user.failedLoginAttempts + 1 >= 10
+                ? { failedLoginLockedUntil: new Date(Date.now() + 15 * 60 * 1000) }
+                : {}),
+            },
+          });
+        }
         return { statusCode: 401, body: { message: "Invalid email, username, or password" } };
       }
-      if (!(await bcrypt.compare(password, user.passwordHash))) {
-        return { statusCode: 401, body: { message: "Invalid email, username, or password" } };
+
+      // ── Per-account lockout ─────────────────────────────────────────
+      if (user.failedLoginLockedUntil && user.failedLoginLockedUntil > new Date()) {
+        const minutesLeft = Math.ceil((user.failedLoginLockedUntil.getTime() - Date.now()) / 60000);
+        return {
+          statusCode: 429,
+          body: { message: `Account temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? "" : "s"}.` },
+        };
+      }
+
+      // ── Reset failed attempt counter on successful password check ────────
+      if (user.failedLoginAttempts > 0 || user.failedLoginLockedUntil) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { failedLoginAttempts: 0, failedLoginLockedUntil: null },
+        });
+      }
+
+      // ── 15-day OTP grace period ───────────────────────────────────
+      // If the user verified an OTP within the last 15 days, skip OTP and
+      // issue a session token directly. This matches how Firebase handles
+      // persistent sessions, while still requiring OTP after the grace period.
+      if (user.lastOtpVerifiedAt) {
+        const gracePeriodMs = OTP_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+        const withinGracePeriod = Date.now() - user.lastOtpVerifiedAt.getTime() < gracePeriodMs;
+        if (withinGracePeriod) {
+          const token = generateAuthToken(user.id, input.remember === true);
+          return {
+            statusCode: 200,
+            body: {
+              requiresOtp: false,
+              message: "Login successful",
+              token,
+              user: createUserPayload(user),
+            },
+          };
+        }
       }
 
       const { challenge, tempToken } = await createOtpChallenge({
@@ -314,6 +393,8 @@ export const authService = {
               usernameChosen: false,
               onboardingRequired: true,
               isEmailVerified: true,
+              // Start the 15-day OTP grace period from the moment of account creation
+              lastOtpVerifiedAt: new Date(),
               termsAcceptedAt: new Date(),
               termsVersion: "2026-08-02",
               privacyVersion: "2026-08-02",
@@ -348,7 +429,14 @@ export const authService = {
         if (claimed.count !== 1) throw new Error("OTP_ALREADY_CONSUMED");
         return tx.user.update({
           where: { id: user.id },
-          data: { isEmailVerified: true },
+          data: {
+            isEmailVerified: true,
+            // Stamp the OTP verification time to start the 15-day grace period
+            lastOtpVerifiedAt: new Date(),
+            // Reset any brute-force counters on successful full login
+            failedLoginAttempts: 0,
+            failedLoginLockedUntil: null,
+          },
         });
       });
 

@@ -24,6 +24,21 @@ export interface AuthOtpPendingResult {
   message?: string;
 }
 
+/** Returned by login when user is within the 15-day OTP grace period */
+export interface EmailLoginDirectResult {
+  requiresOtp: false;
+  token: string;
+  message?: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    username?: string;
+    requiresUsername?: boolean;
+    requiresOnboarding?: boolean;
+  };
+}
+
 export interface FirebaseEmailAuthResult {
   token: string;
   requiresUsername: boolean;

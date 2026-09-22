@@ -7,7 +7,7 @@ const router = Router();
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 5,
   message: { message: "Too many login attempts. Try again after 15 minutes." },
 });
 
@@ -28,7 +28,7 @@ router.post("/login", loginLimiter, authController.login);
 router.post("/verify-auth-otp", otpVerifyLimiter, authController.verifyAuthOtp);
 router.post("/resend-auth-otp", otpRequestLimiter, authController.resendAuthOtp);
 router.post("/prepare-firebase-migration", loginLimiter, authController.prepareFirebaseMigration);
-router.post("/sync-firebase", authController.syncFirebase);
+router.post("/sync-firebase", loginLimiter, authController.syncFirebase);
 router.post("/forgot-password", otpRequestLimiter, authController.forgotPassword);
 router.post("/reset-password", otpVerifyLimiter, authController.resetPassword);
 router.get("/me", protect, authController.getCurrentUser);
