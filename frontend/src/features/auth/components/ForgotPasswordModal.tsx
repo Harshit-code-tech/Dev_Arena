@@ -63,14 +63,19 @@ export function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
     setErrorMessage("");
     setLoading(true);
     try {
-      await resetPasswordWithOtp({ tempToken, otp, newPassword });
-      toast.success("Password reset successfully. You can now log in.");
+      const result = await resetPasswordWithOtp({ tempToken, otp, newPassword });
+      toast.success(
+        result.requiresOnboarding
+          ? "Password reset! Log in and you'll be guided to complete your GitHub setup."
+          : "Password reset successfully. You can now log in.",
+      );
       onClose();
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "The password could not be reset."));
     } finally {
       setLoading(false);
     }
+
   }
 
   return (

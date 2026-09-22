@@ -9,18 +9,12 @@ async function sendResult(
   res.status(result.statusCode).json(result.body);
 }
 
-export const register = async (_req: Request, res: Response): Promise<void> => {
-  res.status(410).json({
-    code: "FIREBASE_AUTH_REQUIRED",
-    message: "Email/password signup is handled by Firebase Authentication. Update the DevArena client and try again.",
-  });
+export const register = async (req: Request, res: Response): Promise<void> => {
+  await sendResult(res, () => authService.register(req.body));
 };
 
-export const login = async (_req: Request, res: Response): Promise<void> => {
-  res.status(410).json({
-    code: "FIREBASE_AUTH_REQUIRED",
-    message: "Email/password login is handled by Firebase Authentication. Update the DevArena client and try again.",
-  });
+export const login = async (req: Request, res: Response): Promise<void> => {
+  await sendResult(res, () => authService.login(req.body));
 };
 
 export const verifyAuthOtp = async (req: Request, res: Response): Promise<void> => {

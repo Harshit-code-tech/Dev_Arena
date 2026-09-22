@@ -7,12 +7,15 @@ import {
   getSocialAuthErrorMessage,
   signInWithSocialProvider,
 } from "../../api/SocialAuthService";
-import { registerWithEmail } from "../../api/EmailAuthService";
+import {
+  requestEmailRegister,
+} from "../../api/EmailAuthService";
+import EmailOtpChallenge from "../../components/EmailOtpChallenge";
 import {
   getPasswordStrength,
   validateEmailSignupInput,
 } from "../../api/AuthValidationService";
-import type { SocialAuthProvider } from "../../api/AuthTypes";
+import type { SocialAuthProvider, AuthOtpVerificationResult } from "../../api/AuthTypes";
 import { useAuth } from "../../context/AuthContext";
 import { claimEmailInvite } from "../../../../services/FriendsService";
 import AuthScreenTransition, {
@@ -34,6 +37,7 @@ function Signup() {
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(null);
   const [transitionOrigin, setTransitionOrigin] = useState<AuthTransitionOrigin | null>(null);
   const [rocketLaunching, setRocketLaunching] = useState(false);
   const [rocketLaunchDistance, setRocketLaunchDistance] = useState(0);
@@ -126,38 +130,45 @@ function Signup() {
 
     try {
       setLoading(true);
-      const data = await registerWithEmail({
+      // Step 1: backend validates and emails an OTP — no Firebase yet
+      const pending = await requestEmailRegister({
         firstName,
         lastName,
         email,
         password,
         agreeTerms,
-        passwordStrength: strength,
       });
-
-      await loginWithToken(data.token);
-      await claimPendingInvite();
-      transitionDestination.current = data.requiresOnboarding ? "/choose-username" : "/dashboard";
-      toast.success(
-        data.requiresOnboarding
-          ? "Account created in Firebase. Complete your DevArena username and GitHub setup."
-          : `Welcome to DevArena, ${firstName}!`,
-      );
-      beginSignupTransition();
-    } catch (signupError: any) {
+      setOtpPending({
+        tempToken: pending.tempToken,
+        email: pending.email,
+        resendAfterSeconds: pending.resendAfterSeconds ?? 60,
+      });
+    } catch (signupError: unknown) {
       console.error(signupError);
-      const errorMessage = signupError.message || "Something went wrong. Please try again.";
-
-      if (errorMessage.includes("already exists")) {
-        setError("An account with this email already exists.");
-        toast.error("An account with this email already exists.");
-      } else {
-        setError(errorMessage);
-        toast.error(errorMessage);
-      }
+      const errorMessage = signupError instanceof Error ? signupError.message : "Something went wrong. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOtpVerified = async (result: AuthOtpVerificationResult) => {
+    // Step 2: OTP verified — Neon DB user is now created. Log in with the returned token.
+    if (!result.token) {
+      toast.error("Verification succeeded but no session was returned. Try logging in.");
+      return;
+    }
+    await loginWithToken(result.token);
+    await claimPendingInvite();
+    const requiresOnboarding = result.user?.requiresOnboarding ?? true;
+    transitionDestination.current = requiresOnboarding ? "/choose-username" : "/dashboard";
+    toast.success(
+      requiresOnboarding
+        ? "Email verified! Complete your DevArena username and GitHub setup."
+        : `Welcome to DevArena, ${firstName}!`,
+    );
+    beginSignupTransition();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -172,11 +183,31 @@ function Signup() {
       <div className="auth-container">
         <section className="auth-form-panel" aria-labelledby="signup-heading">
           <div className="auth-form-shell">
+            {otpPending ? (
+              <>
+                <div className="form-top">
+                  <p className="auth-badge">DevArena / Email verification</p>
+                  <h1 id="signup-heading">Verify your email</h1>
+                  <p className="auth-subtitle">
+                    We sent a 6-digit code to your inbox. Enter it below to create your account.
+                  </p>
+                </div>
+                <EmailOtpChallenge
+                  purpose="signup"
+                  tempToken={otpPending.tempToken}
+                  email={otpPending.email}
+                  resendAfterSeconds={otpPending.resendAfterSeconds}
+                  onVerified={handleOtpVerified}
+                  onBack={() => setOtpPending(null)}
+                />
+              </>
+            ) : (
+            <>
             <div className="form-top">
               <p className="auth-badge">DevArena / New account</p>
               <h1 id="signup-heading">Create account</h1>
               <p className="auth-subtitle">
-                Create your Firebase email/password identity, then continue with DevArena setup.
+                Create your DevArena account. We'll verify your email before anything else.
               </p>
             </div>
 
@@ -343,6 +374,8 @@ function Signup() {
                   Log in
                 </button>
               </div>
+            </>
+            )}
           </div>
         </section>
 

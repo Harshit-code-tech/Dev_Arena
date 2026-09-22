@@ -32,15 +32,17 @@ export async function requestPasswordResetOtp(email: string) {
   return data;
 }
 
-export async function resetPasswordWithOtp(input: ResetPasswordInput) {
+export async function resetPasswordWithOtp(input: ResetPasswordInput): Promise<{ message: string; requiresOnboarding?: boolean }> {
   const response = await fetch(AUTH_ENDPOINTS.resetPassword, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
 
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => ({})) as { message?: string; requiresOnboarding?: boolean };
   if (!response.ok) {
     throw new Error(data.message || "Failed to reset password.");
   }
+  return data;
 }
+

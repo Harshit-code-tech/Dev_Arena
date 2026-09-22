@@ -518,7 +518,18 @@ export const authService = {
         emailOtpExpiresAt: null,
       });
 
-      return { statusCode: 200, body: { message: "Password reset successfully. You can now log in." } };
+      const onboarding = await getOnboardingStatus(user.id).catch(() => null);
+      const pendingOnboarding = Boolean(onboarding?.required && !onboarding.complete);
+
+      return {
+        statusCode: 200,
+        body: {
+          message: pendingOnboarding
+            ? "Password reset! Log in and you'll be guided to complete your GitHub setup."
+            : "Password reset successfully. You can now log in.",
+          requiresOnboarding: pendingOnboarding,
+        },
+      };
     } catch (error: unknown) {
       return { statusCode: 500, body: { message: "Failed to reset password", error: getErrorMessage(error) } };
     }
@@ -672,6 +683,9 @@ export const authService = {
         provider: identity.provider,
         acceptLegal: input.acceptLegal === true,
         migrationUserId,
+        // On login (not signup), recover orphaned Firebase identities that have no DB record
+        // by creating the user silently with onboardingRequired: true.
+        allowOrphanRecovery: input.acceptLegal !== true,
       });
 
       const token = generateAuthToken(user.id, input.remember !== false);

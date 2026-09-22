@@ -18,6 +18,10 @@ export type FirebaseUserUpsertInput = {
     provider: "password" | "google" | "github";
     acceptLegal?: boolean;
     migrationUserId?: string;
+    /** When true, a missing DB user is silently created with onboardingRequired: true.
+     *  Used during login to recover orphaned Firebase identities whose DB record was
+     *  never fully created during a previous failed signup attempt. */
+    allowOrphanRecovery?: boolean;
 };
 
 type AuthRepository = {
@@ -121,7 +125,7 @@ export const authRepository: AuthRepository = {
             });
         }
 
-        if (input.acceptLegal !== true) {
+        if (input.acceptLegal !== true && !input.allowOrphanRecovery) {
             throw new Error("LEGAL_ACCEPTANCE_REQUIRED");
         }
 

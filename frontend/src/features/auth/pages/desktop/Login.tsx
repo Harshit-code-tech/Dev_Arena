@@ -7,9 +7,12 @@ import {
   getSocialAuthErrorMessage,
   signInWithSocialProvider,
 } from "../../api/SocialAuthService";
-import { loginWithEmail } from "../../api/EmailAuthService";
+import {
+  requestEmailLogin,
+} from "../../api/EmailAuthService";
+import EmailOtpChallenge from "../../components/EmailOtpChallenge";
 import { validateEmailLoginInput } from "../../api/AuthValidationService";
-import type { SocialAuthProvider } from "../../api/AuthTypes";
+import type { SocialAuthProvider, AuthOtpVerificationResult } from "../../api/AuthTypes";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { ForgotPasswordModal } from "../../components/ForgotPasswordModal";
@@ -29,6 +32,7 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(null);
   const [transitionOrigin, setTransitionOrigin] = useState<AuthTransitionOrigin | null>(null);
   const signInButtonRef = useRef<HTMLButtonElement>(null);
   const githubButtonRef = useRef<HTMLButtonElement>(null);
@@ -78,33 +82,34 @@ function Login() {
 
     try {
       setLoading(true);
-      const data = await loginWithEmail({ email, password, remember });
-      await loginWithToken(data.token);
-
-      const needsSetup = data.requiresUsername || data.requiresOnboarding;
-      transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
-      toast.success(
-        data.migratedFromLegacy
-          ? "Account migrated to Firebase Authentication. Welcome back!"
-          : needsSetup
-            ? "Complete your DevArena account setup."
-            : "Login successful!",
-      );
-      beginDashboardTransition();
-    } catch (loginError: any) {
+      // Step 1: backend verifies credentials and sends OTP — no Firebase
+      const pending = await requestEmailLogin({ email, password, remember });
+      setOtpPending({
+        tempToken: pending.tempToken,
+        email: pending.email,
+        resendAfterSeconds: pending.resendAfterSeconds ?? 60,
+      });
+    } catch (loginError: unknown) {
       console.error(loginError);
-      const errorMessage = loginError.message || "Something went wrong. Please try again.";
-
-      if (errorMessage.toLowerCase().includes("invalid") || errorMessage.toLowerCase().includes("incorrect")) {
-        setError("Incorrect email or password.");
-        toast.error("Incorrect email or password.");
-      } else {
-        setError(errorMessage);
-        toast.error(errorMessage);
-      }
+      const errorMessage = loginError instanceof Error ? loginError.message : "Something went wrong. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOtpVerified = async (result: AuthOtpVerificationResult) => {
+    // Step 2: OTP verified — backend returned a session token.
+    if (!result.token) {
+      toast.error("Verification succeeded but no session was returned. Try logging in again.");
+      return;
+    }
+    await loginWithToken(result.token);
+    const needsSetup = result.user?.requiresUsername || result.user?.requiresOnboarding;
+    transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
+    toast.success(needsSetup ? "Complete your DevArena account setup." : "Welcome back!");
+    beginDashboardTransition();
   };
 
   return (
@@ -114,11 +119,31 @@ function Login() {
       <div className="auth-container">
         <section className="auth-form-panel" aria-labelledby="login-heading">
           <div className="auth-form-shell">
+            {otpPending ? (
+              <>
+                <div className="form-top">
+                  <p className="auth-badge">DevArena / Email verification</p>
+                  <h1 id="login-heading">Check your inbox</h1>
+                  <p className="auth-subtitle">
+                    We emailed a 6-digit code to verify it's really you.
+                  </p>
+                </div>
+                <EmailOtpChallenge
+                  purpose="login"
+                  tempToken={otpPending.tempToken}
+                  email={otpPending.email}
+                  resendAfterSeconds={otpPending.resendAfterSeconds}
+                  onVerified={handleOtpVerified}
+                  onBack={() => setOtpPending(null)}
+                />
+              </>
+            ) : (
+            <>
             <div className="form-top">
               <p className="auth-badge">DevArena / Secure access</p>
               <h1 id="login-heading">Log in</h1>
               <p className="auth-subtitle">
-                Sign in with your Firebase email/password account to continue your developer journey.
+                Sign in to your DevArena account. We'll send a code to verify it's you.
               </p>
             </div>
 
@@ -242,6 +267,8 @@ function Login() {
                 {" "}and{" "}
                 <button type="button" onClick={() => navigate("/privacy")}>Privacy Policy</button>.
               </p>
+              </>
+              )}
           </div>
         </section>
 
