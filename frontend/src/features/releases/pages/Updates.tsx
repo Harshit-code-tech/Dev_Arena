@@ -54,7 +54,6 @@ function Updates() {
   return (
     <main className="updates-page animated-page">
       <div className="updates-layout">
-
         <header className="hero-updates">
           <h1>Everything that's new</h1>
           <p>
