@@ -20,7 +20,12 @@ import {
   type DevArenaSettings,
   type SettingsPreferenceKey,
 } from "../../../services/SettingsService";
-import { GitHubApi, type GitHubConnectionStatus } from "../../../services/GitHubService";
+import {
+  GitHubApi,
+  rememberGitHubReturnPosition,
+  restoreGitHubReturnPosition,
+  type GitHubConnectionStatus,
+} from "../../../services/GitHubService";
 import {
   getFriendOverview,
   removeFriend,
@@ -69,6 +74,7 @@ export default function Settings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { logout } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const githubReturnPendingRef = useRef(Boolean(searchParams.get("github")));
   const [settings, setSettings] = useState<DevArenaSettings | null>(null);
   const [friends, setFriends] = useState<FriendOverview | null>(null);
   const [githubStatus, setGithubStatus] = useState<GitHubConnectionStatus | null>(null);
@@ -131,11 +137,36 @@ export default function Settings() {
   useEffect(() => {
     const githubResult = searchParams.get("github");
     if (!githubResult) return;
-    if (githubResult === "connected") toast.success("GitHub connected. Public repositories already work; install the app only for private repositories.");
-    else if (githubResult === "installed") toast.success("GitHub App access updated for private repositories.");
-    else toast.error(searchParams.get("message") || "GitHub connection could not be completed.");
-    setSearchParams({}, { replace: true });
+
+    // GitHub changes connection/install state outside React. Check it as soon
+    // as this page is reached so "Not connected" never waits for a refresh.
+    void GitHubApi.status()
+      .then((next) => {
+        setGithubStatus(next);
+        if (githubResult === "installed" && next.connected && next.privateRepositoryAccess) {
+          toast.success("GitHub connected. Repository access is ready.");
+        } else if (githubResult === "connected" && next.connected) {
+          toast.success("GitHub connected.");
+        } else if (githubResult === "error") {
+          toast.error(searchParams.get("message") || "GitHub connection could not be completed.");
+        }
+      })
+      .catch((error) => {
+        toast.error(error instanceof Error ? error.message : "GitHub connection status could not be checked.");
+      });
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("github");
+    nextParams.delete("message");
+    setSearchParams(nextParams, { replace: true });
   }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!loading && githubReturnPendingRef.current) {
+      githubReturnPendingRef.current = false;
+      restoreGitHubReturnPosition();
+    }
+  }, [loading]);
 
   useEffect(() => () => {
     if (selectedPreviewUrl.startsWith("blob:")) URL.revokeObjectURL(selectedPreviewUrl);
@@ -236,9 +267,9 @@ export default function Settings() {
   async function connectGitHub() {
     try {
       setSavingKey("github-connect");
+      rememberGitHubReturnPosition();
       const result = await GitHubApi.startConnection();
-      // Open in a new tab so the DevArena session stays intact
-      window.open(result.authorizationUrl, "_blank", "noopener,noreferrer");
+      window.location.assign(result.authorizationUrl);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub connection could not start.");
     } finally {
@@ -249,9 +280,9 @@ export default function Settings() {
   async function installGitHubApp() {
     try {
       setSavingKey("github-install");
+      rememberGitHubReturnPosition();
       const result = await GitHubApi.startInstallation();
-      // Open in a new tab so the DevArena session stays intact
-      window.open(result.installationUrl, "_blank", "noopener,noreferrer");
+      window.location.assign(result.installationUrl);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub App installation could not start.");
     } finally {
@@ -428,7 +459,7 @@ export default function Settings() {
           </div>
         </section>
 
-        <section className="settings-section github-settings-section page-reveal" style={{ "--reveal-order": 3 } as CSSProperties}>
+        <section id="github-integration" className="settings-section github-settings-section page-reveal" style={{ "--reveal-order": 3 } as CSSProperties}>
           <div className="settings-section-heading">
             <div><p>03 / GitHub integration</p><h2>Repository languages</h2></div>
             <span className={`settings-status${githubStatus?.connected ? " connected" : ""}`}>{githubStatus?.connected ? "Connected" : "Optional"}</span>
