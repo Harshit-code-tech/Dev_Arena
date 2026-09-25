@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { rateLimitKey } from "../../middleware/rate-limit-key";
 import { submitSupportMessage } from "./support.controller";
 
 const router = Router();
@@ -9,6 +10,7 @@ const supportLimiter = rateLimit({
     limit: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: rateLimitKey,
     message: { success: false, message: "Too many support messages. Please wait before trying again." },
 });
 

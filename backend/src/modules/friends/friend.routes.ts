@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { rateLimitKey } from "../../middleware/rate-limit-key";
 import { protect } from "../../middleware/auth.middleware";
 import * as controller from "./friend.controller";
 
@@ -9,6 +10,7 @@ const inviteLimiter = rateLimit({
   limit: 12,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Too many invitations were sent. Try again later." },
 });
 const requestLimiter = rateLimit({
@@ -16,6 +18,7 @@ const requestLimiter = rateLimit({
   limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Too many player requests. Try again later." },
 });
 

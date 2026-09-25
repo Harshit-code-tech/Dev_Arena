@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { rateLimitKey } from "../../middleware/rate-limit-key";
 import { protect } from "../../middleware/auth.middleware";
 import * as controller from "./github.controller";
 
@@ -9,6 +10,7 @@ const limiter = rateLimit({
   limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Too many GitHub requests. Try again shortly." },
 });
 
