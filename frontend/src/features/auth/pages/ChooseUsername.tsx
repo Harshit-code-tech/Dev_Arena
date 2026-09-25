@@ -3,7 +3,12 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import { auth } from "../../../config/Firebase";
-import { GitHubApi, type GitHubConnectionStatus } from "../../../services/GitHubService";
+import {
+  GitHubApi,
+  rememberGitHubReturnPosition,
+  restoreGitHubReturnPosition,
+  type GitHubConnectionStatus,
+} from "../../../services/GitHubService";
 import AuthScreenTransition, {
   getAuthTransitionOrigin,
   type AuthTransitionOrigin,
@@ -103,17 +108,22 @@ export default function ChooseUsername() {
     const githubResult = searchParams.get("github");
     if (!githubResult) return;
 
+    // Re-check immediately after GitHub redirects back. This is the source of
+    // truth for whether OAuth and repository access both completed.
+    void loadGitHubStatus().then(() => restoreGitHubReturnPosition());
+
     if (githubResult === "installed") {
-      toast.success("GitHub connected. Repository access is ready for public and selected private repositories.");
-      void loadGitHubStatus();
+      toast.success("GitHub connected. Repository access is ready.");
     } else if (githubResult === "connected") {
-      toast.success("GitHub connected. Complete repository access selection to continue.");
-      void loadGitHubStatus();
+      toast.success("GitHub connected.");
     } else {
       toast.error(searchParams.get("message") || "GitHub connection could not be completed.");
     }
 
-    setSearchParams({}, { replace: true });
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("github");
+    nextParams.delete("message");
+    setSearchParams(nextParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
@@ -183,6 +193,7 @@ export default function ChooseUsername() {
   async function connectGitHub() {
     try {
       setGithubAction("connect");
+      rememberGitHubReturnPosition();
       const result = await GitHubApi.startConnection();
       window.location.assign(result.authorizationUrl);
     } catch (error) {
@@ -194,6 +205,7 @@ export default function ChooseUsername() {
   async function manageRepositoryAccess() {
     try {
       setGithubAction("install");
+      rememberGitHubReturnPosition();
       const result = await GitHubApi.startInstallation();
       window.location.assign(result.installationUrl);
     } catch (error) {

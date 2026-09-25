@@ -140,11 +140,78 @@ function frontendUrl() {
   return (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/$/, "");
 }
 
+function safeFrontendOrigin(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    const configuredOrigins = [frontendUrl(), ...(process.env.CLIENT_URLS || "").split(",")]
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .flatMap((item) => {
+        try { return [new URL(item).origin]; } catch { return []; }
+      });
+    if (configuredOrigins.includes(parsed.origin)) return parsed.origin;
+    if (process.env.NODE_ENV !== "production" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")) {
+      return parsed.origin;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+type GitHubFlowReturnContext = {
+  returnOrigin: string | null;
+  returnPath: string | null;
+};
+
+function safeFrontendReturnPath(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw || raw.length > 1600 || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return null;
+  try {
+    const parsed = new URL(raw, "https://devarena-return.local");
+    if (parsed.origin !== "https://devarena-return.local") return null;
+    if (parsed.pathname.startsWith("/api/")) return null;
+    parsed.searchParams.delete("github");
+    parsed.searchParams.delete("message");
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return null;
+  }
+}
+
+function createFlowState(returnOrigin?: unknown, returnPath?: unknown) {
+  const payload = {
+    nonce: randomBytes(32).toString("base64url"),
+    returnOrigin: safeFrontendOrigin(returnOrigin),
+    returnPath: safeFrontendReturnPath(returnPath),
+  };
+  return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+}
+
+function returnContextFromState(state: string): GitHubFlowReturnContext {
+  try {
+    const decoded = JSON.parse(Buffer.from(state, "base64url").toString("utf8")) as {
+      returnOrigin?: unknown;
+      returnPath?: unknown;
+    };
+    return {
+      returnOrigin: safeFrontendOrigin(decoded.returnOrigin),
+      returnPath: safeFrontendReturnPath(decoded.returnPath),
+    };
+  } catch {
+    return { returnOrigin: null, returnPath: null };
+  }
+}
+
 function backendPublicUrl() {
-  const configured = process.env.BACKEND_PUBLIC_URL?.trim();
+  const configured = process.env.BACKEND_PUBLIC_URL?.trim() || process.env.RENDER_EXTERNAL_URL?.trim();
   if (configured) return configured.replace(/\/$/, "");
 
-  // Backward-compatible fallback for deployments that already configured only
+  // Render exposes RENDER_EXTERNAL_URL automatically. Outside Render, keep the
+  // backward-compatible fallback for deployments that configured only
   // the OAuth callback URL. New deployments should set BACKEND_PUBLIC_URL.
   const configuredCallback = process.env.GITHUB_APP_CALLBACK_URL?.trim();
   if (configuredCallback) {
@@ -199,7 +266,12 @@ function installUrl() {
 function integrationConfigStatus() {
   const required = ["GITHUB_APP_CLIENT_ID", "GITHUB_APP_CLIENT_SECRET", "GITHUB_APP_SLUG"];
   const missing = required.filter((name) => !process.env[name]?.trim());
-  if (process.env.NODE_ENV === "production" && !process.env.BACKEND_PUBLIC_URL?.trim() && !process.env.GITHUB_APP_CALLBACK_URL?.trim()) {
+  if (
+    process.env.NODE_ENV === "production"
+    && !process.env.BACKEND_PUBLIC_URL?.trim()
+    && !process.env.RENDER_EXTERNAL_URL?.trim()
+    && !process.env.GITHUB_APP_CALLBACK_URL?.trim()
+  ) {
     missing.push("BACKEND_PUBLIC_URL");
   }
   return {
@@ -334,6 +406,43 @@ async function exchangeAuthorizationCode(code: string) {
     throw githubError(payload.error_description || "GitHub authorization could not be completed.", 400);
   }
   return payload;
+}
+
+
+async function authorizeStoredConnection(connection: { id: string; userId: string }, code: string, stateMode: "authorization" | "installation") {
+  const token = await exchangeAuthorizationCode(code);
+  const userResponse = await fetch(`${GITHUB_API}/user`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token.access_token}`,
+      "X-GitHub-Api-Version": API_VERSION,
+      "User-Agent": "DevArena-Language-Reader",
+    },
+  });
+  const githubUser = await userResponse.json().catch(() => ({})) as { id?: number; login?: string };
+  if (!userResponse.ok || !githubUser.id || !githubUser.login) {
+    throw githubError("GitHub account details could not be loaded.", userResponse.status || 400);
+  }
+
+  await prisma.gitHubConnection.update({
+    where: { id: connection.id },
+    data: {
+      githubUserId: String(githubUser.id),
+      githubLogin: githubUser.login,
+      accessTokenEncrypted: encryptSecret(token.access_token!),
+      refreshTokenEncrypted: token.refresh_token ? encryptSecret(token.refresh_token) : null,
+      tokenExpiresAt: token.expires_in ? new Date(Date.now() + token.expires_in * 1000) : null,
+      refreshTokenExpiresAt: token.refresh_token_expires_in
+        ? new Date(Date.now() + token.refresh_token_expires_in * 1000)
+        : null,
+      ...(stateMode === "authorization"
+        ? { oauthStateHash: null, oauthStateExpiresAt: null }
+        : { installStateHash: null, installStateExpiresAt: null }),
+      connectedAt: new Date(),
+    },
+  });
+  void githubService.reverifyUserRepositories(connection.userId).catch(() => undefined);
+  return connection.userId;
 }
 
 async function refreshUserToken(refreshToken: string) {
@@ -828,11 +937,11 @@ export const githubService = {
     return integrationConfigStatus();
   },
 
-  async startConnection(userId: string) {
+  async startConnection(userId: string, returnOrigin?: unknown, returnPath?: unknown) {
     assertProductionGitHubUrls();
     requiredEnv("GITHUB_APP_CLIENT_ID");
     requiredEnv("GITHUB_APP_CLIENT_SECRET");
-    const state = randomBytes(32).toString("base64url");
+    const state = createFlowState(returnOrigin, returnPath);
     await prisma.gitHubConnection.upsert({
       where: { userId },
       update: {
@@ -852,13 +961,13 @@ export const githubService = {
     return { authorizationUrl: authorize.toString() };
   },
 
-  async startInstallation(userId: string) {
+  async startInstallation(userId: string, returnOrigin?: unknown, returnPath?: unknown) {
     assertProductionGitHubUrls();
     const base = installUrl();
     if (!base) throw githubError("GITHUB_APP_SLUG is missing.", 503);
     const connection = await prisma.gitHubConnection.findUnique({ where: { userId } });
     if (!connection?.accessTokenEncrypted) throw githubError("Connect GitHub before installing the GitHub App.", 400);
-    const state = randomBytes(32).toString("base64url");
+    const state = createFlowState(returnOrigin, returnPath);
     await prisma.gitHubConnection.update({
       where: { userId },
       data: {
@@ -877,39 +986,26 @@ export const githubService = {
       where: { oauthStateHash: stateHash(state), oauthStateExpiresAt: { gt: new Date() } },
     });
     if (!connection) throw githubError("GitHub authorization expired or the state was invalid.", 400);
+    const userId = await authorizeStoredConnection(connection, code, "authorization");
+    return { userId, returnContext: returnContextFromState(state) };
+  },
 
-    const token = await exchangeAuthorizationCode(code);
-    const userResponse = await fetch(`${GITHUB_API}/user`, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token.access_token}`,
-        "X-GitHub-Api-Version": API_VERSION,
-        "User-Agent": "DevArena-Language-Reader",
-      },
+  async completeConnectionAfterInstallation(code: string, state: string) {
+    if (!code || !state) throw githubError("GitHub did not return a valid installation authorization response.");
+    const connection = await prisma.gitHubConnection.findFirst({
+      where: { installStateHash: stateHash(state), installStateExpiresAt: { gt: new Date() } },
     });
-    const githubUser = await userResponse.json().catch(() => ({})) as { id?: number; login?: string };
-    if (!userResponse.ok || !githubUser.id || !githubUser.login) {
-      throw githubError("GitHub account details could not be loaded.", userResponse.status || 400);
+    if (!connection) throw githubError("GitHub installation authorization expired or the state was invalid.", 400);
+    const userId = await authorizeStoredConnection(connection, code, "installation");
+
+    // When the GitHub App is configured to request OAuth during installation,
+    // GitHub returns here instead of the Setup URL. Sync the installation now.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const installations = await syncUserInstallations(userId).catch(() => []);
+      if (installations.length > 0) break;
+      if (attempt < 2) await wait(450);
     }
-
-    await prisma.gitHubConnection.update({
-      where: { id: connection.id },
-      data: {
-        githubUserId: String(githubUser.id),
-        githubLogin: githubUser.login,
-        accessTokenEncrypted: encryptSecret(token.access_token!),
-        refreshTokenEncrypted: token.refresh_token ? encryptSecret(token.refresh_token) : null,
-        tokenExpiresAt: token.expires_in ? new Date(Date.now() + token.expires_in * 1000) : null,
-        refreshTokenExpiresAt: token.refresh_token_expires_in
-          ? new Date(Date.now() + token.refresh_token_expires_in * 1000)
-          : null,
-        oauthStateHash: null,
-        oauthStateExpiresAt: null,
-        connectedAt: new Date(),
-      },
-    });
-    void githubService.reverifyUserRepositories(connection.userId).catch(() => undefined);
-    return connection.userId;
+    return { userId, returnContext: returnContextFromState(state) };
   },
 
   async completeInstallation(state: string, installationId: string) {
@@ -937,15 +1033,43 @@ export const githubService = {
       data: { installStateHash: null, installStateExpiresAt: null },
     });
     void githubService.reverifyUserRepositories(connection.userId).catch(() => undefined);
-    return connection.userId;
+    return { userId: connection.userId, returnContext: returnContextFromState(state) };
+  },
+
+  async stateMode(state: string) {
+    if (!state) return null;
+    const hash = stateHash(state);
+    const connection = await prisma.gitHubConnection.findFirst({
+      where: {
+        OR: [
+          { oauthStateHash: hash, oauthStateExpiresAt: { gt: new Date() } },
+          { installStateHash: hash, installStateExpiresAt: { gt: new Date() } },
+        ],
+      },
+      select: { oauthStateHash: true, installStateHash: true },
+    });
+    if (!connection) return null;
+    if (connection.installStateHash === hash) return "installation" as const;
+    if (connection.oauthStateHash === hash) return "authorization" as const;
+    return null;
   },
 
   async requiresMandatoryInstallation(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { onboardingRequired: true },
-    });
-    return Boolean(user?.onboardingRequired);
+    const [user, installationCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { onboardingRequired: true },
+      }),
+      prisma.gitHubInstallationAccess.count({ where: { userId } }),
+    ]);
+    // A first connection should be a complete connection: OAuth + repository
+    // access selection. Existing users that already have an installation can
+    // reconnect OAuth without being forced through repository selection again.
+    return Boolean(user?.onboardingRequired || installationCount === 0);
+  },
+
+  returnContextForState(state: string) {
+    return returnContextFromState(state);
   },
 
   async userIdForState(state: string, mode: "authorization" | "installation") {
@@ -965,11 +1089,15 @@ export const githubService = {
     success: boolean,
     message?: string,
     mode: "authorization" | "installation" = "authorization",
+    returnContext?: Partial<GitHubFlowReturnContext> | null,
   ) {
     const user = userId
       ? await prisma.user.findUnique({ where: { id: userId }, select: { onboardingRequired: true } })
       : null;
-    const target = new URL(user?.onboardingRequired ? "/choose-username" : "/settings", `${frontendUrl()}/`);
+    const destinationOrigin = safeFrontendOrigin(returnContext?.returnOrigin) || frontendUrl();
+    const requestedPath = safeFrontendReturnPath(returnContext?.returnPath);
+    const fallbackPath = user?.onboardingRequired ? "/choose-username" : "/settings";
+    const target = new URL(requestedPath || fallbackPath, `${destinationOrigin}/`);
     target.searchParams.set("github", success ? (mode === "installation" ? "installed" : "connected") : "error");
     if (message) target.searchParams.set("message", message.slice(0, 180));
     return target.toString();
