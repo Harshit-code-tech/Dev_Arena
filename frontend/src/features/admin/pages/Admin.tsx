@@ -434,7 +434,124 @@ export default function Admin() {
         </>}
         <button className="admin-underline-action wide" type="submit" disabled={busy}>Create tournament</button>
       </form>
-      <section className="admin-panel"><header><p>Competition inventory</p><h2>All tournaments</h2></header><div className="admin-cards">{tournaments.map((item) => <article key={item.id} className={selectedTournamentId === item.id ? "selected" : ""}><span>{item.type} / {item.mode}</span><h3>{item.title}</h3><p>{item.status} · {item._count.registrations} registrations · {item._count.dsaSubmissions + item._count.projectSubmissions} submissions</p><div className="admin-review-actions"><button type="button" className="admin-underline-action" onClick={() => { setSelectedTournamentId(item.id); setTab("Submissions"); }}>Review submissions</button><button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Registration_Open" }), "Registration opened.")}>Open registration</button><button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Live" }), "Tournament marked live.")}>Go live</button><button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Judging" }), "Tournament moved to judging.")}>Start judging</button><button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.publishResults(item.id), "Results published and Arena Points awarded.")}>Publish results</button></div></article>)}</div>{selectedTournament && <form className="admin-announcement" onSubmit={(event) => { event.preventDefault(); void run(() => AdminApi.announce(selectedTournament.id, { title: announcementTitle, message: announcementMessage }), "Tournament announcement sent.").then(() => { setAnnouncementTitle(""); setAnnouncementMessage(""); }); }}><h3>Send announcement to {selectedTournament.title}</h3><label><span>Title</span><input required value={announcementTitle} onChange={(event) => setAnnouncementTitle(event.target.value)} /></label><label><span>Message</span><textarea required value={announcementMessage} onChange={(event) => setAnnouncementMessage(event.target.value)} /></label><button className="admin-underline-action" type="submit" disabled={busy}>Send announcement</button></form>}</section>
+      <section className="admin-panel">
+        <header>
+          <p>Competition inventory</p>
+          <h2>All tournaments</h2>
+          <span className="admin-panel-note">
+            Status flow: <strong>Draft</strong> &rarr; <strong>Published</strong> &rarr; <strong>Registration Open</strong> &rarr; <strong>Live</strong> &rarr; <strong>Judging</strong> &rarr; <strong>Completed</strong>. Only relevant actions are shown per status.
+          </span>
+        </header>
+        <div className="admin-cards">
+          {tournaments.map((item) => {
+            const s = item.status;
+            const isDraft = s === "Draft";
+            const isPublished = s === "Published";
+            const isRegOpen = s === "Registration_Open";
+            const isLive = s === "Live";
+            const isJudging = s === "Judging";
+            const isCompleted = s === "Completed" || s === "Cancelled";
+            const submissionCount = item._count.dsaSubmissions + item._count.projectSubmissions;
+            return (
+              <article key={item.id} data-status={s} className={selectedTournamentId === item.id ? "selected" : ""}>
+                <span>{item.type} / {item.mode} &middot; <strong style={{ color: "#fff", fontWeight: 600 }}>{s.replaceAll("_", " ")}</strong></span>
+                <h3>{item.title}</h3>
+                <p>
+                  {item._count.registrations} registration{item._count.registrations !== 1 ? "s" : ""}
+                  {" · "}
+                  {submissionCount} submission{submissionCount !== 1 ? "s" : ""}
+                </p>
+                <div className="admin-review-actions">
+                  {/* Always available */}
+                  <button
+                    type="button"
+                    className="admin-underline-action"
+                    onClick={() => { setSelectedTournamentId(item.id); setTab("Submissions"); }}
+                  >
+                    Review submissions
+                  </button>
+
+                  {/* Draft or Published: open registration */}
+                  {(isDraft || isPublished) && (
+                    <button
+                      type="button"
+                      className="admin-underline-action"
+                      disabled={busy}
+                      title="Move status to Registration Open — players can now register."
+                      onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Registration_Open" }), "Registration opened.")}
+                    >
+                      Open registration
+                    </button>
+                  )}
+
+                  {/* Registration open: go live */}
+                  {isRegOpen && (
+                    <button
+                      type="button"
+                      className="admin-underline-action"
+                      disabled={busy}
+                      title="Close registration and start the live competition phase."
+                      onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Live" }), "Tournament marked live.")}
+                    >
+                      Go live
+                    </button>
+                  )}
+
+                  {/* Live: start judging */}
+                  {isLive && (
+                    <button
+                      type="button"
+                      className="admin-underline-action"
+                      disabled={busy}
+                      title="Close submissions and begin the judging phase."
+                      onClick={() => void run(() => AdminApi.updateTournament(item.id, { status: "Judging" }), "Tournament moved to judging.")}
+                    >
+                      Start judging
+                    </button>
+                  )}
+
+                  {/* Judging: publish results */}
+                  {isJudging && (
+                    <button
+                      type="button"
+                      className="admin-underline-action"
+                      disabled={busy}
+                      title="Publish final results and award Arena Points to all participants."
+                      onClick={() => void run(() => AdminApi.publishResults(item.id), "Results published and Arena Points awarded.")}
+                    >
+                      Publish results
+                    </button>
+                  )}
+
+                  {/* Completed: read-only indicator */}
+                  {isCompleted && (
+                    <span className="admin-muted" style={{ fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                      {s === "Cancelled" ? "Cancelled" : "Results published"}
+                    </span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        {selectedTournament && (
+          <form
+            className="admin-announcement"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void run(
+                () => AdminApi.announce(selectedTournament.id, { title: announcementTitle, message: announcementMessage }),
+                "Tournament announcement sent.",
+              ).then(() => { setAnnouncementTitle(""); setAnnouncementMessage(""); });
+            }}
+          >
+            <h3>Send announcement to {selectedTournament.title}</h3>
+            <label><span>Title</span><input required value={announcementTitle} onChange={(event) => setAnnouncementTitle(event.target.value)} /></label>
+            <label><span>Message</span><textarea required value={announcementMessage} onChange={(event) => setAnnouncementMessage(event.target.value)} /></label>
+            <button className="admin-underline-action" type="submit" disabled={busy}>Send announcement</button>
+          </form>
+        )}
+      </section>
     </section>}
 
 
@@ -454,15 +571,15 @@ export default function Admin() {
     {tab === "Challenges" && <section className="admin-stack">
       {/* ── Competition list ── */}
       <article className="admin-panel">
-        <header><p>Weekly Challenge engine</p><h2>Competitions</h2><span className="admin-panel-note">Workflow: <strong>1)</strong> Create competition → <strong>2)</strong> Add tasks (Draft only) → <strong>3)</strong> Add test cases per task → <strong>4)</strong> Activate. The "Select" button loads tasks for the test-case form below.</span></header>
-        <div className="admin-cards">{competitions.map((c) => <article key={c.id} className={selectedCompetitionId === c.id ? "selected" : ""}>
+        <header><p>Weekly Challenge engine</p><h2>Competitions</h2><span className="admin-panel-note">Workflow: <strong>1.</strong> Create a competition below. <strong>2.</strong> Add tasks (Draft only). <strong>3.</strong> Add test cases per task. <strong>4.</strong> Activate. Click "Select (load tasks)" on any card to load its tasks into the form.</span></header>
+        <div className="admin-cards">{competitions.map((c) => <article key={c.id} data-status={c.status} className={selectedCompetitionId === c.id ? "selected" : ""}>
           <span>{c.status} · {c._count.tasks} task{c._count.tasks === 1 ? "" : "s"}</span>
           <h3>{c.title}</h3>
           <p>{c.weekStart?.slice(0, 10)}{c.opensAt ? ` · opens ${formatDate(c.opensAt)}` : ""}{c.closesAt ? ` · closes ${formatDate(c.closesAt)}` : ""}</p>
           <div className="admin-review-actions">
             <button type="button" className="admin-underline-action" onClick={() => { setSelectedCompetitionId(c.id); setTaskForm((f) => ({ ...f, competitionId: c.status === "Draft" ? c.id : f.competitionId })); void AdminApi.listCompetitionTasks(c.id).then(setCompetitionTasks).catch(() => setCompetitionTasks([])); }}>Select (load tasks)</button>
-            {c.status === "Draft" && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.activateCompetition(c.id), `✅ "${c.title}" activated — now open for submissions.`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Activate</button>}
-            {(c.status === "Active" || c.status === "Evaluating") && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.aggregateResults(c.id), `✅ Results aggregated for "${c.title}".`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Aggregate results</button>}
+            {c.status === "Draft" && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.activateCompetition(c.id), `"${c.title}" activated. Now open for submissions.`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Activate</button>}
+            {(c.status === "Active" || c.status === "Evaluating") && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.aggregateResults(c.id), `Results aggregated for "${c.title}".`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Aggregate results</button>}
           </div>
         </article>)}
         {competitions.length === 0 && <div className="admin-empty-readable">No competitions yet. Create one below.</div>}
@@ -484,14 +601,14 @@ export default function Admin() {
               description: generated.description ?? f.description,
               difficulty: generated.difficulty ?? aiGenerateDifficulty,
             }));
-            setMessage(`✨ AI generated "${generated.title}" — review and save it in the Add Task form. ${generated.sampleTestCases?.length ?? 0} sample test cases included (add them manually below).`);
+            setMessage(`AI generated "${generated.title}". Review and save it in the Add Task form. ${generated.sampleTestCases?.length ?? 0} sample test case(s) included. Add them manually below.`);
           } catch (err) {
             setMessage(err instanceof Error ? err.message : "AI generation failed.");
           } finally {
             setAiGenerating(false);
           }
         }}>
-          <header><p>Gemini Flash Latest</p><h2>🤖 Generate task</h2><span className="admin-panel-note">Enter a topic and difficulty — Gemini will write a complete challenge. Results pre-fill the Add Task form for review before saving.</span></header>
+          <header><p>Gemini Flash Latest</p><h2>Generate task</h2><span className="admin-panel-note">Enter a topic and difficulty. Gemini will write a complete challenge and pre-fill the Add Task form for review before saving.</span></header>
           <label className="wide"><span>Topic</span><input required value={aiGenerateTopic} onChange={(e) => setAiGenerateTopic(e.target.value)} placeholder="e.g. Binary search trees, Dynamic programming, Graph BFS" /></label>
           <label><span>Difficulty</span>
             <select value={aiGenerateDifficulty} onChange={(e) => setAiGenerateDifficulty(e.target.value)} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
@@ -502,9 +619,9 @@ export default function Admin() {
         </form>
 
         {/* ── Create competition ── */}
-        <form className="admin-panel admin-form" onSubmit={(e) => { e.preventDefault(); void run(() => AdminApi.createCompetition({ ...competitionForm, opensAt: competitionForm.opensAt || null, closesAt: competitionForm.closesAt || null }), "✅ Competition created — now add tasks to it using Step 2.").then(() => { setCompetitionForm({ title: "", weekStart: "", opensAt: "", closesAt: "" }); void AdminApi.challengeCompetitions().then(setCompetitions); }); }}>
+        <form className="admin-panel admin-form" onSubmit={(e) => { e.preventDefault(); void run(() => AdminApi.createCompetition({ ...competitionForm, opensAt: competitionForm.opensAt || null, closesAt: competitionForm.closesAt || null }), "Competition created. Add tasks to it using Step 2.").then(() => { setCompetitionForm({ title: "", weekStart: "", opensAt: "", closesAt: "" }); void AdminApi.challengeCompetitions().then(setCompetitions); }); }}>
           <header><p>Step 1 · Create competition</p><h2>New week</h2><span className="admin-panel-note">Creates a Draft competition container. Add tasks next.</span></header>
-          <label><span>Title</span><input required value={competitionForm.title} onChange={(e) => setCompetitionForm((f) => ({ ...f, title: e.target.value }))} placeholder="Week 42 — November Challenge" /></label>
+          <label><span>Title</span><input required value={competitionForm.title} onChange={(e) => setCompetitionForm((f) => ({ ...f, title: e.target.value }))} placeholder="Week 42 - November Challenge" /></label>
           <DateField label="Week start" required value={competitionForm.weekStart} onChange={(v) => setCompetitionForm((f) => ({ ...f, weekStart: v }))} />
           <DateField label="Opens at" value={competitionForm.opensAt} onChange={(v) => setCompetitionForm((f) => ({ ...f, opensAt: v }))} />
           <DateField label="Closes at" value={competitionForm.closesAt} onChange={(f) => setCompetitionForm((ff) => ({ ...ff, closesAt: f }))} />
@@ -515,12 +632,12 @@ export default function Admin() {
         <form className="admin-panel admin-form" onSubmit={(e) => {
           e.preventDefault();
           const resolvedCompetitionId = taskForm.competitionId || selectedCompetitionId;
-          if (!resolvedCompetitionId) { setMessage("⚠ Select a Draft competition first."); return; }
+          if (!resolvedCompetitionId) { setMessage("Select a Draft competition first."); return; }
           const isDraft = competitions.some((c) => c.id === resolvedCompetitionId && c.status === "Draft");
-          if (!isDraft) { setMessage("⚠ Tasks can only be added to Draft competitions. This competition is already active or completed."); return; }
+          if (!isDraft) { setMessage("Tasks can only be added to Draft competitions. This competition is already active or completed."); return; }
           void run(
             () => AdminApi.createTask({ ...taskForm, competitionId: resolvedCompetitionId }),
-            "✅ Task created — now add at least one test case to it in Step 3 below.",
+            "Task created. Add at least one test case to it in Step 3 below.",
           ).then(() => {
             setTaskForm((f) => ({ ...f, title: "", description: "" }));
             void AdminApi.challengeCompetitions().then(setCompetitions);
@@ -528,7 +645,7 @@ export default function Admin() {
           });
         }}>
           <header><p>Step 2 · Requires Draft competition</p><h2>Add task</h2><span className="admin-panel-note">Tasks can only be added to <strong>Draft</strong> competitions. Click "Select (load tasks)" on a card above to pre-select a competition.</span></header>
-          {competitions.filter((c) => c.status === "Draft").length === 0 && <p style={{ fontSize: 12, color: "#f87171", margin: "0 0 12px", padding: "8px 12px", background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.3)", borderRadius: 6 }}>⚠ No Draft competitions. Create one in Step 1 first.</p>}
+          {competitions.filter((c) => c.status === "Draft").length === 0 && <p style={{ fontSize: 12, color: "#f87171", margin: "0 0 12px", padding: "8px 12px", background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.3)", borderRadius: 6 }}>No Draft competitions. Create one in Step 1 first.</p>}
           <label><span>Competition (Draft only)</span>
             <select value={taskForm.competitionId || selectedCompetitionId} onChange={(e) => { setTaskForm((f) => ({ ...f, competitionId: e.target.value })); setSelectedCompetitionId(e.target.value); void AdminApi.listCompetitionTasks(e.target.value).then(setCompetitionTasks).catch(() => setCompetitionTasks([])); }} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
               <option value="">Select Draft competition…</option>
@@ -557,8 +674,8 @@ export default function Admin() {
       {/* ── Add test case ── */}
       <form className="admin-panel admin-form" onSubmit={(e) => {
         e.preventDefault();
-        if (!testCaseForm.taskId) { setMessage("⚠ Select a task first."); return; }
-        void run(() => AdminApi.createTestCase(testCaseForm), "✅ Test case added. Keeping the same task selected so you can add more.").then(() => {
+        if (!testCaseForm.taskId) { setMessage("Select a task first."); return; }
+        void run(() => AdminApi.createTestCase(testCaseForm), "Test case added. The task remains selected so you can add more.").then(() => {
           // Keep taskId to allow adding multiple test cases to the same task rapidly
           setTestCaseForm((f) => ({ taskId: f.taskId, input: "", expectedOutput: "", isHidden: false, weight: 1 }));
           if (selectedCompetitionId) void AdminApi.listCompetitionTasks(selectedCompetitionId).then(setCompetitionTasks).catch(() => setCompetitionTasks([]));
@@ -566,7 +683,7 @@ export default function Admin() {
         });
       }}>
         <header><p>Step 3 · Click "Select (load tasks)" on a competition card above first</p><h2>Add test case</h2><span className="admin-panel-note">Test cases run via Piston sandbox. Hidden cases are invisible to players. Every task needs ≥ 1 test case before the competition can be activated. <strong>After submitting, the task stays selected so you can add more cases.</strong></span></header>
-        {selectedCompetitionId && competitionTasks.length === 0 && <p style={{ fontSize: 12, color: "#fbbf24", margin: "0 0 12px", padding: "8px 12px", background: "rgba(251,191,36,.08)", border: "1px solid rgba(251,191,36,.3)", borderRadius: 6 }}>No tasks found. Add tasks in Step 2 first.</p>}
+        {selectedCompetitionId && competitionTasks.length === 0 && <p style={{ fontSize: 12, color: "#fbbf24", margin: "0 0 12px", padding: "8px 12px", background: "rgba(251,191,36,.08)", border: "1px solid rgba(251,191,36,.3)", borderRadius: 6 }}>No tasks in this competition yet. Add tasks in Step 2 first.</p>}
         <label><span>Task</span>
           <select value={testCaseForm.taskId} onChange={(e) => setTestCaseForm((f) => ({ ...f, taskId: e.target.value }))} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
             <option value="">Select task… (click "Select (load tasks)" on a card above)</option>
@@ -583,7 +700,7 @@ export default function Admin() {
 
     {tab === "Support" && <section className="admin-stack">
       <article className="admin-panel">
-        <header><p>Support inbox</p><h2>Messages</h2><span className="admin-panel-note">All support form submissions — even ones where email delivery failed. Delivered = email was sent successfully.</span></header>
+        <header><p>Support inbox</p><h2>Messages</h2><span className="admin-panel-note">All support form submissions, including ones where email delivery failed. Delivered = email was sent successfully.</span></header>
         {supportMessages.length === 0
           ? <div className="admin-empty-readable">No support messages yet.</div>
           : <div className="admin-table admin-support-table">

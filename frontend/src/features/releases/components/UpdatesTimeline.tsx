@@ -150,7 +150,7 @@ const TimelineCard = memo(function TimelineCard({
               {entry.breakingChanges?.length ? (
                 <div className="specs-block specs-block--breaking">
                   <h3 className="specs-heading">
-                    <span className="specs-badge specs-badge--breaking">⚠ Breaking change</span>
+                    <span className="specs-badge specs-badge--breaking">Breaking change</span>
                   </h3>
                   <ul className="specs-list">
                     {entry.breakingChanges.map((bc, i) => (

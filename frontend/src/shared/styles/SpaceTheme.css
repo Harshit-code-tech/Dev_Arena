@@ -17,8 +17,9 @@
   --da-ink-mute: #5a5a5f;
   --da-hairline-dark: #3a3a3f;
   --da-hairline-light: #e0e0e8;
-  --da-display: "D-DIN-Bold", "Arial Narrow", Arial, Verdana, sans-serif;
-  --da-body: "D-DIN", Arial, Verdana, sans-serif;
+  /* Inter used as D-DIN substitute — same engineering, condensed feel */
+  --da-display: "Inter", "D-DIN-Bold", "Arial Narrow", Arial, Verdana, sans-serif;
+  --da-body: "Inter", "D-DIN", Arial, Verdana, sans-serif;
   --da-pill: 32px;
   --da-radius-xs: 4px;
   --da-radius-sm: 8px;
@@ -41,7 +42,7 @@ body {
   overflow-x: hidden;
   background: var(--da-canvas-night) !important;
   color: var(--da-on-primary) !important;
-  font-family: var(--da-body) !important;
+  font-family: "Inter", "D-DIN", Arial, Verdana, sans-serif !important;
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: 0.32px;

@@ -81,19 +81,21 @@ function Blog() {
                         <span className="blog-eyebrow">DevArena</span>
                         <h1>Dispatches from<br />the arena</h1>
                         <p className="blog-subtitle">
-                            Dev war stories, platform changelogs, and opinions that'll probably start a flame war.
+                            Dev war stories, platform changelogs, and opinions that will probably start a flame war.
                         </p>
                     </div>
-                    <div className="blog-header-actions">
-                        <button type="button" className="new-post-btn" onClick={() => navigate("/blog/new")}>
-                            <i className="bx bx-edit-alt" aria-hidden="true" />
-                            Write a post
-                        </button>
-                        <button type="button" className="drafts-btn" onClick={() => navigate("/blog/drafts")}>
-                            <i className="bx bx-file-blank" aria-hidden="true" />
-                            Drafts
-                        </button>
-                    </div>
+                    {user && (
+                        <div className="blog-header-actions">
+                            <button type="button" className="new-post-btn" onClick={() => navigate("/blog/new")}>
+                                <i className="bx bx-edit-alt" aria-hidden="true" />
+                                Write a post
+                            </button>
+                            <button type="button" className="drafts-btn" onClick={() => navigate("/blog/drafts")}>
+                                <i className="bx bx-file-blank" aria-hidden="true" />
+                                Drafts
+                            </button>
+                        </div>
+                    )}
                 </header>
 
                 {/* ── Tab switcher ── */}
@@ -139,11 +141,8 @@ function Blog() {
                     ) : posts.length === 0 ? (
                         <div className="blog-empty">
                             <i className="bx bx-message-square-dots blog-empty-icon" aria-hidden="true" />
-                            <h3>No posts yet — be the first to talk trash</h3>
+                            <h3>No posts yet. Be the first to talk trash</h3>
                             <p>Got hot takes, post-mortems, or dark patterns you want to warn people about? The floor's yours.</p>
-                            <button type="button" className="new-post-btn" onClick={() => navigate("/blog/new")}>
-                                Drop some knowledge
-                            </button>
                         </div>
                     ) : (
                         <div className="blog-feed">

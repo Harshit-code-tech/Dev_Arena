@@ -121,7 +121,7 @@ function NewBlog() {
                 toast.success("Post updated successfully!");
             } else {
                 await publishBlogPost(draftId, payload);
-                toast.success("Dispatch published to the arena! 🚀");
+                toast.success("Dispatch published to the arena!");
             }
             navigate("/blog");
         } catch (error) {
@@ -223,19 +223,7 @@ function NewBlog() {
                             <i className="bx bx-save" aria-hidden="true" />
                             {isSaving ? "Saving..." : "Save Draft"}
                         </button>
-                        <button
-                            type="button"
-                            className="cancel-btn"
-                            onClick={() => {
-                                if (hasUnsavedContent) {
-                                    setShowDraftModal(true);
-                                } else {
-                                    navigate("/blog");
-                                }
-                            }}
-                        >
-                            Cancel
-                        </button>
+
                         <button
                             type="button"
                             className="publish-btn"
@@ -245,7 +233,7 @@ function NewBlog() {
                             <i className={`bx ${isEditingPost ? "bx-check-circle" : "bx-paper-plane"}`} aria-hidden="true" />
                             {isPublishing
                                 ? (isEditingPost ? "Saving..." : "Shipping...")
-                                : (isEditingPost ? "Save Changes" : "Ship to the World 🚀")}
+                                : (isEditingPost ? "Save Changes" : "Ship to the World")}
                         </button>
                     </div>
                 </form>

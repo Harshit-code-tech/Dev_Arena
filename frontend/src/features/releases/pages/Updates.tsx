@@ -55,12 +55,9 @@ function Updates() {
     <main className="updates-page animated-page">
       <div className="updates-layout">
         <header className="hero-updates">
-          <span className="eyebrow" aria-label="Section label">
-            Changelog
-          </span>
           <h1>Everything that's new</h1>
           <p>
-            Every improvement, fix, and new feature — documented as it ships.
+            Every improvement, fix, and new feature, documented as it ships.
             The latest release is always at the top.
           </p>
         </header>
