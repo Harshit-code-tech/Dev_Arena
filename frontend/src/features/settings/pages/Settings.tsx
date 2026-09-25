@@ -269,7 +269,7 @@ export default function Settings() {
       setSavingKey("github-connect");
       rememberGitHubReturnPosition();
       const result = await GitHubApi.startConnection();
-      window.location.assign(result.authorizationUrl);
+      window.location.replace(result.authorizationUrl);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub connection could not start.");
     } finally {
@@ -282,7 +282,7 @@ export default function Settings() {
       setSavingKey("github-install");
       rememberGitHubReturnPosition();
       const result = await GitHubApi.startInstallation();
-      window.location.assign(result.installationUrl);
+      window.location.replace(result.installationUrl);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub App installation could not start.");
     } finally {
