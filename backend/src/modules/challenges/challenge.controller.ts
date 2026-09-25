@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { sendTrackingError } from "../../shared/utils/tracking";
 import { challengeService } from "./challenge.service";
-import type { SubmitCodeInput, CreateCompetitionInput, CreateTaskInput, CreateTestCaseInput } from "./challenge.types";
+import type { SubmitCodeInput, CreateCompetitionInput, CreateTaskInput, CreateTestCaseInput, HintInput } from "./challenge.types";
 
 function userId(req: Request) {
     return req.user?.id || "";
@@ -89,6 +89,41 @@ export const createTestCase = async (req: Request, res: Response): Promise<void>
 export const aggregateResults = async (req: Request, res: Response): Promise<void> => {
     try {
         const data = await challengeService.aggregateResults(String(req.params.id));
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
+};
+
+export const getAiHint = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { taskId } = req.body as HintInput;
+        if (!taskId) {
+            res.status(400).json({ success: false, message: "taskId is required." });
+            return;
+        }
+        const data = await challengeService.getAiHint(userId(req), taskId);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
+};
+
+export const listCompetitions = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await challengeService.listCompetitions();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        const result = sendTrackingError(error);
+        res.status(result.status).json({ success: false, message: result.message });
+    }
+};
+
+export const listTasksForCompetition = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await challengeService.listTasksForCompetition(String(req.params.id));
         res.status(200).json({ success: true, data });
     } catch (error) {
         const result = sendTrackingError(error);

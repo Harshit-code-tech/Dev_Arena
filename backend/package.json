@@ -17,6 +17,7 @@
     "scores:rebuild": "tsx src/scripts/rebuild-tracking-scores.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",

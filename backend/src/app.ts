@@ -61,6 +61,7 @@ import feedbackRoutes from "./modules/feedback/feedback.routes";
 import challengeRoutes from "./modules/challenges/challenge.routes";
 import supportRoutes from "./modules/support/support.routes";
 import coachRoutes from "./modules/coach/coach.routes";
+import aiRoutes from "./modules/ai/ai.routes";
 
 export function createApp(port: number) {
   const app = express();
@@ -149,6 +150,7 @@ export function createApp(port: number) {
   app.use("/api/feedback", feedbackRoutes);
   app.use("/api/support", supportRoutes);
   app.use("/api/coach", coachRoutes);
+  app.use("/api/ai", aiRoutes);
 
   // ── 404 fallback ──────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {

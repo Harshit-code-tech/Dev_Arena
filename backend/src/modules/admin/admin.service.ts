@@ -581,4 +581,22 @@ export const adminService = {
     ]);
     return { status: "ok", databaseLatencyMs: Date.now() - start, webhookFailures, refreshJobs, judgeQueue, realtimeEventsLastHour: realtimeEvents, judgeConfigured: Boolean(process.env.TOURNAMENT_JUDGE_URL), webhookConfigured: Boolean(process.env.GITHUB_WEBHOOK_SECRET) };
   },
+
+  // ── Support messages ────────────────────────────────────────────
+  // Returns the 100 most recent support form submissions ordered newest-first.
+  // Useful for admins to follow up on undelivered messages when SMTP is down.
+  async listSupportMessages() {
+    return prisma.supportMessage.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        message: true,
+        delivered: true,
+        createdAt: true,
+      },
+    });
+  },
 };

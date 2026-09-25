@@ -46,6 +46,7 @@ function Support() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
   const [statusMessage, setStatusMessage] = useState("");
@@ -53,7 +54,7 @@ function Support() {
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
-    if (!name.trim() || !email.trim() || !message.trim()) {
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
       setFormStatus("error");
       setStatusMessage("Fill in every field first! We can't read your mind (yet).");
       return;
@@ -66,7 +67,7 @@ function Support() {
       const response = await fetch("/api/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim() }),
       });
 
       const payload = (await response.json().catch(() => null)) as { success: boolean; message?: string } | null;
@@ -77,6 +78,7 @@ function Support() {
 
       setName("");
       setEmail("");
+      setSubject("");
       setMessage("");
       setFormStatus("success");
       setStatusMessage("Message launched into our inbox! We'll look into it before you can say 'it worked on my machine'.");
@@ -169,6 +171,18 @@ function Support() {
                 placeholder="your.actual@email.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                disabled={formStatus === "loading" || formStatus === "success"}
+              />
+            </label>
+
+            <label>
+              <span>Subject</span>
+              <input
+                type="text"
+                placeholder="e.g. Bug report, Feature request, Account issue"
+                maxLength={150}
+                value={subject}
+                onChange={(event) => setSubject(event.target.value)}
                 disabled={formStatus === "loading" || formStatus === "success"}
               />
             </label>

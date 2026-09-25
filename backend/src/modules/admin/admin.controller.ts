@@ -33,3 +33,4 @@ export const publishResults = (req: Request, res: Response) => send(res, () => a
 export const createAnnouncement = (req: Request, res: Response) => send(res, () => adminService.createAnnouncement(userId(req), String(req.params.tournamentId), req.body || {}), true);
 export const moderation = (_req: Request, res: Response) => send(res, () => adminService.moderation());
 export const systemHealth = (_req: Request, res: Response) => send(res, () => adminService.systemHealth());
+export const listSupportMessages = (_req: Request, res: Response) => send(res, () => adminService.listSupportMessages());

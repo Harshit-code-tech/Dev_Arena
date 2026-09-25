@@ -49,4 +49,14 @@ export const AdminApi = {
   announce: (id: string, input: { title: string; message: string }) => request<any>(`/api/admin/tournaments/${id}/announcements`, { method: "POST", body: JSON.stringify(input) }),
   moderation: () => request<{ feedback: any[]; reports: any[]; auditLogs: any[] }>("/api/admin/moderation"),
   systemHealth: () => request<Record<string, unknown>>("/api/admin/system-health"),
+  supportMessages: () => request<any[]>("/api/admin/support-messages"),
+  // ── Weekly Challenge admin ─────────────────────────────────────
+  challengeCompetitions: () => request<any[]>("/api/challenge/admin/competitions"),
+  listCompetitionTasks: (id: string) => request<any[]>(`/api/challenge/admin/competition/${id}/tasks`),
+  createCompetition: (input: Record<string, unknown>) => request<any>("/api/challenge/admin/competition", { method: "POST", body: JSON.stringify(input) }),
+  activateCompetition: (id: string) => request<any>(`/api/challenge/admin/competition/${id}/activate`, { method: "POST" }),
+  aggregateResults: (id: string) => request<any>(`/api/challenge/admin/competition/${id}/aggregate`, { method: "POST" }),
+  createTask: (input: Record<string, unknown>) => request<any>("/api/challenge/admin/task", { method: "POST", body: JSON.stringify(input) }),
+  createTestCase: (input: Record<string, unknown>) => request<any>("/api/challenge/admin/test-case", { method: "POST", body: JSON.stringify(input) }),
+  generateChallenge: (topic: string, difficulty?: string) => request<any>("/api/ai/generate-challenge", { method: "POST", body: JSON.stringify({ topic, difficulty }) }),
 };

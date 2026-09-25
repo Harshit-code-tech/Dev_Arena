@@ -23,4 +23,5 @@ router.put("/dsa-submissions/:submissionId", controller.reviewDsa);
 router.put("/project-submissions/:submissionId", controller.reviewProject);
 router.get("/moderation", controller.moderation);
 router.get("/system-health", controller.systemHealth);
+router.get("/support-messages", controller.listSupportMessages);
 export default router;

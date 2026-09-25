@@ -84,3 +84,8 @@ export function getCompetitionResults(weekStart?: string) {
   const params = weekStart ? `?weekStart=${weekStart}` : "";
   return apiRequest<CompetitionResults>(`/api/challenge/results${params}`);
 }
+
+/** Fetches the current competition to get the latest submission status for a task. */
+export function refreshActiveCompetition() {
+  return apiRequest<ActiveCompetition | null>("/api/challenge");
+}
