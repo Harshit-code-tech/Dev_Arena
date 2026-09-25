@@ -48,7 +48,7 @@ export interface AICallOptions {
 // ── Circuit-breaker state (module-level, resets on server restart) ─────────────
 
 const RATE_LIMIT_COOLDOWN_MS = 5 * 60 * 1000;      // 429: hard rate limit — 5 min
-const TRANSIENT_COOLDOWN_MS  = 90 * 1000;           // 503: soft transient — 90 sec + jitter
+const TRANSIENT_COOLDOWN_MS  = 30 * 1000;           // 503: soft transient — 30 sec + jitter
 
 const rateLimitedUntil: Record<AIProvider, number> = {
     gemini: 0,

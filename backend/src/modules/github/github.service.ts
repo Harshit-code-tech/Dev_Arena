@@ -419,7 +419,7 @@ async function authorizeStoredConnection(connection: { id: string; userId: strin
       "User-Agent": "DevArena-Language-Reader",
     },
   });
-  const githubUser = await userResponse.json().catch(() => ({})) as { id?: number; login?: string };
+  const githubUser = await userResponse.json().catch(() => ({})) as { id?: number; login?: string; avatar_url?: string };
   if (!userResponse.ok || !githubUser.id || !githubUser.login) {
     throw githubError("GitHub account details could not be loaded.", userResponse.status || 400);
   }
@@ -441,6 +441,16 @@ async function authorizeStoredConnection(connection: { id: string; userId: strin
       connectedAt: new Date(),
     },
   });
+
+  // Persist the GitHub avatar so the profile picture is visible immediately
+  // after connecting — only updates if the user has no existing custom avatar.
+  if (githubUser.avatar_url) {
+    await prisma.user.update({
+      where: { id: connection.userId },
+      data: { avatarUrl: { set: githubUser.avatar_url } },
+    }).catch(() => undefined); // Non-fatal — avatar can be set manually later
+  }
+
   void githubService.reverifyUserRepositories(connection.userId).catch(() => undefined);
   return connection.userId;
 }
@@ -1124,7 +1134,7 @@ export const githubService = {
       select: { repositorySelection: true },
     });
 
-    return {
+    const result = {
       connected: Boolean(connection?.accessTokenEncrypted),
       githubLogin: connection?.githubLogin || null,
       connectedAt: connection?.connectedAt || null,
@@ -1142,6 +1152,39 @@ export const githubService = {
       accessError,
       technologyPermissionRequired: 1,
     };
+
+    // Backfill avatar for users who connected before avatar persistence was added.
+    if (result.connected) {
+      void (async () => {
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { avatarUrl: true } });
+          if (!dbUser?.avatarUrl) {
+            const token = await optionalUserToken(userId).catch(() => null);
+            if (token) {
+              const ghRes = await fetch(`${GITHUB_API}/user`, {
+                headers: {
+                  Accept: "application/vnd.github+json",
+                  Authorization: `Bearer ${token}`,
+                  "X-GitHub-Api-Version": API_VERSION,
+                  "User-Agent": "DevArena-Language-Reader",
+                },
+              });
+              const ghUser = await ghRes.json().catch(() => ({})) as { avatar_url?: string };
+              if (ghUser.avatar_url) {
+                await prisma.user.update({
+                  where: { id: userId },
+                  data: { avatarUrl: ghUser.avatar_url },
+                });
+              }
+            }
+          }
+        } catch {
+          // Non-fatal — avatar backfill failure should never surface to the user
+        }
+      })();
+    }
+
+    return result;
   },
 
   async listRepositories(_userId: string) {
