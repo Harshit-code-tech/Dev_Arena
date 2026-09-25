@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { rateLimitKey } from "../../middleware/rate-limit-key";
 
 import { protect } from "../../middleware/auth.middleware";
 import { requireChatDevice } from "../../middleware/chat-device.middleware";
@@ -11,6 +12,7 @@ const writeLimiter = rateLimit({
   limit: 60,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Too many Player Hub actions. Try again shortly." },
 });
 const messageLimiter = rateLimit({
@@ -18,6 +20,7 @@ const messageLimiter = rateLimit({
   limit: 120,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Message rate limit reached. Try again shortly." },
 });
 const authenticatorLimiter = rateLimit({
@@ -25,6 +28,7 @@ const authenticatorLimiter = rateLimit({
   limit: 8,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
   message: { success: false, message: "Too many Authenticator attempts. Wait a few minutes and try again." },
 });
 

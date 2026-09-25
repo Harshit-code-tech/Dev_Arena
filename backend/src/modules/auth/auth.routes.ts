@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { rateLimitKey } from "../../middleware/rate-limit-key";
 import * as authController from "./auth.controller";
 import { protect } from "../../middleware/auth.middleware";
 
@@ -8,18 +9,21 @@ const router = Router();
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
+  keyGenerator: rateLimitKey,
   message: { message: "Too many login attempts. Try again after 15 minutes." },
 });
 
 const otpRequestLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
+  keyGenerator: rateLimitKey,
   message: { message: "Too many verification-code requests. Try again later." },
 });
 
 const otpVerifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 25,
+  keyGenerator: rateLimitKey,
   message: { message: "Too many verification attempts. Try again after 15 minutes." },
 });
 
