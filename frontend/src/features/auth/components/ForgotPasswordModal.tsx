@@ -31,10 +31,6 @@ export function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
     try {
       const data = await requestPasswordResetOtp(email);
       toast.success(data.message || "Password reset instructions were sent.");
-      if (data.useFirebaseReset) {
-        setStep("firebase_sent");
-        return;
-      }
       if (!data.tempToken) throw new Error("Password reset session could not be created.");
       setTempToken(data.tempToken);
       setStep("otp_and_reset");
@@ -96,9 +92,7 @@ export function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
         <p className="auth-modal-copy">
           {step === "email"
             ? "Enter the email address associated with your DevArena account."
-            : step === "firebase_sent"
-              ? "Firebase sent a secure password-reset link to your email. Open that message to choose a new password."
-              : "This is a legacy DevArena account. Enter the one-time code from your email and choose a new password; the account will migrate to Firebase the next time you sign in."}
+            : "Enter the 6-digit code from your email and choose a new password. Your Firebase password will be updated securely."}
         </p>
 
         {errorMessage && (
@@ -128,12 +122,6 @@ export function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
               {loading ? <span className="btn-loader" /> : "Send reset code"}
             </button>
           </form>
-        ) : step === "firebase_sent" ? (
-          <div className="auth-form auth-modal-form">
-            <button type="button" className="auth-submit underline-action" onClick={onClose}>
-              Done
-            </button>
-          </div>
         ) : (
           <form className="auth-form auth-modal-form" onSubmit={handleResetPassword} noValidate>
             <div className={`floating-field auth-otp-field${otp ? " has-value" : ""}`}>

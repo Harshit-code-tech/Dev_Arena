@@ -10,6 +10,7 @@ export default function EmailOtpChallenge({
   resendAfterSeconds = 60,
   onVerified,
   onBack,
+  onChallengeUpdated,
 }: EmailOtpChallengeProps) {
   const [activeToken, setActiveToken] = useState(tempToken);
   const [maskedEmail, setMaskedEmail] = useState(email);
@@ -73,8 +74,14 @@ export default function EmailOtpChallenge({
       const result = await resendEmailAuthOtp(activeToken);
       setActiveToken(result.tempToken);
       setMaskedEmail(result.email);
-      setCountdown(result.resendAfterSeconds || 60);
+      const nextResendAfterSeconds = result.resendAfterSeconds || 60;
+      setCountdown(nextResendAfterSeconds);
       setOtp("");
+      onChallengeUpdated?.({
+        tempToken: result.tempToken,
+        email: result.email,
+        resendAfterSeconds: nextResendAfterSeconds,
+      });
       toast.success(result.message || "A new verification code was sent.");
     } catch (resendError) {
       const message = resendError instanceof Error
