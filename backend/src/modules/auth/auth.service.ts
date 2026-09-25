@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { timingSafeEqual } from "crypto";
 import type { AuthOtpPurpose } from "@prisma/client";
 import { prisma } from "../../database/prisma";
 import { sendAuthOtpEmail } from "../../shared/utils/email";
@@ -35,7 +34,12 @@ import type {
   VerifyAuthOtpInput,
 } from "./auth.types";
 import { completeOnboarding as finalizeOnboarding, getOnboardingStatus } from "./onboarding.service";
-import { verifyFirebaseIdToken } from "./firebase-auth.service";
+import {
+  createFirebasePasswordUser,
+  findFirebaseUserByEmail,
+  updateFirebasePassword,
+  verifyFirebaseIdToken,
+} from "./firebase-auth.service";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
@@ -46,29 +50,11 @@ function requiresUsername(username: string | undefined, usernameChosen = true) {
 }
 
 function normalizeUsername(value: unknown) {
-  return String(value || "").trim().replace(/^@/, "");
+  return String(value || "").trim().replace(/^@/, "").toLowerCase();
 }
 
-/** Bcrypt cost factor — 12 is the 2025 recommended minimum (Firebase uses 8–10) */
-const BCRYPT_COST = 12;
-
-/** OTP grace period: if user verified OTP within this window, skip OTP on next login */
+/** OTP grace period: if the user verified DevArena email OTP within this window, login can skip a new code. */
 const OTP_GRACE_PERIOD_DAYS = 15;
-
-/**
- * A dummy hash used for constant-time comparison when the user is not found.
- * This prevents timing attacks that could enumerate valid email addresses.
- */
-const DUMMY_HASH = "$2b$12$Gv9Rf2KXxiKf9hBoRSSSxuHbqPalL8bNRJTgGMVIKBmrJq3M7cHiC";
-
-function validatePasswordStrength(password: string): string | null {
-  if (password.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter";
-  if (!/[0-9]/.test(password)) return "Password must contain at least one number";
-  if (!/[^A-Za-z0-9]/.test(password)) return "Password must contain at least one special character (e.g. !@#$%)";
-  if (password.length > 128) return "Password must be 128 characters or fewer";
-  return null;
-}
 
 function createUserPayload(user: {
   id: string;
@@ -187,122 +173,206 @@ function otpPendingResponse(
   };
 }
 
+
+function isWithinOtpGrace(lastOtpVerifiedAt: Date | null | undefined) {
+  if (!lastOtpVerifiedAt) return false;
+  const gracePeriodMs = OTP_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+  return Date.now() - lastOtpVerifiedAt.getTime() < gracePeriodMs;
+}
+
+function firebaseServiceError(message: string, fallback: string): AuthServiceResult | null {
+  if (message === "FIREBASE_MIGRATION_REQUIRED") {
+    return {
+      statusCode: 409,
+      body: {
+        code: "FIREBASE_MIGRATION_REQUIRED",
+        message: "This DevArena account predates Firebase password authentication. Log in with your existing password once to migrate it securely.",
+      },
+    };
+  }
+  if (message === "FIREBASE_IDENTITY_CONFLICT") {
+    return {
+      statusCode: 409,
+      body: { code: "FIREBASE_IDENTITY_CONFLICT", message: "This email is already linked to another Firebase identity." },
+    };
+  }
+  if (message === "LEGAL_ACCEPTANCE_REQUIRED") {
+    return {
+      statusCode: 403,
+      body: {
+        code: "LEGAL_ACCEPTANCE_REQUIRED",
+        message: "No verified DevArena account exists for this Firebase login. Complete signup and email OTP verification first.",
+      },
+    };
+  }
+  if (message === "FIREBASE_PROJECT_ID_NOT_CONFIGURED") {
+    return {
+      statusCode: 503,
+      body: { code: "FIREBASE_NOT_CONFIGURED", message: "Firebase token verification is not configured on the DevArena backend." },
+    };
+  }
+  if (message === "FIREBASE_ADMIN_NOT_CONFIGURED" || message === "FIREBASE_ADMIN_CREDENTIALS_INVALID") {
+    return {
+      statusCode: 503,
+      body: {
+        code: "FIREBASE_ADMIN_NOT_CONFIGURED",
+        message: "Firebase password administration is not configured on the DevArena backend.",
+      },
+    };
+  }
+  if (message === "FIREBASE_WEB_API_KEY_NOT_CONFIGURED") {
+    return {
+      statusCode: 503,
+      body: {
+        code: "FIREBASE_WEB_API_KEY_NOT_CONFIGURED",
+        message: "Firebase password administration is missing its Web API key.",
+      },
+    };
+  }
+  if (message === "FIREBASE_ADMIN_AUTH_FAILED" || message.startsWith("FIREBASE_ADMIN_REQUEST_FAILED")) {
+    return {
+      statusCode: 503,
+      body: {
+        code: "FIREBASE_ADMIN_UNAVAILABLE",
+        message: "Firebase password administration is temporarily unavailable. Try again.",
+      },
+    };
+  }
+  if (message.startsWith("FIREBASE_CERT_FETCH_FAILED")) {
+    return {
+      statusCode: 503,
+      body: { code: "FIREBASE_VERIFICATION_UNAVAILABLE", message: "Firebase verification is temporarily unavailable. Try again." },
+    };
+  }
+  if (message === "FIREBASE_PROVIDER_NOT_SUPPORTED") {
+    return {
+      statusCode: 400,
+      body: { code: "FIREBASE_PROVIDER_NOT_SUPPORTED", message: "This endpoint requires Firebase email/password authentication." },
+    };
+  }
+  if (message.includes("jwt") || message.startsWith("FIREBASE_ID_TOKEN")) {
+    return {
+      statusCode: 401,
+      body: { code: "FIREBASE_TOKEN_INVALID", message: "Firebase sign-in could not be verified. Please sign in again." },
+    };
+  }
+  if (message.startsWith("FIREBASE_")) {
+    return {
+      statusCode: 401,
+      body: { code: "FIREBASE_TOKEN_INVALID", message: fallback },
+    };
+  }
+  return null;
+}
+
 export const authService = {
   async register(input: RegisterInput): Promise<AuthServiceResult> {
     try {
-      const { email, password, name, acceptLegal } = input;
-      if (!email || !password || !name) {
-        return { statusCode: 400, body: { message: "Name, email, and password are required" } };
+      const idToken = String(input.idToken || "");
+      const trimmedName = String(input.name || "").trim().replace(/\s+/g, " ");
+      if (!idToken || !trimmedName) {
+        return { statusCode: 400, body: { message: "Firebase sign-in and name are required" } };
       }
-      if (acceptLegal !== true) {
+      if (input.acceptLegal !== true) {
         return { statusCode: 400, body: { message: "You must accept the Terms of Service and Privacy Policy to continue" } };
       }
-
-      const trimmedEmail = email.trim().toLowerCase();
-      const trimmedName = name.trim().replace(/\s+/g, " ");
       if (trimmedName.length < 2 || trimmedName.length > 80) {
         return { statusCode: 400, body: { message: "Name must contain 2 to 80 characters" } };
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-        return { statusCode: 400, body: { message: "Invalid email format" } };
-      }
-      const strengthError = validatePasswordStrength(password);
-      if (strengthError) {
-        return { statusCode: 400, body: { message: strengthError } };
-      }
-      if (await authRepository.findUserByEmail(trimmedEmail)) {
-        return { statusCode: 409, body: { message: "An account with this email already exists" } };
+
+      const identity = await verifyFirebaseIdToken(idToken);
+      if (identity.provider !== "password") throw new Error("FIREBASE_PROVIDER_NOT_SUPPORTED");
+
+      const existingByUid = await prisma.user.findUnique({ where: { firebaseUid: identity.uid } });
+      const existingByEmail = await authRepository.findUserByEmail(identity.email);
+      const existing = existingByUid || existingByEmail;
+      if (existing) {
+        if (!existing.firebaseUid) {
+          return {
+            statusCode: 409,
+            body: {
+              code: "FIREBASE_MIGRATION_REQUIRED",
+              message: "A DevArena account with this email already exists. Log in with its existing password once to migrate it to Firebase.",
+            },
+          };
+        }
+        if (existing.firebaseUid !== identity.uid) {
+          return {
+            statusCode: 409,
+            body: { code: "FIREBASE_IDENTITY_CONFLICT", message: "This email is already linked to another Firebase identity." },
+          };
+        }
+        return { statusCode: 409, body: { message: "An account with this email already exists. Log in instead." } };
       }
 
-      const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
       const { challenge, tempToken } = await createOtpChallenge({
         purpose: "Signup",
-        email: trimmedEmail,
+        email: identity.email,
         pendingName: trimmedName,
-        pendingPasswordHash: passwordHash,
         rememberSession: true,
       });
 
-      return otpPendingResponse(challenge, tempToken, "A verification code was sent to your email");
+      return otpPendingResponse(challenge, tempToken, "Firebase account created. Enter the verification code sent to your email to finish signup.");
     } catch (error: unknown) {
+      const message = getErrorMessage(error);
       console.error("Registration Error:", error);
-      if (getErrorMessage(error) === "OTP_EMAIL_DELIVERY_FAILED") {
+      if (message === "OTP_EMAIL_DELIVERY_FAILED") {
         return { statusCode: 502, body: { message: "The verification email could not be sent. Check the email service configuration and try again." } };
       }
-      return { statusCode: 500, body: { message: "An unexpected error occurred during registration" } };
+      return firebaseServiceError(message, "Firebase signup could not be verified.")
+        || { statusCode: 500, body: { message: "An unexpected error occurred during registration" } };
     }
   },
 
   async login(input: LoginInput): Promise<AuthServiceResult> {
     try {
-      const { email, password } = input;
-      if (!email || !password) {
-        return { statusCode: 400, body: { message: "Email or username and password are required" } };
+      const idToken = String(input.idToken || "");
+      if (!idToken) {
+        return { statusCode: 400, body: { message: "Firebase sign-in is required" } };
       }
 
-      const identifier = email.trim().toLowerCase();
-      const user = await authRepository.findUserByLoginIdentifier(identifier);
+      const identity = await verifyFirebaseIdToken(idToken);
+      if (identity.provider !== "password") throw new Error("FIREBASE_PROVIDER_NOT_SUPPORTED");
 
-      // ── Timing-safe comparison ──────────────────────────────────────
-      // Always run bcrypt.compare regardless of whether the user exists.
-      // This prevents timing attacks that can enumerate valid email addresses
-      // by measuring response time differences.
-      const hashToCheck = user?.passwordHash ?? DUMMY_HASH;
-      const passwordMatch = await bcrypt.compare(password, hashToCheck);
-
-      if (!user || !user.passwordHash || !passwordMatch) {
-        // Increment failed attempt counter on the real user if they exist
-        if (user) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              failedLoginAttempts: { increment: 1 },
-              // Lock the account for 15 minutes after 10 consecutive failures
-              ...(user.failedLoginAttempts + 1 >= 10
-                ? { failedLoginLockedUntil: new Date(Date.now() + 15 * 60 * 1000) }
-                : {}),
-            },
-          });
+      let migrationUserId: string | undefined;
+      if (input.migrationToken) {
+        const migration = verifyAuthToken(input.migrationToken);
+        if (
+          !migration.isFirebaseMigration ||
+          !migration.userId ||
+          !migration.firebaseMigrationEmail ||
+          migration.firebaseMigrationEmail.toLowerCase() !== identity.email.toLowerCase()
+        ) {
+          return { statusCode: 401, body: { message: "The Firebase migration proof is invalid or expired." } };
         }
-        return { statusCode: 401, body: { message: "Invalid email, username, or password" } };
+        migrationUserId = migration.userId;
       }
 
-      // ── Per-account lockout ─────────────────────────────────────────
-      if (user.failedLoginLockedUntil && user.failedLoginLockedUntil > new Date()) {
-        const minutesLeft = Math.ceil((user.failedLoginLockedUntil.getTime() - Date.now()) / 60000);
+      const user = await authRepository.upsertFirebaseUser({
+        firebaseUid: identity.uid,
+        email: identity.email,
+        emailVerified: identity.emailVerified,
+        displayName: identity.displayName,
+        photoURL: identity.photoURL,
+        provider: "password",
+        acceptLegal: false,
+        migrationUserId,
+        allowOrphanRecovery: false,
+      });
+
+      // Firebase has already validated the password. DevArena keeps the existing
+      // 15-day email-OTP grace period as the second authentication layer.
+      if (user.isEmailVerified && isWithinOtpGrace(user.lastOtpVerifiedAt)) {
+        const token = generateAuthToken(user.id, input.remember === true);
         return {
-          statusCode: 429,
-          body: { message: `Account temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? "" : "s"}.` },
+          statusCode: 200,
+          body: {
+            requiresOtp: false,
+            message: "Login successful",
+            token,
+            user: createUserPayload(user),
+          },
         };
-      }
-
-      // ── Reset failed attempt counter on successful password check ────────
-      if (user.failedLoginAttempts > 0 || user.failedLoginLockedUntil) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { failedLoginAttempts: 0, failedLoginLockedUntil: null },
-        });
-      }
-
-      // ── 15-day OTP grace period ───────────────────────────────────
-      // If the user verified an OTP within the last 15 days, skip OTP and
-      // issue a session token directly. This matches how Firebase handles
-      // persistent sessions, while still requiring OTP after the grace period.
-      if (user.lastOtpVerifiedAt) {
-        const gracePeriodMs = OTP_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
-        const withinGracePeriod = Date.now() - user.lastOtpVerifiedAt.getTime() < gracePeriodMs;
-        if (withinGracePeriod) {
-          const token = generateAuthToken(user.id, input.remember === true);
-          return {
-            statusCode: 200,
-            body: {
-              requiresOtp: false,
-              message: "Login successful",
-              token,
-              user: createUserPayload(user),
-            },
-          };
-        }
       }
 
       const { challenge, tempToken } = await createOtpChallenge({
@@ -312,28 +382,38 @@ export const authService = {
         rememberSession: input.remember === true,
       });
 
-      return otpPendingResponse(challenge, tempToken, "Password accepted. Enter the code sent to your email to finish signing in.");
+      return otpPendingResponse(challenge, tempToken, "Firebase password verified. Enter the code sent to your email to finish signing in.");
     } catch (error: unknown) {
+      const message = getErrorMessage(error);
       console.error("Login Error:", error);
-      if (getErrorMessage(error) === "OTP_EMAIL_DELIVERY_FAILED") {
+      if (message === "OTP_EMAIL_DELIVERY_FAILED") {
         return { statusCode: 502, body: { message: "The login code could not be sent. Check the email service configuration and try again." } };
       }
-      return { statusCode: 500, body: { message: "An unexpected error occurred during login" } };
+      return firebaseServiceError(message, "Firebase login could not be verified.")
+        || { statusCode: 500, body: { message: "An unexpected error occurred during login" } };
     }
   },
+
 
   async verifyAuthOtp(input: VerifyAuthOtpInput): Promise<AuthServiceResult> {
     try {
       const tempToken = String(input.tempToken || "");
       const otp = String(input.otp || "").trim();
-      if (!tempToken || !/^\d{6}$/.test(otp)) {
-        return { statusCode: 400, body: { message: "Enter the complete 6-digit verification code" } };
+      const idToken = String(input.idToken || "");
+      if (!tempToken || !/^\d{6}$/.test(otp) || !idToken) {
+        return { statusCode: 400, body: { message: "Enter the complete 6-digit verification code while signed in with Firebase" } };
       }
+
+      const identity = await verifyFirebaseIdToken(idToken);
+      if (identity.provider !== "password") throw new Error("FIREBASE_PROVIDER_NOT_SUPPORTED");
 
       const decoded = parseOtpToken(tempToken);
       const challenge = await prisma.authOtpChallenge.findUnique({ where: { id: decoded.authOtpChallengeId } });
       if (!challenge || challenge.purpose !== decoded.authOtpPurpose) {
         return { statusCode: 401, body: { message: "This verification request is invalid. Start again." } };
+      }
+      if (challenge.email.toLowerCase() !== identity.email.toLowerCase()) {
+        return { statusCode: 401, body: { message: "This verification request belongs to a different Firebase account. Start again." } };
       }
       if (challenge.consumedAt) {
         return { statusCode: 409, body: { message: "This verification code has already been used. Start again." } };
@@ -367,16 +447,17 @@ export const authService = {
       }
 
       if (challenge.purpose === "Signup") {
-        if (!challenge.pendingName || !challenge.pendingPasswordHash) {
+        if (!challenge.pendingName) {
           return { statusCode: 409, body: { message: "The signup verification is incomplete. Start again." } };
         }
-        if (await authRepository.findUserByEmail(challenge.email)) {
+
+        const existingByUid = await prisma.user.findUnique({ where: { firebaseUid: identity.uid } });
+        const existingByEmail = await authRepository.findUserByEmail(challenge.email);
+        if (existingByUid || existingByEmail) {
           await prisma.authOtpChallenge.update({ where: { id: challenge.id }, data: { consumedAt: new Date() } });
-          return { statusCode: 409, body: { message: "An account with this email already exists" } };
+          return { statusCode: 409, body: { message: "An account with this email already exists. Log in instead." } };
         }
 
-        const pendingName = challenge.pendingName;
-        const pendingPasswordHash = challenge.pendingPasswordHash;
         const pendingUsername = await nextPendingUsername();
         const user = await prisma.$transaction(async (tx) => {
           const claimed = await tx.authOtpChallenge.updateMany({
@@ -387,14 +468,16 @@ export const authService = {
 
           return tx.user.create({
             data: {
+              firebaseUid: identity.uid,
               email: challenge.email,
-              passwordHash: pendingPasswordHash,
-              name: pendingName,
+              passwordHash: null,
+              name: challenge.pendingName!,
               username: pendingUsername,
               usernameChosen: false,
               onboardingRequired: true,
+              // DevArena's numeric OTP verified ownership of the email. Firebase
+              // remains the source of truth for the password credential itself.
               isEmailVerified: true,
-              // Start the 15-day OTP grace period from the moment of account creation
               lastOtpVerifiedAt: new Date(),
               termsAcceptedAt: new Date(),
               termsVersion: "2026-08-02",
@@ -407,7 +490,7 @@ export const authService = {
         return {
           statusCode: 200,
           body: {
-            message: "Email verified and account created",
+            message: "Email verified and Firebase account linked to DevArena",
             token,
             user: createUserPayload(user),
           },
@@ -421,6 +504,9 @@ export const authService = {
       if (!user) {
         return { statusCode: 404, body: { message: "User not found" } };
       }
+      if (!user.firebaseUid || user.firebaseUid !== identity.uid || user.email.toLowerCase() !== identity.email.toLowerCase()) {
+        return { statusCode: 401, body: { message: "This verification request does not match the signed-in Firebase account." } };
+      }
 
       const verifiedUser = await prisma.$transaction(async (tx) => {
         const claimed = await tx.authOtpChallenge.updateMany({
@@ -432,9 +518,7 @@ export const authService = {
           where: { id: user.id },
           data: {
             isEmailVerified: true,
-            // Stamp the OTP verification time to start the 15-day grace period
             lastOtpVerifiedAt: new Date(),
-            // Reset any brute-force counters on successful full login
             failedLoginAttempts: 0,
             failedLoginLockedUntil: null,
           },
@@ -458,9 +542,11 @@ export const authService = {
       if (message === "OTP_ALREADY_CONSUMED") {
         return { statusCode: 409, body: { message: "This verification code has already been used. Start again." } };
       }
-      if (message === "INVALID_AUTH_OTP_TOKEN" || message.includes("jwt")) {
+      if (message === "INVALID_AUTH_OTP_TOKEN") {
         return { statusCode: 401, body: { message: "This verification request is invalid. Start again." } };
       }
+      const firebaseError = firebaseServiceError(message, "Firebase sign-in could not be verified for this OTP.");
+      if (firebaseError) return firebaseError;
       const errorCode = error && typeof error === "object" && "code" in error ? String(error.code) : "";
       if (errorCode === "P2002") {
         return { statusCode: 409, body: { message: "An account with this email already exists" } };
@@ -539,22 +625,10 @@ export const authService = {
 
       const user = await authRepository.findUserByEmail(email);
       if (!user) return { statusCode: 404, body: { message: "Email is not registered with us" } };
-      if (user.firebaseUid) {
-        return {
-          statusCode: 409,
-          body: {
-            message: "This account uses Firebase Authentication. Use the Firebase password-reset email.",
-            useFirebaseReset: true,
-          },
-        };
-      }
-      if (!user.passwordHash) {
-        return {
-          statusCode: 400,
-          body: { message: "This account does not have a legacy DevArena password. Use its connected sign-in provider." },
-        };
-      }
 
+      // Password ownership is now Firebase-only, but DevArena keeps its familiar
+      // six-digit recovery UX. The OTP proves control of the registered email;
+      // resetPassword then changes the Firebase password from the trusted backend.
       const otp = generateAuthOtp();
       await authRepository.updateUser(user.id, {
         emailOtp: hashAuthOtp(otp),
@@ -600,9 +674,35 @@ export const authService = {
         return { statusCode: 410, body: { message: "OTP expired" } };
       }
 
-      const passwordHash = await bcrypt.hash(newPassword, 10);
+      let firebaseUid = user.firebaseUid;
+
+      // Normal Firebase account: reset the password in Firebase itself.
+      if (firebaseUid) {
+        await updateFirebasePassword(firebaseUid, newPassword);
+      } else {
+        // Legacy DevArena account that has never completed its one-time Firebase
+        // migration. Reuse an existing Firebase identity if one exists; otherwise
+        // create the Firebase password identity now. This keeps password hashes
+        // out of Neon after a successful reset.
+        const existingFirebaseUser = await findFirebaseUserByEmail(user.email);
+        if (existingFirebaseUser?.localId) {
+          firebaseUid = existingFirebaseUser.localId;
+          await updateFirebasePassword(firebaseUid, newPassword);
+        } else {
+          const created = await createFirebasePasswordUser({
+            email: user.email,
+            password: newPassword,
+            displayName: user.name,
+            emailVerified: true,
+          });
+          firebaseUid = created.uid;
+        }
+      }
+
       await authRepository.updateUser(user.id, {
-        passwordHash,
+        firebaseUid,
+        passwordHash: null,
+        isEmailVerified: true,
         emailOtp: null,
         emailOtpExpiresAt: null,
       });
@@ -620,7 +720,11 @@ export const authService = {
         },
       };
     } catch (error: unknown) {
-      return { statusCode: 500, body: { message: "Failed to reset password", error: getErrorMessage(error) } };
+      const message = getErrorMessage(error);
+      const firebaseError = firebaseServiceError(message, "Firebase could not reset this password.");
+      if (firebaseError) return firebaseError;
+      console.error("Password reset failed:", error);
+      return { statusCode: 500, body: { message: "Failed to reset password" } };
     }
   },
 
@@ -749,6 +853,23 @@ export const authService = {
     try {
       const identity = await verifyFirebaseIdToken(String(input.idToken || ""));
 
+      // Password-based Firebase identities are never allowed to create a new
+      // DevArena/Neon account through this generic sync endpoint. New password
+      // accounts must complete /register -> DevArena OTP -> verify-auth-otp.
+      if (identity.provider === "password") {
+        const existingByUid = await prisma.user.findUnique({ where: { firebaseUid: identity.uid } });
+        const existingByEmail = await authRepository.findUserByEmail(identity.email);
+        if (!existingByUid && !existingByEmail) {
+          return {
+            statusCode: 403,
+            body: {
+              code: "SIGNUP_OTP_REQUIRED",
+              message: "Complete email signup and the DevArena verification code before a session can be created.",
+            },
+          };
+        }
+      }
+
       let migrationUserId: string | undefined;
       if (input.migrationToken) {
         const migration = verifyAuthToken(input.migrationToken);
@@ -772,10 +893,24 @@ export const authService = {
         provider: identity.provider,
         acceptLegal: input.acceptLegal === true,
         migrationUserId,
-        // On login (not signup), recover orphaned Firebase identities that have no DB record
-        // by creating the user silently with onboardingRequired: true.
-        allowOrphanRecovery: input.acceptLegal !== true,
+        // Social-provider recovery behavior stays unchanged. Password identities
+        // must never create a DevArena account through sync-firebase because
+        // signup has to pass the DevArena email OTP first.
+        allowOrphanRecovery: identity.provider !== "password" && input.acceptLegal !== true,
       });
+
+      // A Firebase password session alone is not enough to bypass DevArena OTP.
+      // This path is only used to restore a previously verified session while
+      // its 15-day OTP grace period is still valid.
+      if (identity.provider === "password" && (!user.isEmailVerified || !isWithinOtpGrace(user.lastOtpVerifiedAt))) {
+        return {
+          statusCode: 401,
+          body: {
+            code: "AUTH_OTP_REQUIRED",
+            message: "Email verification is required again. Sign in to receive a new DevArena code.",
+          },
+        };
+      }
 
       const token = generateAuthToken(user.id, input.remember !== false);
       return {

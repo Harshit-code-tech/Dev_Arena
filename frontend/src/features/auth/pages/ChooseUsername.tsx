@@ -11,6 +11,11 @@ import AuthScreenTransition, {
 import { useAuth } from "../context/AuthContext";
 import { saveFirestoreUsername } from "../api/FirestoreUserService";
 import {
+  clearOnboardingUsernameDraft,
+  getOnboardingUsernameDraft,
+  storeOnboardingUsernameDraft,
+} from "../api/AuthFlowStorageService";
+import {
   checkUsernameAvailability,
   choosePermanentUsername,
   completeDevArenaOnboarding,
@@ -40,7 +45,7 @@ export default function ChooseUsername() {
   const [usernameSaved, setUsernameSaved] = useState(false);
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
-  const [message, setMessage] = useState("Use 3–24 lowercase letters, numbers, dots, or underscores.");
+  const [message, setMessage] = useState("Use 3–24 letters, numbers, dots, or underscores. Capital letters are converted to lowercase.");
   const [savingUsername, setSavingUsername] = useState(false);
   const [githubStatus, setGithubStatus] = useState<GitHubConnectionStatus | null>(null);
   const [githubLoading, setGithubLoading] = useState(true);
@@ -50,7 +55,7 @@ export default function ChooseUsername() {
 
   const usernameRequired = needsUsername(user);
   const onboardingRequired = needsOnboarding(user);
-  const normalizedUsername = useMemo(() => username.trim().replace(/^@/, ""), [username]);
+  const normalizedUsername = useMemo(() => username.trim().replace(/^@/, "").toLowerCase(), [username]);
   const validFormat = /^[a-z0-9._]{3,24}$/.test(normalizedUsername) && !normalizedUsername.startsWith("__pending_");
   const usernameComplete = usernameSaved || (!usernameRequired && Boolean(currentUsername(user)));
   const githubReady = Boolean(githubStatus?.connected && githubStatus.privateRepositoryAccess);
@@ -60,8 +65,21 @@ export default function ChooseUsername() {
   useEffect(() => {
     if (!user) return;
     const existingUsername = currentUsername(user);
+    const usernameStillRequired = needsUsername(user);
+
+    if (usernameStillRequired) {
+      const draft = getOnboardingUsernameDraft(user.uid)
+        .toLowerCase()
+        .replace(/[^a-z0-9._]/g, "")
+        .slice(0, 24);
+      setUsername(draft);
+      setUsernameSaved(false);
+      return;
+    }
+
+    clearOnboardingUsernameDraft(user.uid);
     setUsername(existingUsername);
-    setUsernameSaved(!needsUsername(user) && Boolean(existingUsername));
+    setUsernameSaved(Boolean(existingUsername));
   }, [user]);
 
   async function loadGitHubStatus() {
@@ -105,7 +123,7 @@ export default function ChooseUsername() {
       return;
     }
     if (!validFormat) {
-      setMessage("Use 3–24 lowercase letters, numbers, dots, or underscores. Capital letters are not allowed.");
+      setMessage("Use 3–24 letters, numbers, dots, or underscores. Capital letters are converted to lowercase.");
       return;
     }
 
@@ -145,6 +163,7 @@ export default function ChooseUsername() {
     try {
       setSavingUsername(true);
       await choosePermanentUsername(normalizedUsername);
+      clearOnboardingUsernameDraft(user.uid);
       if (auth.currentUser) await saveFirestoreUsername(auth.currentUser, normalizedUsername);
       setUsernameSaved(true);
       setAvailable(true);
@@ -235,7 +254,15 @@ export default function ChooseUsername() {
                   <input
                     autoFocus
                     value={username}
-                    onChange={(event) => setUsername(event.target.value.replace(/[^a-z0-9._]/g, ""))}
+                    maxLength={24}
+                    onChange={(event) => {
+                      const nextUsername = event.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9._]/g, "")
+                        .slice(0, 24);
+                      setUsername(nextUsername);
+                      storeOnboardingUsernameDraft(user.uid, nextUsername);
+                    }}
                     placeholder=" "
                     autoComplete="username"
                     aria-describedby="username-status"

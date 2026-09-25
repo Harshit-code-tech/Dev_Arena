@@ -15,6 +15,11 @@ import { validateEmailLoginInput } from "../../api/AuthValidationService";
 import type { SocialAuthProvider, AuthOtpVerificationResult } from "../../api/AuthTypes";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
+import {
+  clearPendingAuthOtp,
+  getPendingAuthOtp,
+  storePendingAuthOtp,
+} from "../../api/AuthFlowStorageService";
 import { ForgotPasswordModal } from "../../components/ForgotPasswordModal";
 import AuthScreenTransition, {
   getAuthTransitionOrigin,
@@ -32,7 +37,7 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(null);
+  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(() => getPendingAuthOtp("login"));
   const [transitionOrigin, setTransitionOrigin] = useState<AuthTransitionOrigin | null>(null);
   const signInButtonRef = useRef<HTMLButtonElement>(null);
   const githubButtonRef = useRef<HTMLButtonElement>(null);
@@ -54,6 +59,7 @@ function Login() {
       const { token, requiresUsername, requiresOnboarding } = await signInWithSocialProvider(provider);
 
       if (!token) throw new Error("Login failed");
+      clearPendingAuthOtp("login");
       await loginWithToken(token);
       const needsSetup = requiresUsername || requiresOnboarding;
       transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
@@ -86,6 +92,7 @@ function Login() {
 
       if (!result.requiresOtp) {
         // 15-day grace period: backend skipped OTP, returned session directly
+        clearPendingAuthOtp("login");
         await loginWithToken(result.token);
         const needsSetup = result.user?.requiresUsername || result.user?.requiresOnboarding;
         transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
@@ -95,11 +102,13 @@ function Login() {
       }
 
       // OTP required — show challenge screen
-      setOtpPending({
+      const challenge = {
         tempToken: result.tempToken,
         email: result.email,
         resendAfterSeconds: result.resendAfterSeconds ?? 60,
-      });
+      };
+      setOtpPending(challenge);
+      storePendingAuthOtp("login", challenge);
     } catch (loginError: unknown) {
       console.error(loginError);
       const errorMessage = loginError instanceof Error ? loginError.message : "Something went wrong. Please try again.";
@@ -111,6 +120,8 @@ function Login() {
   };
 
   const handleOtpVerified = async (result: AuthOtpVerificationResult) => {
+    clearPendingAuthOtp("login");
+    setOtpPending(null);
     // Step 2: OTP verified — backend returned a session token.
     if (!result.token) {
       toast.error("Verification succeeded but no session was returned. Try logging in again.");
@@ -145,7 +156,14 @@ function Login() {
                   email={otpPending.email}
                   resendAfterSeconds={otpPending.resendAfterSeconds}
                   onVerified={handleOtpVerified}
-                  onBack={() => setOtpPending(null)}
+                  onChallengeUpdated={(challenge) => {
+                    setOtpPending(challenge);
+                    storePendingAuthOtp("login", challenge);
+                  }}
+                  onBack={() => {
+                    clearPendingAuthOtp("login");
+                    setOtpPending(null);
+                  }}
                 />
               </>
             ) : (

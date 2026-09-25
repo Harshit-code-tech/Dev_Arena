@@ -17,6 +17,11 @@ import {
 } from "../../api/AuthValidationService";
 import type { SocialAuthProvider, AuthOtpVerificationResult } from "../../api/AuthTypes";
 import { useAuth } from "../../context/AuthContext";
+import {
+  clearPendingAuthOtp,
+  getPendingAuthOtp,
+  storePendingAuthOtp,
+} from "../../api/AuthFlowStorageService";
 import { claimEmailInvite } from "../../../../services/FriendsService";
 import AuthScreenTransition, {
   getAuthTransitionOrigin,
@@ -37,7 +42,7 @@ function Signup() {
   const [agreeTerms, setAgreeTerms] = useState(false); // Must be explicitly opted in — GDPR/CCPA requires active consent
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(null);
+  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(() => getPendingAuthOtp("signup"));
   const [transitionOrigin, setTransitionOrigin] = useState<AuthTransitionOrigin | null>(null);
   const [rocketLaunching, setRocketLaunching] = useState(false);
   const [rocketLaunchDistance, setRocketLaunchDistance] = useState(0);
@@ -95,6 +100,7 @@ function Signup() {
       const { token, requiresOnboarding } = await signInWithSocialProvider(provider, { acceptLegal: true });
 
       if (!token) throw new Error("Signup failed");
+      clearPendingAuthOtp("signup");
       await loginWithToken(token);
       await claimPendingInvite();
       transitionDestination.current = requiresOnboarding ? "/choose-username" : "/dashboard";
@@ -138,11 +144,13 @@ function Signup() {
         password,
         agreeTerms,
       });
-      setOtpPending({
+      const challenge = {
         tempToken: pending.tempToken,
         email: pending.email,
         resendAfterSeconds: pending.resendAfterSeconds ?? 60,
-      });
+      };
+      setOtpPending(challenge);
+      storePendingAuthOtp("signup", challenge);
     } catch (signupError: unknown) {
       console.error(signupError);
       const errorMessage = signupError instanceof Error ? signupError.message : "Something went wrong. Please try again.";
@@ -154,6 +162,8 @@ function Signup() {
   };
 
   const handleOtpVerified = async (result: AuthOtpVerificationResult) => {
+    clearPendingAuthOtp("signup");
+    setOtpPending(null);
     // Step 2: OTP verified — Neon DB user is now created. Log in with the returned token.
     if (!result.token) {
       toast.error("Verification succeeded but no session was returned. Try logging in.");
@@ -198,7 +208,14 @@ function Signup() {
                   email={otpPending.email}
                   resendAfterSeconds={otpPending.resendAfterSeconds}
                   onVerified={handleOtpVerified}
-                  onBack={() => setOtpPending(null)}
+                  onChallengeUpdated={(challenge) => {
+                    setOtpPending(challenge);
+                    storePendingAuthOtp("signup", challenge);
+                  }}
+                  onBack={() => {
+                    clearPendingAuthOtp("signup");
+                    setOtpPending(null);
+                  }}
                 />
               </>
             ) : (

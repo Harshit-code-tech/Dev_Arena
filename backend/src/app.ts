@@ -13,7 +13,6 @@ function normalizeOrigin(url: string): string {
 const ALLOWED_ORIGINS = new Set<string>([
   "http://localhost:5173",
   "http://localhost:4173",
-
 ]);
 
 // Add configured origins from environment variables, splitting comma-separated lists and stripping trailing slashes
@@ -30,7 +29,8 @@ function isOriginAllowed(origin: string): boolean {
   const normalized = normalizeOrigin(origin);
   if (ALLOWED_ORIGINS.has(normalized)) return true;
   // Allow DevArena Vercel deployments and preview branches
-  if (/^https:\/\/devarena[a-z0-9-]*\.vercel\.app$/i.test(normalized)) return true;
+  if (/^https:\/\/devarena[a-z0-9-]*\.vercel\.app$/i.test(normalized))
+    return true;
   return false;
 }
 
@@ -69,40 +69,56 @@ export function createApp(port: number) {
   // Global rate limit: 500 requests per 15 minutes per IP.
   // Prevents DDoS and scraping of all API endpoints.
   // Per-route limiters on auth paths are stricter on top of this.
-  app.use(rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 500,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: "Too many requests. Please slow down and try again later." },
-    skip: (req) => req.method === "GET" && req.path === "/health", // never limit health checks
-  }));
-  app.use(helmet({
-    // Enforce HTTPS for 1 year in production (tells browsers to never use HTTP)
-    hsts: process.env.NODE_ENV === "production"
-      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
-      : false,
-  }));
-  app.use(cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server requests (no Origin header) and allowlisted origins
-      if (!origin || isOriginAllowed(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: origin '${origin}' is not allowed`));
-      }
-    },
-    credentials: true,
-  }));
-  app.use(express.json({
-    limit: "8mb",
-    verify: (req, _res, buffer) => {
-      const request = req as Request & { rawBody?: Buffer };
-      if ((request.originalUrl || request.url || "").startsWith("/api/github/webhook")) {
-        request.rawBody = Buffer.from(buffer);
-      }
-    },
-  }));
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 500,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        success: false,
+        message: "Too many requests. Please slow down and try again later.",
+      },
+      skip: (req) => req.method === "GET" && req.path === "/health", // never limit health checks
+    }),
+  );
+  app.use(
+    helmet({
+      // Enforce HTTPS for 1 year in production (tells browsers to never use HTTP)
+      hsts:
+        process.env.NODE_ENV === "production"
+          ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+          : false,
+    }),
+  );
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow server-to-server requests (no Origin header) and allowlisted origins
+        if (!origin || isOriginAllowed(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin '${origin}' is not allowed`));
+        }
+      },
+      credentials: true,
+    }),
+  );
+  app.use(
+    express.json({
+      limit: "8mb",
+      verify: (req, _res, buffer) => {
+        const request = req as Request & { rawBody?: Buffer };
+        if (
+          (request.originalUrl || request.url || "").startsWith(
+            "/api/github/webhook",
+          )
+        ) {
+          request.rawBody = Buffer.from(buffer);
+        }
+      },
+    }),
+  );
   app.use(morgan("dev"));
 
   // ── Health check ──────────────────────────────────────────────
