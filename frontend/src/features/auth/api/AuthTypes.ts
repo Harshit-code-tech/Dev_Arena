@@ -85,6 +85,12 @@ export interface AuthOtpResendResult {
   message?: string;
 }
 
+export interface AuthOtpChallengeState {
+  tempToken: string;
+  email: string;
+  resendAfterSeconds: number;
+}
+
 export interface EmailOtpChallengeProps {
   purpose: AuthOtpPurpose;
   tempToken: string;
@@ -92,6 +98,7 @@ export interface EmailOtpChallengeProps {
   resendAfterSeconds?: number;
   onVerified: (result: AuthOtpVerificationResult) => Promise<void> | void;
   onBack: () => void;
+  onChallengeUpdated?: (challenge: AuthOtpChallengeState) => void;
 }
 
 export interface SocialAuthResult {
@@ -139,7 +146,6 @@ export interface ApiErrorResponse {
   message?: string;
   code?: string;
   retryAfterSeconds?: number;
-  useFirebaseReset?: boolean;
 }
 
 export interface BackendMeResponse {
@@ -163,7 +169,6 @@ export interface BackendMeResponse {
 export interface ForgotPasswordResponse {
   message?: string;
   tempToken?: string;
-  useFirebaseReset?: boolean;
 }
 
 export interface ResetPasswordInput {
@@ -176,4 +181,4 @@ export interface ForgotPasswordModalProps {
   onClose: () => void;
 }
 
-export type ForgotPasswordStep = "email" | "otp_and_reset" | "firebase_sent";
+export type ForgotPasswordStep = "email" | "otp_and_reset";

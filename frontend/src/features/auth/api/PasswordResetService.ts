@@ -1,4 +1,4 @@
-import { sendPasswordResetEmail } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 import { auth } from "../../../config/Firebase";
 import { AUTH_ENDPOINTS } from "./AuthConstants";
@@ -16,19 +16,9 @@ export async function requestPasswordResetOtp(email: string) {
   });
 
   const data = await response.json().catch(() => ({})) as ForgotPasswordResponse & { message?: string };
-
-  if (response.status === 409 && data.useFirebaseReset) {
-    await sendPasswordResetEmail(auth, normalizedEmail);
-    return {
-      message: "Firebase sent a password-reset link to your email.",
-      useFirebaseReset: true,
-    } satisfies ForgotPasswordResponse;
-  }
-
   if (!response.ok) {
-    throw new Error(data.message || "Failed to send password reset instructions.");
+    throw new Error(data.message || "Failed to send password reset code.");
   }
-
   return data;
 }
 
@@ -43,6 +33,9 @@ export async function resetPasswordWithOtp(input: ResetPasswordInput): Promise<{
   if (!response.ok) {
     throw new Error(data.message || "Failed to reset password.");
   }
+
+  // A reset invalidates the old Firebase credential. Clear any stale local
+  // Firebase session so the next sign-in always uses the new password.
+  await signOut(auth).catch(() => undefined);
   return data;
 }
-
