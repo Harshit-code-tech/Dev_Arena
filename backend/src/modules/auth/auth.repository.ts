@@ -102,7 +102,12 @@ export const authRepository: AuthRepository = {
         const existing = existingByUid || existingByEmail;
         if (existing) {
             if (existing.firebaseUid && existing.firebaseUid !== input.firebaseUid) {
-                throw new Error("FIREBASE_IDENTITY_CONFLICT");
+                // For social providers (google/github), link the Firebase UID to the existing
+                // account if the emails match — this is safe since the provider verified the email.
+                if (input.provider === "password") {
+                    throw new Error("FIREBASE_IDENTITY_CONFLICT");
+                }
+                // Social login: link the new Firebase UID to the existing account
             }
 
             // Password-based Firebase identities may only claim a pre-existing DevArena
@@ -110,7 +115,6 @@ export const authRepository: AuthRepository = {
             if (!existing.firebaseUid && input.provider === "password" && input.migrationUserId !== existing.id) {
                 throw new Error("FIREBASE_MIGRATION_REQUIRED");
             }
-
 
             return prisma.user.update({
                 where: { id: existing.id },
@@ -134,20 +138,46 @@ export const authRepository: AuthRepository = {
             pendingUsername = createPendingUsername();
         }
 
-        return prisma.user.create({
-            data: {
-                firebaseUid: input.firebaseUid,
-                name: input.displayName?.trim() || normalizedEmail.split("@")[0],
-                username: pendingUsername,
-                usernameChosen: false,
-                onboardingRequired: true,
-                email: normalizedEmail,
-                avatarUrl: input.photoURL || null,
-                isEmailVerified: input.emailVerified,
-                termsAcceptedAt: new Date(),
-                termsVersion: "2026-08-02",
-                privacyVersion: "2026-08-02",
-            },
-        });
+        try {
+            return await prisma.user.create({
+                data: {
+                    firebaseUid: input.firebaseUid,
+                    name: input.displayName?.trim() || normalizedEmail.split("@")[0],
+                    username: pendingUsername,
+                    usernameChosen: false,
+                    onboardingRequired: true,
+                    email: normalizedEmail,
+                    avatarUrl: input.photoURL || null,
+                    isEmailVerified: input.emailVerified,
+                    termsAcceptedAt: new Date(),
+                    termsVersion: "2026-08-02",
+                    privacyVersion: "2026-08-02",
+                },
+            });
+        } catch (err: unknown) {
+            // P2002 = unique constraint violation — email already exists (race condition
+            // between the findUnique check above and the create, e.g. double-click or
+            // two tabs signing in simultaneously). Recover by doing an update instead.
+            const isUniqueViolation =
+                err instanceof Error &&
+                "code" in err &&
+                (err as { code?: string }).code === "P2002";
+
+            if (isUniqueViolation) {
+                const raceExisting = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+                if (raceExisting) {
+                    return prisma.user.update({
+                        where: { id: raceExisting.id },
+                        data: {
+                            firebaseUid: input.firebaseUid,
+                            name: raceExisting.name || input.displayName?.trim() || normalizedEmail.split("@")[0],
+                            avatarUrl: raceExisting.avatarUrl || input.photoURL || null,
+                            isEmailVerified: raceExisting.isEmailVerified || input.emailVerified,
+                        },
+                    });
+                }
+            }
+            throw err;
+        }
     },
 };

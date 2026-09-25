@@ -117,6 +117,14 @@ export function sendTrackingError(error: unknown) {
         return { status: error.statusCode, message: error.message };
     }
 
-    const message = error instanceof Error ? error.message : "Unexpected tracking error";
-    return { status: 500, message };
+    if (error instanceof Error) {
+        // Support plain errors that have statusCode set on them
+        const statusCode = (error as Error & { statusCode?: number }).statusCode;
+        if (typeof statusCode === "number" && statusCode >= 100 && statusCode < 600) {
+            return { status: statusCode, message: error.message };
+        }
+        return { status: 500, message: error.message };
+    }
+
+    return { status: 500, message: "Unexpected error" };
 }

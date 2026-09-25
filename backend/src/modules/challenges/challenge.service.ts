@@ -1,6 +1,176 @@
 import { prisma } from "../../database/prisma";
 import { TrackingError, getWeekStart } from "../../shared/utils/tracking";
 import type { CompetitionSubmissionStatus } from "@prisma/client";
+import { callAI, isAIAvailable } from "../../shared/utils/ai-client";
+
+// ── AI Hint cache (module-level) ─────────────────────────────────
+// Key: `${userId}:${taskId}` — cached for 1 hour per user+task.
+// A hint for the same problem doesn't change between requests.
+const hintCache = new Map<string, { hint: string; expiresAt: number }>();
+setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of hintCache.entries()) { if (v.expiresAt <= now) hintCache.delete(k); }
+}, 30 * 60 * 1000).unref();
+
+// ── Piston language name map ─────────────────────────────────────
+// Maps frontend display names → Piston runtime identifiers.
+const PISTON_LANG_MAP: Record<string, string> = {
+    JavaScript: "javascript",
+    TypeScript: "typescript",
+    Python: "python",
+    Java: "java",
+    "C++": "c++",
+    C: "c",
+    Go: "go",
+    Rust: "rust",
+    "C#": "csharp",
+    Ruby: "ruby",
+    Kotlin: "kotlin",
+    Swift: "swift",
+};
+
+// ── Piston code execution judge ──────────────────────────────────
+// Runs async after submitCode returns — the player never waits for it.
+
+interface PistonRunResult {
+    run?: {
+        stdout?: string;
+        stderr?: string;
+        code?: number | null;
+        signal?: string | null;
+    };
+    compile?: {
+        stderr?: string;
+        code?: number | null;
+    };
+    message?: string; // error field from Piston when runtime is unknown
+}
+
+async function evaluateSubmissionWithPiston(
+    submissionId: string,
+    taskId: string,
+    code: string,
+    language: string,
+): Promise<void> {
+    const PISTON_URL = (process.env.PISTON_API_URL || "https://emkc.org/api/v2/piston").replace(/\/$/, "");
+    const runtime = PISTON_LANG_MAP[language] ?? language.toLowerCase();
+
+    // Load the task and its test cases (all — hidden + visible)
+    const task = await prisma.competitionTask.findUnique({
+        where: { id: taskId },
+        include: {
+            testCases: { orderBy: { weight: "desc" } },
+        },
+    });
+    if (!task || task.testCases.length === 0) {
+        // No test cases configured — mark Pending for manual review
+        return;
+    }
+
+    // Mark Evaluating so the frontend can show a spinner
+    await prisma.competitionSubmission.update({
+        where: { id: submissionId },
+        data: { status: "Evaluating" as CompetitionSubmissionStatus },
+    });
+
+    const timeoutMs = task.timeLimitMs ?? 5000;
+    const results: string[] = [];
+    let totalWeight = 0;
+    let passedWeight = 0;
+    let passedCount = 0;
+    const startMs = Date.now();
+
+    for (const tc of task.testCases) {
+        totalWeight += tc.weight;
+        try {
+            const resp = await fetch(`${PISTON_URL}/execute`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    language: runtime,
+                    version: "*",
+                    files: [{ content: code }],
+                    stdin: tc.input,
+                    run_timeout: timeoutMs,
+                    compile_timeout: 15000,
+                }),
+                signal: AbortSignal.timeout(timeoutMs + 10000),
+            });
+
+            if (!resp.ok) {
+                results.push(`TC[${tc.id.slice(0, 6)}]: HTTP ${resp.status} from Piston`);
+                continue;
+            }
+
+            const data = (await resp.json()) as PistonRunResult;
+
+            // Compile error check
+            if (data.compile?.code !== undefined && data.compile.code !== 0) {
+                const errSnippet = (data.compile.stderr ?? "").slice(0, 200);
+                results.push(`TC[${tc.id.slice(0, 6)}]: COMPILE_ERROR — ${errSnippet}`);
+                // Compilation failure applies to all remaining test cases too
+                break;
+            }
+
+            const stdout = (data.run?.stdout ?? "").trim();
+            const expected = tc.expectedOutput.trim();
+            const passed = stdout === expected;
+
+            if (passed) {
+                passedWeight += tc.weight;
+                passedCount++;
+            }
+
+            results.push(
+                `TC[${tc.id.slice(0, 6)}]: ${
+                    passed ? "PASS" : "FAIL"
+                } | expected=${expected.slice(0, 80)} | got=${stdout.slice(0, 80)}`,
+            );
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "timeout or network error";
+            results.push(`TC[${tc.id.slice(0, 6)}]: ERROR — ${msg.slice(0, 120)}`);
+        }
+    }
+
+    const elapsedMs = Date.now() - startMs;
+    const correctness = totalWeight > 0 ? (passedWeight / totalWeight) * 100 : 0;
+
+    // Efficiency: blended metric — rewards both passing all tests and being fast
+    // Full marks only if every test passed; partial score scales with correctness.
+    const allPassed = passedCount === task.testCases.length;
+    const speedBonus = allPassed ? Math.max(0, 20 - Math.floor(elapsedMs / 1000)) : 0;
+    const efficiency = allPassed
+        ? Math.min(100, 80 + speedBonus)
+        : correctness * 0.6;
+
+    let finalStatus: CompetitionSubmissionStatus;
+    if (allPassed) {
+        finalStatus = "Passed";
+    } else if (passedCount > 0) {
+        finalStatus = "Partial";
+    } else {
+        finalStatus = "Failed";
+    }
+
+    await prisma.competitionSubmission.update({
+        where: { id: submissionId },
+        data: {
+            status: finalStatus,
+            correctness: Math.round(correctness * 100) / 100,
+            efficiency: Math.round(efficiency * 100) / 100,
+            testsPassed: passedCount,
+            testsTotal: task.testCases.length,
+            evaluationLog: results.join("\n").slice(0, 8000),
+            evaluatedAt: new Date(),
+        },
+    });
+
+    console.log(
+        `[piston] submission=${submissionId} lang=${runtime} status=${finalStatus} ` +
+        `passed=${passedCount}/${task.testCases.length} correctness=${correctness.toFixed(1)}% elapsedMs=${elapsedMs}`,
+    );
+}
+
 import type {
     ActiveCompetitionResponse,
     CompetitionResultEntry,
@@ -149,6 +319,12 @@ export const challengeService = {
                 submittedAt: new Date(),
             },
         });
+
+        // Fire Piston evaluation async — player gets Pending status immediately.
+        // Results (Passed / Partial / Failed) are written back to the DB in the background.
+        void evaluateSubmissionWithPiston(submission.id, taskId, code, language).catch((err) =>
+            console.error("[piston] evaluation threw unexpectedly:", err instanceof Error ? err.message : err),
+        );
 
         return mapSubmission(submission);
     },
@@ -305,6 +481,37 @@ export const challengeService = {
         });
     },
 
+    async listCompetitions() {
+        return prisma.weeklyCompetition.findMany({
+            orderBy: { weekStart: "desc" },
+            take: 20,
+            select: {
+                id: true,
+                title: true,
+                weekStart: true,
+                status: true,
+                opensAt: true,
+                closesAt: true,
+                _count: { select: { tasks: true } },
+            },
+        });
+    },
+
+    async listTasksForCompetition(competitionId: string) {
+        return prisma.competitionTask.findMany({
+            where: { competitionId },
+            orderBy: { sortOrder: "asc" },
+            select: {
+                id: true,
+                title: true,
+                type: true,
+                difficulty: true,
+                weightPercentage: true,
+                _count: { select: { testCases: true } },
+            },
+        });
+    },
+
     // ─── Scoring aggregation ─────────────────────────────────────
 
     async aggregateResults(competitionId: string) {
@@ -427,5 +634,80 @@ export const challengeService = {
         });
 
         return { aggregated: participantIds.size };
+    },
+
+    // ─── AI Hint ─────────────────────────────────────────────────
+
+    // Cache hints per user+task for 1 hour — a hint for the same problem
+    // doesn't change, so there's no reason to re-call AI on every click.
+    // Key: `${userId}:${taskId}`, Value: { hint, expiresAt }
+    async getAiHint(userId: string, taskId: string): Promise<{ hint: string }> {
+        const task = await prisma.competitionTask.findUnique({
+            where: { id: taskId },
+            select: {
+                title: true,
+                description: true,
+                expectedTime: true,
+                expectedSpace: true,
+                competitionId: true,
+            },
+        });
+        if (!task) throw new TrackingError("Task not found.", 404);
+
+        // Confirm the task belongs to a competition the user can see
+        const competition = await prisma.weeklyCompetition.findUnique({
+            where: { id: task.competitionId },
+            select: { status: true },
+        });
+        if (!competition || competition.status !== "Active") {
+            throw new TrackingError("Hints are only available during an active competition.", 403);
+        }
+
+        const submission = await prisma.competitionSubmission.findUnique({
+            where: { taskId_userId: { taskId, userId } },
+            select: { status: true, correctness: true },
+        });
+
+        const submissionContext = submission
+            ? `The user has already submitted. Status: ${submission.status}. Correctness: ${submission.correctness}%.`
+            : "The user has not submitted yet.";
+
+        const DEFAULT_HINT = "Think carefully about the time complexity constraint. What data structure would reduce repeated work here?";
+
+        if (!isAIAvailable()) return { hint: DEFAULT_HINT };
+
+        // ── Cache check ────────────────────────────────────────────
+        const cacheKey = `${userId}:${taskId}`;
+        const cachedHint = hintCache.get(cacheKey);
+        if (cachedHint && cachedHint.expiresAt > Date.now()) {
+            return { hint: cachedHint.hint };
+        }
+
+        try {
+            const prompt =
+                `You are a mischievous but helpful coding coach for a competitive programming platform called DevArena.\n\n` +
+                `The user is stuck on this problem:\n` +
+                `Title: ${task.title}\n` +
+                `Description: ${task.description}\n` +
+                `Expected Time Complexity: ${task.expectedTime ?? "not specified"}\n` +
+                `Expected Space Complexity: ${task.expectedSpace ?? "not specified"}\n` +
+                `${submissionContext}\n\n` +
+                `Rules:\n` +
+                `- Give ONE progressive algorithmic hint. Max 2 sentences.\n` +
+                `- Do NOT give the solution, code, or the exact algorithm name outright.\n` +
+                `- Point them toward the right approach without spoiling it.\n` +
+                `- Be slightly taunting and mischievous — this is a competitive arena.\n` +
+                `- Output ONLY the hint text. No labels, no quotes, no extra formatting.`;
+
+            const text = await callAI(prompt, { maxTokens: 160, temperature: 0.88 });
+            if (text && text.length > 10) {
+                hintCache.set(cacheKey, { hint: text, expiresAt: Date.now() + 60 * 60 * 1000 });
+                return { hint: text };
+            }
+        } catch (err) {
+            console.error("[challenge-hint] AI failed:", err instanceof Error ? err.message : err);
+        }
+
+        return { hint: DEFAULT_HINT };
     },
 };

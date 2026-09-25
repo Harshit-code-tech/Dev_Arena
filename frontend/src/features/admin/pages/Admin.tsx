@@ -5,8 +5,8 @@ import MonitoringLineChart from "../components/MonitoringLineChart";
 import { AdminApi } from "../../../services/AdminService";
 import "../styles/Admin.css";
 
-type AdminTab = "Overview" | "Tournaments" | "Submissions" | "Users" | "Moderation" | "System";
-const tabs: AdminTab[] = ["Overview", "Tournaments", "Submissions", "Users", "Moderation", "System"];
+type AdminTab = "Overview" | "Tournaments" | "Submissions" | "Users" | "Moderation" | "Challenges" | "Support" | "System";
+const tabs: AdminTab[] = ["Overview", "Tournaments", "Submissions", "Users", "Moderation", "Challenges", "Support", "System"];
 
 const initialTournament = {
   title: "", description: "", rules: "", type: "DSA", mode: "Solo", status: "Draft", difficulty: "Mixed",
@@ -265,11 +265,23 @@ export default function Admin() {
   const [submissions, setSubmissions] = useState<{ dsa: any[]; projects: any[] }>({ dsa: [], projects: [] });
   const [moderation, setModeration] = useState<any>(null);
   const [health, setHealth] = useState<any>(null);
+  const [competitions, setCompetitions] = useState<any[]>([]);
+  const [competitionTasks, setCompetitionTasks] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<any[]>([]);
   const [tournamentForm, setTournamentForm] = useState<Record<string, unknown>>(initialTournament);
   const [announcementTitle, setAnnouncementTitle] = useState("");
   const [announcementMessage, setAnnouncementMessage] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Challenge admin form state
+  const [competitionForm, setCompetitionForm] = useState({ title: "", weekStart: "", opensAt: "", closesAt: "" });
+  const [taskForm, setTaskForm] = useState({ competitionId: "", type: "DSA", title: "", description: "", difficulty: "Medium", weightPercentage: 50, timeLimitMs: 3000, memoryLimitMb: 256 });
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState("");
+  const [testCaseForm, setTestCaseForm] = useState({ taskId: "", input: "", expectedOutput: "", isHidden: false, weight: 1 });
+  const [aiGenerateTopic, setAiGenerateTopic] = useState("");
+  const [aiGenerateDifficulty, setAiGenerateDifficulty] = useState("Medium");
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   const selectedTournament = useMemo(() => tournaments.find((item) => item.id === selectedTournamentId), [tournaments, selectedTournamentId]);
   const chartHistory = useMemo(() => compactPresenceHistory(history), [history]);
@@ -301,7 +313,17 @@ export default function Admin() {
     if (tab === "Submissions") void AdminApi.submissions(selectedTournamentId || undefined).then(setSubmissions).catch((reason) => setMessage(reason instanceof Error ? reason.message : "Submissions could not be loaded."));
     if (tab === "Moderation") void AdminApi.moderation().then(setModeration).catch((reason) => setMessage(reason instanceof Error ? reason.message : "Moderation data could not be loaded."));
     if (tab === "System") void AdminApi.systemHealth().then(setHealth).catch((reason) => setMessage(reason instanceof Error ? reason.message : "System health could not be loaded."));
+    if (tab === "Challenges") void AdminApi.challengeCompetitions().then(setCompetitions).catch((reason) => setMessage(reason instanceof Error ? reason.message : "Challenge competitions could not be loaded."));
+    if (tab === "Support") void AdminApi.supportMessages().then(setSupportMessages).catch((reason) => setMessage(reason instanceof Error ? reason.message : "Support messages could not be loaded."));
   }, [tab, selectedTournamentId, access]);
+
+  // Load tasks for selected competition (for test case form)
+  useEffect(() => {
+    if (!access || !selectedCompetitionId) return;
+    void AdminApi.listCompetitionTasks(selectedCompetitionId)
+      .then(setCompetitionTasks)
+      .catch(() => setCompetitionTasks([]));
+  }, [selectedCompetitionId, access]);
 
   async function run(action: () => Promise<unknown>, success: string) {
     setBusy(true); setMessage("");
@@ -428,5 +450,154 @@ export default function Admin() {
       <article className="admin-panel"><header><p>Operations</p><h2>Audit logs</h2><span className="admin-panel-note">Administrative actions are translated into readable changes. Internal UUIDs and raw JSON are intentionally hidden.</span></header><AuditOperations items={moderation.auditLogs || []} /></article>
     </section>}
     {tab === "System" && health && <section className="admin-panel"><header><p>Infrastructure</p><h2>System health</h2></header><div className="admin-metrics">{Object.entries(health).map(([key, value]) => <article key={key}><span>{key.replaceAll(/([A-Z])/g, " $1")}</span><strong>{String(value)}</strong></article>)}</div></section>}
+
+    {tab === "Challenges" && <section className="admin-stack">
+      {/* ── Competition list ── */}
+      <article className="admin-panel">
+        <header><p>Weekly Challenge engine</p><h2>Competitions</h2><span className="admin-panel-note">Workflow: <strong>1)</strong> Create competition → <strong>2)</strong> Add tasks (Draft only) → <strong>3)</strong> Add test cases per task → <strong>4)</strong> Activate. The "Select" button loads tasks for the test-case form below.</span></header>
+        <div className="admin-cards">{competitions.map((c) => <article key={c.id} className={selectedCompetitionId === c.id ? "selected" : ""}>
+          <span>{c.status} · {c._count.tasks} task{c._count.tasks === 1 ? "" : "s"}</span>
+          <h3>{c.title}</h3>
+          <p>{c.weekStart?.slice(0, 10)}{c.opensAt ? ` · opens ${formatDate(c.opensAt)}` : ""}{c.closesAt ? ` · closes ${formatDate(c.closesAt)}` : ""}</p>
+          <div className="admin-review-actions">
+            <button type="button" className="admin-underline-action" onClick={() => { setSelectedCompetitionId(c.id); setTaskForm((f) => ({ ...f, competitionId: c.status === "Draft" ? c.id : f.competitionId })); void AdminApi.listCompetitionTasks(c.id).then(setCompetitionTasks).catch(() => setCompetitionTasks([])); }}>Select (load tasks)</button>
+            {c.status === "Draft" && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.activateCompetition(c.id), `✅ "${c.title}" activated — now open for submissions.`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Activate</button>}
+            {(c.status === "Active" || c.status === "Evaluating") && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.aggregateResults(c.id), `✅ Results aggregated for "${c.title}".`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Aggregate results</button>}
+          </div>
+        </article>)}
+        {competitions.length === 0 && <div className="admin-empty-readable">No competitions yet. Create one below.</div>}
+        </div>
+      </article>
+
+      <div className="admin-three-column">
+        {/* ── 🤖 AI Challenge Generator ── */}
+        <form className="admin-panel admin-form" onSubmit={async (e) => {
+          e.preventDefault();
+          if (!aiGenerateTopic.trim()) return;
+          setAiGenerating(true); setMessage("");
+          try {
+            const generated = await AdminApi.generateChallenge(aiGenerateTopic.trim(), aiGenerateDifficulty);
+            // Pre-fill task form with generated values
+            setTaskForm((f) => ({
+              ...f,
+              title: generated.title ?? f.title,
+              description: generated.description ?? f.description,
+              difficulty: generated.difficulty ?? aiGenerateDifficulty,
+            }));
+            setMessage(`✨ AI generated "${generated.title}" — review and save it in the Add Task form. ${generated.sampleTestCases?.length ?? 0} sample test cases included (add them manually below).`);
+          } catch (err) {
+            setMessage(err instanceof Error ? err.message : "AI generation failed.");
+          } finally {
+            setAiGenerating(false);
+          }
+        }}>
+          <header><p>Gemini Flash Latest</p><h2>🤖 Generate task</h2><span className="admin-panel-note">Enter a topic and difficulty — Gemini will write a complete challenge. Results pre-fill the Add Task form for review before saving.</span></header>
+          <label className="wide"><span>Topic</span><input required value={aiGenerateTopic} onChange={(e) => setAiGenerateTopic(e.target.value)} placeholder="e.g. Binary search trees, Dynamic programming, Graph BFS" /></label>
+          <label><span>Difficulty</span>
+            <select value={aiGenerateDifficulty} onChange={(e) => setAiGenerateDifficulty(e.target.value)} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
+              <option>Easy</option><option>Medium</option><option>Hard</option><option>Expert</option>
+            </select>
+          </label>
+          <button className="admin-underline-action wide" type="submit" disabled={aiGenerating || busy}>{aiGenerating ? "Generating…" : "Generate with AI"}</button>
+        </form>
+
+        {/* ── Create competition ── */}
+        <form className="admin-panel admin-form" onSubmit={(e) => { e.preventDefault(); void run(() => AdminApi.createCompetition({ ...competitionForm, opensAt: competitionForm.opensAt || null, closesAt: competitionForm.closesAt || null }), "✅ Competition created — now add tasks to it using Step 2.").then(() => { setCompetitionForm({ title: "", weekStart: "", opensAt: "", closesAt: "" }); void AdminApi.challengeCompetitions().then(setCompetitions); }); }}>
+          <header><p>Step 1 · Create competition</p><h2>New week</h2><span className="admin-panel-note">Creates a Draft competition container. Add tasks next.</span></header>
+          <label><span>Title</span><input required value={competitionForm.title} onChange={(e) => setCompetitionForm((f) => ({ ...f, title: e.target.value }))} placeholder="Week 42 — November Challenge" /></label>
+          <DateField label="Week start" required value={competitionForm.weekStart} onChange={(v) => setCompetitionForm((f) => ({ ...f, weekStart: v }))} />
+          <DateField label="Opens at" value={competitionForm.opensAt} onChange={(v) => setCompetitionForm((f) => ({ ...f, opensAt: v }))} />
+          <DateField label="Closes at" value={competitionForm.closesAt} onChange={(f) => setCompetitionForm((ff) => ({ ...ff, closesAt: f }))} />
+          <button className="admin-underline-action wide" type="submit" disabled={busy}>Create competition</button>
+        </form>
+
+        {/* ── Create task ── */}
+        <form className="admin-panel admin-form" onSubmit={(e) => {
+          e.preventDefault();
+          const resolvedCompetitionId = taskForm.competitionId || selectedCompetitionId;
+          if (!resolvedCompetitionId) { setMessage("⚠ Select a Draft competition first."); return; }
+          const isDraft = competitions.some((c) => c.id === resolvedCompetitionId && c.status === "Draft");
+          if (!isDraft) { setMessage("⚠ Tasks can only be added to Draft competitions. This competition is already active or completed."); return; }
+          void run(
+            () => AdminApi.createTask({ ...taskForm, competitionId: resolvedCompetitionId }),
+            "✅ Task created — now add at least one test case to it in Step 3 below.",
+          ).then(() => {
+            setTaskForm((f) => ({ ...f, title: "", description: "" }));
+            void AdminApi.challengeCompetitions().then(setCompetitions);
+            void AdminApi.listCompetitionTasks(resolvedCompetitionId).then(setCompetitionTasks).catch(() => setCompetitionTasks([]));
+          });
+        }}>
+          <header><p>Step 2 · Requires Draft competition</p><h2>Add task</h2><span className="admin-panel-note">Tasks can only be added to <strong>Draft</strong> competitions. Click "Select (load tasks)" on a card above to pre-select a competition.</span></header>
+          {competitions.filter((c) => c.status === "Draft").length === 0 && <p style={{ fontSize: 12, color: "#f87171", margin: "0 0 12px", padding: "8px 12px", background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.3)", borderRadius: 6 }}>⚠ No Draft competitions. Create one in Step 1 first.</p>}
+          <label><span>Competition (Draft only)</span>
+            <select value={taskForm.competitionId || selectedCompetitionId} onChange={(e) => { setTaskForm((f) => ({ ...f, competitionId: e.target.value })); setSelectedCompetitionId(e.target.value); void AdminApi.listCompetitionTasks(e.target.value).then(setCompetitionTasks).catch(() => setCompetitionTasks([])); }} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
+              <option value="">Select Draft competition…</option>
+              {competitions.filter((c) => c.status === "Draft").map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+          </label>
+          <label><span>Type</span>
+            <select value={taskForm.type} onChange={(e) => setTaskForm((f) => ({ ...f, type: e.target.value }))} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
+              <option>DSA</option><option>Development</option><option>Debugging</option>
+            </select>
+          </label>
+          <label><span>Title</span><input required value={taskForm.title} onChange={(e) => setTaskForm((f) => ({ ...f, title: e.target.value }))} /></label>
+          <label><span>Difficulty</span>
+            <select value={taskForm.difficulty} onChange={(e) => setTaskForm((f) => ({ ...f, difficulty: e.target.value }))} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
+              <option>Easy</option><option>Medium</option><option>Hard</option><option>Expert</option>
+            </select>
+          </label>
+          <label><span>Weight % of competition score</span><input type="number" min={1} max={100} value={taskForm.weightPercentage} onChange={(e) => setTaskForm((f) => ({ ...f, weightPercentage: Number(e.target.value) }))} /></label>
+          <label><span>Time limit (ms)</span><input type="number" min={500} value={taskForm.timeLimitMs} onChange={(e) => setTaskForm((f) => ({ ...f, timeLimitMs: Number(e.target.value) }))} /></label>
+          <label><span>Memory limit (MB)</span><input type="number" min={16} value={taskForm.memoryLimitMb} onChange={(e) => setTaskForm((f) => ({ ...f, memoryLimitMb: Number(e.target.value) }))} /></label>
+          <label className="wide"><span>Problem description</span><textarea required value={taskForm.description} onChange={(e) => setTaskForm((f) => ({ ...f, description: e.target.value }))} /></label>
+          <button className="admin-underline-action wide" type="submit" disabled={busy}>Add task</button>
+        </form>
+      </div>
+
+      {/* ── Add test case ── */}
+      <form className="admin-panel admin-form" onSubmit={(e) => {
+        e.preventDefault();
+        if (!testCaseForm.taskId) { setMessage("⚠ Select a task first."); return; }
+        void run(() => AdminApi.createTestCase(testCaseForm), "✅ Test case added. Keeping the same task selected so you can add more.").then(() => {
+          // Keep taskId to allow adding multiple test cases to the same task rapidly
+          setTestCaseForm((f) => ({ taskId: f.taskId, input: "", expectedOutput: "", isHidden: false, weight: 1 }));
+          if (selectedCompetitionId) void AdminApi.listCompetitionTasks(selectedCompetitionId).then(setCompetitionTasks).catch(() => setCompetitionTasks([]));
+          void AdminApi.challengeCompetitions().then(setCompetitions);
+        });
+      }}>
+        <header><p>Step 3 · Click "Select (load tasks)" on a competition card above first</p><h2>Add test case</h2><span className="admin-panel-note">Test cases run via Piston sandbox. Hidden cases are invisible to players. Every task needs ≥ 1 test case before the competition can be activated. <strong>After submitting, the task stays selected so you can add more cases.</strong></span></header>
+        {selectedCompetitionId && competitionTasks.length === 0 && <p style={{ fontSize: 12, color: "#fbbf24", margin: "0 0 12px", padding: "8px 12px", background: "rgba(251,191,36,.08)", border: "1px solid rgba(251,191,36,.3)", borderRadius: 6 }}>No tasks found. Add tasks in Step 2 first.</p>}
+        <label><span>Task</span>
+          <select value={testCaseForm.taskId} onChange={(e) => setTestCaseForm((f) => ({ ...f, taskId: e.target.value }))} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
+            <option value="">Select task… (click "Select (load tasks)" on a card above)</option>
+            {competitionTasks.map((t) => <option key={t.id} value={t.id}>{t.title} ({t._count.testCases} test case{t._count.testCases === 1 ? "" : "s"})</option>)}
+          </select>
+        </label>
+        <label className="wide"><span>Input (stdin)</span><textarea required value={testCaseForm.input} onChange={(e) => setTestCaseForm((f) => ({ ...f, input: e.target.value }))} placeholder={"5\n1 2 3 4 5"} /></label>
+        <label className="wide"><span>Expected output (stdout)</span><textarea required value={testCaseForm.expectedOutput} onChange={(e) => setTestCaseForm((f) => ({ ...f, expectedOutput: e.target.value }))} placeholder="15" /></label>
+        <label><span>Weight</span><input type="number" min={1} value={testCaseForm.weight} onChange={(e) => setTestCaseForm((f) => ({ ...f, weight: Number(e.target.value) }))} /></label>
+        <label className="wide admin-checkbox"><input type="checkbox" checked={testCaseForm.isHidden} onChange={(e) => setTestCaseForm((f) => ({ ...f, isHidden: e.target.checked }))} /><span>Hidden test case (not shown to players)</span></label>
+        <button className="admin-underline-action wide" type="submit" disabled={busy || !testCaseForm.taskId}>Add test case</button>
+      </form>
+    </section>}
+
+    {tab === "Support" && <section className="admin-stack">
+      <article className="admin-panel">
+        <header><p>Support inbox</p><h2>Messages</h2><span className="admin-panel-note">All support form submissions — even ones where email delivery failed. Delivered = email was sent successfully.</span></header>
+        {supportMessages.length === 0
+          ? <div className="admin-empty-readable">No support messages yet.</div>
+          : <div className="admin-table admin-support-table">
+              <div className="admin-table-head"><span>Date</span><span>Name</span><span>Email</span><span>Status</span><span>Message</span></div>
+              {supportMessages.map((m) => <div key={m.id} className="admin-support-row">
+                <span className="admin-muted" style={{ fontSize: 11 }}>{formatDate(m.createdAt)}</span>
+                <strong>{m.name}</strong>
+                <a href={`mailto:${m.email}`} style={{ color: "#818cf8", fontSize: 12 }}>{m.email}</a>
+                <StatusBadge value={m.delivered ? "Delivered" : "Undelivered"} />
+                <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,.72)", gridColumn: "1 / -1", paddingTop: 8, borderTop: "1px solid #1a1a1e", lineHeight: 1.6 }}>{m.message}</p>
+              </div>)}
+            </div>
+        }
+      </article>
+    </section>}
   </main>;
 }

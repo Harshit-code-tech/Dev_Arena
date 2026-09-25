@@ -12,8 +12,11 @@ router.use(protect);
 router.get("/", challengeController.getActiveCompetition);
 router.post("/submit", challengeController.submitCode);
 router.get("/results", challengeController.getResults);
+router.post("/hint", challengeController.getAiHint);
 
 // ── Admin ────────────────────────────────────────────────────────
+router.get("/admin/competitions", requireAdmin, challengeController.listCompetitions);
+router.get("/admin/competition/:id/tasks", requireAdmin, challengeController.listTasksForCompetition);
 router.post("/admin/competition", requireAdmin, challengeController.createCompetition);
 router.post("/admin/competition/:id/activate", requireAdmin, challengeController.activateCompetition);
 router.post("/admin/competition/:id/aggregate", requireAdmin, challengeController.aggregateResults);

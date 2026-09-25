@@ -165,7 +165,8 @@ export default function ChooseUsername() {
     try {
       setGithubAction("connect");
       const result = await GitHubApi.startConnection();
-      window.location.assign(result.authorizationUrl);
+      // Open GitHub OAuth in a new tab — keeps the onboarding session alive in this tab.
+      window.open(result.authorizationUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub connection could not start.");
       setGithubAction(null);
@@ -176,7 +177,8 @@ export default function ChooseUsername() {
     try {
       setGithubAction("install");
       const result = await GitHubApi.startInstallation();
-      window.location.assign(result.installationUrl);
+      // Open GitHub App installation in a new tab — keeps onboarding alive.
+      window.open(result.installationUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "GitHub repository access could not be opened.");
       setGithubAction(null);

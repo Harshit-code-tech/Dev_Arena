@@ -79,6 +79,20 @@
   font-weight: 600;
 }
 
+.coach-card-ai-badge {
+  opacity: 0.75;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 .coach-card-message {
   margin: 0;
   font-size: 15px;

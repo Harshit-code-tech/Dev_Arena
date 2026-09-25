@@ -99,7 +99,7 @@ function buildDevArenaEmail(options: DevArenaEmailOptions) {
   return { text: textParts.join("\n\n"), html };
 }
 
-export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
+export const sendEmail = async (to: string, subject: string, text: string, html?: string, replyTo?: string) => {
   try {
     const info = await transporter.sendMail({
       from: `DevArena <${senderAddress}>`,
@@ -107,6 +107,7 @@ export const sendEmail = async (to: string, subject: string, text: string, html?
       subject,
       text,
       html,
+      ...(replyTo ? { replyTo } : {}),
     });
     console.log("Email sent: %s", info.messageId);
     return true;
@@ -120,9 +121,10 @@ export async function sendDevArenaEmail(
   to: string,
   subject: string,
   options: DevArenaEmailOptions,
+  replyTo?: string,
 ) {
   const message = buildDevArenaEmail(options);
-  return sendEmail(to, subject, message.text, message.html);
+  return sendEmail(to, subject, message.text, message.html, replyTo);
 }
 
 export type AuthOtpEmailPurpose = "signup" | "login" | "password-reset" | "identity-change";

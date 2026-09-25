@@ -106,3 +106,7 @@ export type CreateTestCaseInput = {
     isHidden?: boolean;
     weight?: number;
 };
+
+export type HintInput = {
+    taskId: string;
+};

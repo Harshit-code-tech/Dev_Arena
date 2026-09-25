@@ -1544,3 +1544,19 @@ model Release {
   @@index([releasedAt(sort: Desc)])
   @@map("releases")
 }
+
+// ── Support ───────────────────────────────────────────────────────
+// Stores every support form submission regardless of email delivery status.
+// Admins can view undelivered messages via GET /api/admin/support-messages.
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  delivered Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("support_messages")
+}
