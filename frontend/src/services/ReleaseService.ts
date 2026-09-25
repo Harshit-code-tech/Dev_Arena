@@ -1,3 +1,4 @@
+import { resolveApiUrl } from "./ApiClient";
 import { RELEASES_PER_PAGE } from "./ReleaseConstants";
 
 export type BreakingChange = {
@@ -39,26 +40,32 @@ type BackendRelease = {
 type BackendReleaseListResponse = {
   success: boolean;
   data?: BackendRelease[];
+  message?: string;
   pagination?: {
     totalPages?: number;
   };
 };
 
 export async function getReleasePageViewModel(page: number): Promise<ReleasePageViewModel> {
-  const response = await fetch(`/api/releases?page=${page}&limit=${RELEASES_PER_PAGE}`);
-  const data = await response.json();
+  const url = resolveApiUrl(`/api/releases?page=${page}&limit=${RELEASES_PER_PAGE}`);
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+  });
+
+  const data = (await response.json().catch(() => null)) as BackendReleaseListResponse | null;
+
+  if (!response.ok || !data) {
+    throw new Error(data?.message || `Failed to fetch releases (${response.status})`);
+  }
+
+  if (!data.success) {
+    throw new Error(data.message || "Failed to fetch releases");
+  }
 
   return buildReleasePageViewModel(data);
 }
 
 function buildReleasePageViewModel(response: BackendReleaseListResponse): ReleasePageViewModel {
-  if (!response.success) {
-    return {
-      entries: [],
-      totalPages: 1,
-    };
-  }
-
   return {
     entries: mapReleasesToUpdateEntries(response.data || []),
     totalPages: normalizeTotalPages(response.pagination?.totalPages),

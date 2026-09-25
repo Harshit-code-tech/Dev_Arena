@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import UpdatesTimeline from "../components/UpdatesTimeline";
 import Pagination from "../../../shared/components/Pagination";
 import PageLoader from "../../../shared/components/Skeletons/PageLoader";
@@ -10,7 +9,6 @@ import {
 import "../styles/Updates.css";
 
 function Updates() {
-  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageEntries, setPageEntries] = useState<UpdateEntry[]>([]);
@@ -56,18 +54,6 @@ function Updates() {
   return (
     <main className="updates-page animated-page">
       <div className="updates-layout">
-        <div className="updates-top-bar">
-          <button
-            type="button"
-            className="updates-back-btn"
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-          >
-            <i className="bx bx-left-arrow-alt" aria-hidden="true" />
-            <span>Back</span>
-          </button>
-        </div>
-
         <header className="hero-updates">
           <span className="eyebrow" aria-label="Section label">
             Changelog
