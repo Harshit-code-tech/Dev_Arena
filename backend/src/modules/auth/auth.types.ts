@@ -4,21 +4,21 @@ export type AuthServiceResult = {
 };
 
 export type RegisterInput = {
-  email?: string;
-  password?: string;
+  idToken?: string;
   name?: string;
   acceptLegal?: boolean;
 };
 
 export type LoginInput = {
-  email?: string;
-  password?: string;
+  idToken?: string;
   remember?: boolean;
+  migrationToken?: string;
 };
 
 export type VerifyAuthOtpInput = {
   tempToken?: string;
   otp?: string;
+  idToken?: string;
 };
 
 export type ResendAuthOtpInput = {
