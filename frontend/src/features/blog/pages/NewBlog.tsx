@@ -223,9 +223,6 @@ function NewBlog() {
                             <i className="bx bx-save" aria-hidden="true" />
                             {isSaving ? "Saving..." : "Save Draft"}
                         </button>
-<<<<<<< HEAD
-
-=======
                         <button
                             type="button"
                             className="cancel-btn"
@@ -239,7 +236,6 @@ function NewBlog() {
                         >
                             Cancel
                         </button>
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
                         <button
                             type="button"
                             className="publish-btn"
