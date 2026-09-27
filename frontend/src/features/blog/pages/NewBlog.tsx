@@ -82,7 +82,7 @@ function NewBlog() {
     };
 
     async function saveDraft() {
-        if (!title.trim() && !content.trim()) return navigate("/blog");
+        if (!title.trim() && !content.trim()) return navigate("/player-hub?section=community");
 
         setIsSaving(true);
         const finalTitle = selectedTag && !title.startsWith(`[${selectedTag}]`)
@@ -123,7 +123,7 @@ function NewBlog() {
                 await publishBlogPost(draftId, payload);
                 toast.success("Dispatch published to the arena!");
             }
-            navigate("/blog");
+            navigate("/player-hub?section=community");
         } catch (error) {
             console.error(error);
             toast.error("Failed to save post. Please make sure you are logged in as the author.");
@@ -143,7 +143,7 @@ function NewBlog() {
                             if (hasUnsavedContent) {
                                 setShowDraftModal(true);
                             } else {
-                                navigate("/blog");
+                                navigate("/player-hub?section=community");
                             }
                         }}
                     >
@@ -223,7 +223,23 @@ function NewBlog() {
                             <i className="bx bx-save" aria-hidden="true" />
                             {isSaving ? "Saving..." : "Save Draft"}
                         </button>
+<<<<<<< HEAD
 
+=======
+                        <button
+                            type="button"
+                            className="cancel-btn"
+                            onClick={() => {
+                                if (hasUnsavedContent) {
+                                    setShowDraftModal(true);
+                                } else {
+                                    navigate("/player-hub?section=community");
+                                }
+                            }}
+                        >
+                            Cancel
+                        </button>
+>>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
                         <button
                             type="button"
                             className="publish-btn"
@@ -241,7 +257,7 @@ function NewBlog() {
                 {showDraftModal && (
                     <DraftModal
                         onSave={saveDraft}
-                        onDiscard={() => navigate("/blog")}
+                        onDiscard={() => navigate("/player-hub?section=community")}
                         onKeepEditing={() => setShowDraftModal(false)}
                     />
                 )}

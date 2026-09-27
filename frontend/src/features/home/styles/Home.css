@@ -1,6 +1,17 @@
 /* DevArena landing page.
    Home-specific layout lives here so it does not compete with the shared theme. */
 
+html.landing-paging-active,
+body.landing-paging-active {
+  overscroll-behavior-y: none;
+}
+
+/* Section changes are driven by Home.tsx. Do not enable native scroll-snap here:
+   browser snap + wheel paging can race and skip more than one landing section. */
+body .home-page .landing-snap-section {
+  scroll-snap-align: none;
+}
+
 body .home-page {
   width: 100%;
   min-height: 100vh;

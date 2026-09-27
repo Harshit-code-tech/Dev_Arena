@@ -13,9 +13,25 @@ const links = [
   { name: "Challenges", path: "/challenges", icon: "bx-target-lock" },
   { name: "Tournaments", path: "/tournaments", icon: "bx-trophy" },
   { name: "Player Hub", path: "/player-hub", icon: "bx-network-chart" },
-  { name: "Blog", path: "/blog", icon: "bx-news" },
   { name: "Profile", path: "/profile", icon: "bx-user" },
 ] as const;
+
+const routePrefetchers: Record<string, () => Promise<unknown>> = {
+  "/dashboard": () => import("../../features/dashboard/pages/Dashboard"),
+  "/dsa": () => import("../../features/dsa/pages/DSA"),
+  "/projects": () => import("../../features/projects/pages/Projects"),
+  "/players": () => import("../../features/friends/pages/Friends"),
+  "/leaderboard": () => import("../../features/leaderboard/pages/Leaderboard"),
+  "/challenges": () => import("../../features/challenges/pages/Challenges"),
+  "/tournaments": () => import("../../features/tournaments/pages/Tournaments"),
+  "/player-hub": () => import("../../features/player-hub/pages/PlayerHub"),
+  "/profile": () => import("../../features/profile/pages/Profile"),
+  "/admin": () => import("../../features/admin/pages/Admin"),
+};
+
+function prefetchRoute(path: string) {
+  void routePrefetchers[path]?.();
+}
 
 type SidebarProps = {
   open?: boolean;
@@ -58,6 +74,8 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
                 key={link.path}
                 to={link.path}
                 onClick={onClose}
+                onMouseEnter={() => prefetchRoute(link.path)}
+                onFocus={() => prefetchRoute(link.path)}
                 className={({ isActive }) => `sidebar-link${isActive ? " active" : ""}`}
               >
                 <i className={`bx ${link.icon}`} aria-hidden="true" />
@@ -70,7 +88,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         <div className="sidebar-footer">
           <div className="sidebar-mission" aria-label="How DevArena works">
             <span>The Daily Ritual</span>
-            <strong>Code · Flex · Roast · Repeat</strong>
+            <strong>Code · Run · Flex · Repeat</strong>
             <p>Fake commits won't save you. Ship real code or get left behind.</p>
           </div>
         </div>

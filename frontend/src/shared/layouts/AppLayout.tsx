@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
+import PageLoader from "../components/Skeletons/PageLoader";
 import { startRealtimeSync } from "../../services/RealtimeService";
 import { sendPresenceHeartbeat } from "../../services/PresenceService";
 import "../styles/AppLayout.css";
@@ -44,9 +45,18 @@ export default function AppLayout() {
       <div className="app-workspace">
         <TopBar onMenuToggle={() => setSidebarOpen((current) => !current)} />
         <main className="app-content">
-          <div className="route-stage" key={location.pathname}>
-            <Outlet />
-          </div>
+          <Suspense
+            key={location.pathname}
+            fallback={
+              <div className="route-stage route-stage--loading">
+                <PageLoader />
+              </div>
+            }
+          >
+            <div className="route-stage">
+              <Outlet />
+            </div>
+          </Suspense>
         </main>
       </div>
     </div>

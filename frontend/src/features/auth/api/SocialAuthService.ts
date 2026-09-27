@@ -59,6 +59,9 @@ export function getSocialAuthErrorMessage(
     case "auth/account-exists-with-different-credential":
       return "Account already exists with another login method.";
 
+    case "LEGAL_ACCEPTANCE_REQUIRED":
+      return "Account not created. Please create an account first.";
+
     default:
       if (error instanceof Error && error.message) {
         return error.message;

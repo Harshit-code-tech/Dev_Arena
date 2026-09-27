@@ -708,33 +708,34 @@ body .app.auth-route .auth-illustration::before {
 
 body .app.auth-route .auth-wordmark {
   position: absolute;
-  z-index: -1;
-  top: 50%;
-  right: clamp(8px, 1.2vw, 22px);
-  color: transparent;
-  -webkit-text-stroke: 0 transparent;
-  font-size: clamp(72px, 8vw, 150px);
+  z-index: 0;
+  top: clamp(28px, 4.5vh, 54px);
+  left: 50%;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  width: max-content;
+  color: #ffffff;
+  font-family: var(--da-display, "Arial Narrow", Arial, sans-serif);
+  font-size: clamp(54px, 6vw, 104px);
   font-weight: 700;
-  line-height: 0.78;
-  letter-spacing: -3px;
-  text-transform: uppercase;
-  writing-mode: vertical-rl;
-  transform: translateY(-50%);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  text-transform: none;
+  writing-mode: horizontal-tb;
+  transform: translateX(-50%);
+  opacity: .16;
   user-select: none;
   pointer-events: none;
-}
-
-body .app.auth-route .auth-wordmark-dev,
-body .app.auth-route .auth-wordmark-arena {
-  color: transparent;
+  white-space: nowrap;
 }
 
 body .app.auth-route .auth-wordmark-dev {
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-dev, #ffffff) 22%, transparent);
+  color: var(--da-brand-dev, #ffffff);
 }
 
 body .app.auth-route .auth-wordmark-arena {
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-arena, #77787d) 42%, transparent);
+  color: var(--da-brand-arena, #77787d);
 }
 
 body .app.auth-route .illustration-icon {
@@ -966,19 +967,6 @@ body .app.auth-route .auth-illustration p:not(.auth-visual-kicker) {
   body .app.auth-route .auth-footer {
     margin-top: 9px !important;
   }
-
-  body .app.auth-route .auth-wordmark-dev,
-body .app.auth-route .auth-wordmark-arena {
-  color: transparent;
-}
-
-body .app.auth-route .auth-wordmark-dev {
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-dev, #ffffff) 22%, transparent);
-}
-
-body .app.auth-route .auth-wordmark-arena {
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--da-brand-arena, #77787d) 42%, transparent);
-}
 
 body .app.auth-route .illustration-icon {
     max-height: 40dvh !important;

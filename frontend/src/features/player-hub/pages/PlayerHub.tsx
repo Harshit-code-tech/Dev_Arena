@@ -43,6 +43,12 @@ import LiveDateTime from "../../../shared/components/LiveDateTime";
 import AnimatedSelect, { type AnimatedSelectOption } from "../../../shared/components/AnimatedSelect";
 import { OfflineMessageQueue, type QueuedEncryptedMessage } from "../../../services/OfflineMessageQueueService";
 import SecureChatRecoveryPanel from "../components/SecureChatRecoveryPanel";
+import ConfirmDialog from "../../../shared/components/ConfirmDialog";
+import {
+  deleteBlogPost,
+  getPublishedBlogPosts,
+  type BlogPostViewModel,
+} from "../../../services/BlogService";
 import "../styles/PlayerHub.css";
 
 type HubSection =
@@ -61,6 +67,7 @@ type ModalState =
   | { type: "create-collaboration" }
   | { type: "apply"; post: CollaborationPost }
   | { type: "applications"; post: CollaborationPost }
+  | { type: "choose-community-content" }
   | { type: "create-community" }
   | { type: "comments"; post: CommunityPost }
   | { type: "report"; subjectType: string; subjectId: string; subject: string }
@@ -70,7 +77,7 @@ const SECTION_META: Array<{ id: HubSection; label: string; kicker: string; icon:
   { id: "discover", label: "Discover Players", kicker: "Live player directory", icon: "bx-radar" },
   { id: "projects", label: "Shared Projects", kicker: "Public proof of work", icon: "bx-folder-open" },
   { id: "collaboration", label: "Collaboration Board", kicker: "Real opportunities", icon: "bx-network-chart" },
-  { id: "community", label: "Community Posts", kicker: "Live discussions", icon: "bx-conversation" },
+  { id: "community", label: "Community", kicker: "Posts and long-form blogs", icon: "bx-conversation" },
   { id: "messages", label: "Direct Messaging", kicker: "Encrypted player chat", icon: "bx-message-square-dots" },
   { id: "safety", label: "Block / Report", kicker: "Persistent trust controls", icon: "bx-shield-quarter" },
   { id: "matching", label: "Player Matching", kicker: "Explainable tech matching", icon: "bx-git-compare" },
@@ -259,6 +266,8 @@ export default function PlayerHub() {
   const [projects, setProjects] = useState<SharedProject[]>([]);
   const [collaborations, setCollaborations] = useState<CollaborationPost[]>([]);
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPostViewModel[]>([]);
+  const [blogToDelete, setBlogToDelete] = useState<BlogPostViewModel | null>(null);
   const [collaborationApplications, setCollaborationApplications] = useState<CollaborationApplication[]>([]);
   const [conversations, setConversations] = useState<DirectConversation[]>([]);
   const [blockedPlayers, setBlockedPlayers] = useState<BlockedPlayer[]>([]);
@@ -323,6 +332,7 @@ export default function PlayerHub() {
   const refreshProjects = useCallback(async () => setProjects(await PlayerHubApi.projects()), []);
   const refreshCollaborations = useCallback(async () => setCollaborations(await PlayerHubApi.collaborations()), []);
   const refreshCommunity = useCallback(async () => setCommunityPosts(await PlayerHubApi.community()), []);
+  const refreshBlogs = useCallback(async () => setBlogPosts(await getPublishedBlogPosts()), []);
   const refreshConversations = useCallback(async () => {
     const data = await PlayerHubApi.conversations();
     setConversations(data);
@@ -349,14 +359,14 @@ export default function PlayerHub() {
     try {
       await Promise.all([
         refreshOverview(), refreshPlayers(), refreshProjects(), refreshCollaborations(),
-        refreshCommunity(), refreshConversations(), refreshBlocks(), refreshMatching(),
+        refreshCommunity(), refreshBlogs(), refreshConversations(), refreshBlocks(), refreshMatching(),
       ]);
     } catch (reason) {
       toast.error(reason instanceof Error ? reason.message : "Player Hub could not load.");
     } finally {
       setLoading(false);
     }
-  }, [refreshBlocks, refreshCollaborations, refreshCommunity, refreshConversations, refreshMatching, refreshOverview, refreshPlayers, refreshProjects]);
+  }, [refreshBlocks, refreshBlogs, refreshCollaborations, refreshCommunity, refreshConversations, refreshMatching, refreshOverview, refreshPlayers, refreshProjects]);
 
   useEffect(() => { void refreshAll(); }, [refreshAll]);
 
@@ -590,6 +600,21 @@ export default function PlayerHub() {
       await refreshCollaborations();
     } catch (reason) {
       toast.error(reason instanceof Error ? reason.message : "Application could not update.");
+    } finally {
+      setBusyId("");
+    }
+  };
+
+  const confirmDeleteBlog = async () => {
+    if (!blogToDelete) return;
+    setBusyId(blogToDelete.id);
+    try {
+      await deleteBlogPost(blogToDelete.id);
+      setBlogPosts((current) => current.filter((post) => post.id !== blogToDelete.id));
+      toast.success("Blog deleted.");
+      setBlogToDelete(null);
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "Blog could not be deleted.");
     } finally {
       setBusyId("");
     }
@@ -996,13 +1021,29 @@ export default function PlayerHub() {
         </section>}
 
         {activeSection === "community" && <section className="hub-section">
-          <SectionHeader index="04" title="Community Posts" copy="Publish deliberate technical discussions, project updates, questions, resources, and code-review requests using real player identities." aside={<button className="hub-primary-action" type="button" onClick={() => setModal({ type: "create-community" })}>Create post</button>} />
+          <SectionHeader index="04" title="Community" copy="Share quick technical posts or publish longer blogs without leaving Player Hub." aside={<button className="hub-primary-action" type="button" onClick={() => setModal({ type: "choose-community-content" })}>Create</button>} />
           <div className="hub-toolbar hub-toolbar-compact"><label className="hub-filter"><span>Post type</span><AnimatedSelect value={communityFilter} onChange={setCommunityFilter} options={["All posts", ...Array.from(new Set(communityPosts.map((item) => item.type)))].map((value) => ({ value, label: value }))} ariaLabel="Filter community posts by type" /></label><span className="hub-result-count">{filteredPosts.length} posts</span></div>
-          {filteredPosts.length === 0 ? <EmptyState title="The feed is dead quiet" copy="Drop some tech wisdom, hot takes, or war stories from production." /> : <div className="community-feed">{filteredPosts.map((post) => <article className="community-post" key={post.id}>
+          {filteredPosts.length === 0 ? <EmptyState title="No community posts yet" copy="Start a technical discussion, share a project update, or ask the community a question." /> : <div className="community-feed">{filteredPosts.map((post) => <article className="community-post" key={post.id}>
             <header><div className="player-identity community-author"><Avatar person={post.author} size="small" /><div><strong>{post.author.name}</strong><span>@{post.author.username} · <LiveDateTime value={post.createdAt} /></span></div></div><b>{post.type}</b></header><h3>{post.title}</h3><p>{post.content}</p>{post.codeSnippet && <pre><code>{post.codeSnippet}</code></pre>}
             {post.comments.slice(-2).map((comment) => <div className="community-comment-preview" key={comment.id}><strong>@{comment.author.username}</strong><span>{comment.content}</span></div>)}
             <footer><button type="button" className={post.reactedByMe ? "active" : ""} onClick={() => void PlayerHubApi.reactCommunityPost(post.id, !post.reactedByMe).then(refreshCommunity).catch((reason) => toast.error(reason.message))}><i className="bx bx-like" /> {post.reactionCount}</button><button type="button" onClick={() => setModal({ type: "comments", post })}><i className="bx bx-message-rounded" /> {post.commentCount}</button><button type="button" className={post.savedByMe ? "active" : ""} onClick={() => void PlayerHubApi.saveCommunityPost(post.id, !post.savedByMe).then(refreshCommunity).catch((reason) => toast.error(reason.message))}><i className="bx bx-bookmark" /> {post.saveCount}</button><button type="button" onClick={() => setModal({ type: "report", subjectType: "post", subjectId: post.id, subject: post.title })}><i className="bx bx-flag" /> Report</button></footer>
           </article>)}</div>}
+
+          <section className="community-blog-section" aria-labelledby="community-blog-heading">
+            <header>
+              <div><p>Long-form community</p><h3 id="community-blog-heading">Blogs</h3><span>Technical write-ups, tutorials, post-mortems, and longer developer stories.</span></div>
+              <button type="button" className="hub-primary-action" onClick={() => navigate("/blog/drafts")}>Drafts</button>
+            </header>
+            {blogPosts.length === 0 ? <EmptyState title="No blogs published yet" copy="Use Create above and choose Blog to publish the first long-form entry." /> : <div className="community-blog-grid">{blogPosts.map((post) => {
+              const canManageBlog = Boolean(user && post.authorId && (user.uid === post.authorId || ("isAdmin" in user && user.isAdmin)));
+              return <article className="community-blog-card" key={post.id}>
+                <header><span>{post.authorName}</span><time>{post.formattedDate}</time></header>
+                <h4>{post.title}</h4>
+                <p>{post.content}</p>
+                {canManageBlog && <footer><button type="button" onClick={() => navigate(`/blog/new?postId=${post.id}`)}>Edit</button><button type="button" disabled={busyId === post.id} onClick={() => setBlogToDelete(post)}>{busyId === post.id ? "Deleting..." : "Delete"}</button></footer>}
+              </article>;
+            })}</div>}
+          </section>
         </section>}
 
         {activeSection === "messages" && <section className="hub-section">
@@ -1085,9 +1126,13 @@ export default function PlayerHub() {
 
       </div>
 
-      {modal && <HubModal title={modal.type === "player" ? modal.player.name : modal.type === "project" ? modal.project.title : modal.type === "apply" ? "Apply to collaborate" : modal.type === "applications" ? "Collaboration applications" : modal.type === "comments" ? "Community discussion" : modal.type === "report" ? "Submit report" : modal.type === "create-collaboration" ? "Post collaboration" : "Create community post"} eyebrow="Player Hub action" onClose={() => { setModal(null); setModalError(""); }}>
+      {modal && <HubModal title={modal.type === "player" ? modal.player.name : modal.type === "project" ? modal.project.title : modal.type === "apply" ? "Apply to collaborate" : modal.type === "applications" ? "Collaboration applications" : modal.type === "comments" ? "Community discussion" : modal.type === "report" ? "Submit report" : modal.type === "create-collaboration" ? "Post collaboration" : modal.type === "choose-community-content" ? "Create in Community" : "Create community post"} eyebrow="Player Hub action" onClose={() => { setModal(null); setModalError(""); }}>
         {modal.type === "player" && (() => { const tech = verifiedTechProfile(modal.player); const match = matchingByPlayer.get(modal.player.id); return <div className="player-modal-profile"><div className="player-identity"><Avatar person={modal.player} size="large" /><div><h3>{modal.player.name}</h3><p>@{modal.player.username} · {modal.player.rank} · {modal.player.arenaScore} SP</p></div></div><div className="hub-chip-row">{tech.primary.length ? tech.primary.map((skill) => <span key={skill}>{skill}</span>) : <span>No eligible project technologies</span>}</div><div className="match-reason"><i className="bx bx-sparkles" /><span>{match ? `${match.score}% live match. ${match.reasons.join(" ")}` : "No active recommendation is available because this player may already be connected, pending, hidden, or excluded by safety rules."}</span></div><div className="hub-modal-actions"><button type="button" onClick={() => { setModal(null); navigate(`/player-hub/players/${modal.player.id}/work`); }}>View DSA & Projects</button><button type="button" onClick={() => void relationshipAction(modal.player)}>{modal.player.relationship === "friends" ? "Open message" : "Connect"}</button><button type="button" onClick={() => void toggleBlock(modal.player.id, !modal.player.blockedByMe)}>{modal.player.blockedByMe ? "Unblock" : "Block"}</button><button type="button" onClick={() => setModal({ type: "report", subjectType: "player", subjectId: modal.player.id, subject: modal.player.name })}>Report</button></div></div>; })()}
         {modal.type === "project" && <div className="project-modal-detail"><div className="player-identity"><Avatar person={modal.project.owner} /><div><h3>{modal.project.title}</h3><p>@{modal.project.owner.username} · {modal.project.domain}</p></div></div><p>{modal.project.description || "No public description."}</p><RepositoryLanguageEvidence project={modal.project} /><dl className="project-modal-grid"><div><dt>Status</dt><dd>{modal.project.status.replaceAll("_", " ")}</dd></div><div><dt>Milestones</dt><dd>{modal.project.metrics.completedMilestones}/{modal.project.metrics.totalMilestones}</dd></div><div><dt>Sessions</dt><dd>{modal.project.metrics.totalSessions}</dd></div><div><dt>Saved</dt><dd>{modal.project.saveCount} players</dd></div></dl><div className="hub-modal-actions">{modal.project.shareSlug && <button type="button" onClick={() => navigate(`/shared/projects/${modal.project.shareSlug}`)}>Open public project</button>}<button type="button" onClick={() => void openConversation(modal.project.owner)}>Message owner</button><button type="button" onClick={() => setModal({ type: "report", subjectType: "project", subjectId: modal.project.id, subject: modal.project.title })}>Report</button></div></div>}
+        {modal.type === "choose-community-content" && <div className="community-create-chooser">
+          <button type="button" onClick={() => setModal({ type: "create-community" })}><i className="bx bx-message-square-detail" aria-hidden="true" /><span><strong>Post</strong><small>Quick discussions, questions, resources, project updates, or code-review requests.</small></span></button>
+          <button type="button" onClick={() => { setModal(null); navigate("/blog/new"); }}><i className="bx bx-news" aria-hidden="true" /><span><strong>Blog</strong><small>Long-form technical write-ups, tutorials, post-mortems, and developer stories.</small></span></button>
+        </div>}
         {modal.type === "applications" && <div className="application-review-list">{collaborationApplications.length === 0 ? <EmptyState title="No applications yet" copy="Applications will appear here in real time." /> : collaborationApplications.map((application) => <article key={application.id}><div className="player-identity"><Avatar person={application.applicant} size="small" /><div><strong>{application.applicant.name}</strong><span>@{application.applicant.username} · {application.status}</span></div></div><p>{application.introduction}</p><small>{application.availability} · <LiveDateTime value={application.createdAt} /></small><div className="hub-card-actions"><button type="button" disabled={busyId === application.id} onClick={() => void updateApplicationStatus(modal.post.id, application.id, "Shortlisted")}>Shortlist</button><button type="button" disabled={busyId === application.id} onClick={() => void updateApplicationStatus(modal.post.id, application.id, "Accepted")}>Accept</button><button type="button" disabled={busyId === application.id} onClick={() => void updateApplicationStatus(modal.post.id, application.id, "Rejected")}>Reject</button><button type="button" onClick={() => void openConversation(application.applicant)}>Message</button></div></article>)}</div>}
         {(modal.type === "create-collaboration" || modal.type === "apply" || modal.type === "create-community" || modal.type === "comments" || modal.type === "report") && <form className="hub-modal-form" onSubmit={submitModal}>
           {modalError && <div className="hub-form-error"><i className="bx bx-error-circle" />{modalError}</div>}
@@ -1099,6 +1144,20 @@ export default function PlayerHub() {
           <button type="submit">{modal.type === "report" ? "Submit report" : modal.type === "comments" ? "Add comment" : modal.type === "apply" ? "Send application" : "Publish"}</button>
         </form>}
       </HubModal>}
+
+      <ConfirmDialog
+        isOpen={Boolean(blogToDelete)}
+        title="Delete blog?"
+        message={`Delete "${blogToDelete?.title || "this blog"}"? This action cannot be undone.`}
+        confirmLabel="Delete blog"
+        cancelLabel="Keep blog"
+        isDestructive={true}
+        isLoading={Boolean(blogToDelete && busyId === blogToDelete.id)}
+        onConfirm={() => void confirmDeleteBlog()}
+        onCancel={() => {
+          if (!busyId) setBlogToDelete(null);
+        }}
+      />
     </main>
   );
 }

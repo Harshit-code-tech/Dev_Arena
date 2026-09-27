@@ -209,7 +209,7 @@ function Support() {
                   disabled={formStatus === "loading"}
                   aria-busy={formStatus === "loading"}
                 >
-                  {formStatus === "loading" ? "Firing message…" : "Launch message 🚀"}
+                  {formStatus === "loading" ? "Firing message…" : "Launch message"}
                 </button>
               )}
               {statusMessage && (
@@ -221,7 +221,7 @@ function Support() {
                   }
                   role="status"
                 >
-                  {formStatus === "success" ? "✅ " : "⚠ "}
+
                   {statusMessage}
                 </span>
               )}

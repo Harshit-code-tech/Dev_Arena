@@ -52,7 +52,7 @@ export default function Feedback() {
           <small>{feedback.length}/4000</small>
         </label>
         <button className="feedback-submit" type="submit" disabled={sending || !feature || feedback.trim().length < 10}>
-          {sending ? "Launching into the void…" : "Launch feedback 🚀"}
+          {sending ? "Launching into the void…" : "Launch feedback"}
         </button>
       </form>
     </main>
