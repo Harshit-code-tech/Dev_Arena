@@ -4,7 +4,10 @@ import {
   getRankProgress,
 } from "../features/dashboard/utils/RankSystem";
 import { getStoredAuthToken } from "../features/auth/api/AuthStorageService";
-import { getNearbyLeaderboard, type LeaderboardEntry } from "./LeaderboardService";
+import {
+  getNearbyLeaderboard,
+  type LeaderboardEntry,
+} from "./LeaderboardService";
 import { HEATMAP_PAST_WEEKS, SEASON_LENGTH_DAYS } from "./DashboardConstants";
 import { MS_PER_DAY } from "./DateConstants";
 import {
@@ -89,7 +92,9 @@ export async function getDashboardViewModel(): Promise<DashboardViewModel> {
   return viewModel;
 }
 
-async function fetchDashboardData(token: string): Promise<BackendDashboardResponse> {
+async function fetchDashboardData(
+  token: string,
+): Promise<BackendDashboardResponse> {
   const response = await fetch("/api/dashboard/me", {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -98,7 +103,10 @@ async function fetchDashboardData(token: string): Promise<BackendDashboardRespon
   return response.json();
 }
 
-async function updateDashboardStats(token: string, payload: DashboardUpdatePayload) {
+async function updateDashboardStats(
+  token: string,
+  payload: DashboardUpdatePayload,
+) {
   const response = await fetch("/api/dashboard/me", {
     method: "PUT",
     headers: {
@@ -121,7 +129,8 @@ function buildDashboardViewModel(
     createdAt: new Date(log.createdAt),
   }));
   const seasonPoints = normalizeNumber(response.stats.seasonPoints, 0);
-  const backendRank = response.stats.rank || getRankFromPoints(seasonPoints).name;
+  const backendRank =
+    response.stats.rank || getRankFromPoints(seasonPoints).name;
   const nextRank = getNextRank(seasonPoints);
   const heatmap = buildHeatmap(logs);
 
@@ -155,7 +164,9 @@ function getRequiredDashboardAuthToken() {
   return token;
 }
 
-function calculateDaysRemaining(seasonStartDate: BackendDashboardStats["seasonStartDate"]) {
+function calculateDaysRemaining(
+  seasonStartDate: BackendDashboardStats["seasonStartDate"],
+) {
   if (!seasonStartDate) return SEASON_LENGTH_DAYS;
   const start = new Date(seasonStartDate);
   if (Number.isNaN(start.getTime())) return SEASON_LENGTH_DAYS;
@@ -175,7 +186,9 @@ function buildHeatmap(logs: DashboardLog[]) {
 }
 
 function findMostActiveDate(logs: DashboardLog[]) {
-  return findMostActiveDateFromCounts(countItemsByDate(logs, (log) => log.createdAt));
+  return findMostActiveDateFromCounts(
+    countItemsByDate(logs, (log) => log.createdAt),
+  );
 }
 
 function syncExpiredSeasonIfNeeded(
