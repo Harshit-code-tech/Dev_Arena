@@ -78,11 +78,11 @@ function AiHintSection({ taskId, canSubmit }: { taskId: string; canSubmit: boole
         onClick={() => void fetchHint()}
         disabled={loading}
       >
-        {loading ? "Consulting the oracle..." : hint ? "🔄 Get Another Hint" : "💡 Get AI Hint"}
+        {loading ? "Consulting the oracle..." : hint ? "Get Another Hint" : "Get AI Hint"}
       </button>
       {visible && hint && (
         <div className="challenge-hint-box">
-          <span className="challenge-hint-label">✨ AI Hint (Gemini)</span>
+          <span className="challenge-hint-label">AI Hint (Gemini)</span>
           <p>{hint}</p>
           <button
             type="button"
@@ -124,7 +124,7 @@ function TaskCard({
     try {
       setSubmitting(true);
       const submission = await submitCode(task.id, code, language);
-      toast.success("Code flung into the grader! Praying for your test cases... 🙏");
+      toast.success("Code flung into the grader! Praying for your test cases...");
       onSubmitted(task.id, submission);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Submission failed.");
@@ -251,9 +251,6 @@ function TaskCard({
 // ── Results leaderboard ──────────────────────────────────────────
 
 function positionLabel(pos: number): string {
-  if (pos === 1) return "🥇";
-  if (pos === 2) return "🥈";
-  if (pos === 3) return "🥉";
   return `#${pos}`;
 }
 
@@ -281,7 +278,7 @@ function ResultsPanel({ competitionId }: { competitionId?: string }) {
   if (!results || results.results.length === 0) {
     return (
       <section className="challenges-empty">
-        <span className="challenges-empty-icon" aria-hidden="true">📊</span>
+        <span className="challenges-empty-icon" aria-hidden="true"><i className="bx bx-bar-chart-alt-2" /></span>
         <h2>No Results Yet</h2>
         <p>Results will appear here once the competition is evaluated. Check back after submissions close.</p>
       </section>
@@ -396,7 +393,7 @@ export default function Challenges() {
           });
           if (!hasPendingSubmission(fresh)) {
             if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-            toast.success("Results in! Check your submission status 🔥");
+            toast.success("Results in! Check your submission status");
           }
         })
         .catch(() => { /* silently ignore poll errors */ });
@@ -472,7 +469,7 @@ export default function Challenges() {
 
         {tab === "competition" ? (
           <section className="challenges-empty page-reveal">
-            <span className="challenges-empty-icon" aria-hidden="true">⚔️</span>
+            <span className="challenges-empty-icon" aria-hidden="true"><i className="bx bx-target-lock" /></span>
             <h2>The Arena is Quiet... Too Quiet.</h2>
             <p>
               No live wars this week. Sharpen your algorithms, hydrate, and prep your fingers for the next bloodbath. Check back soon!

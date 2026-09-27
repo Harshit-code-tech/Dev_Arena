@@ -543,8 +543,13 @@ body .updates-page .updates-scroll-window {
 }
 
 .specs-item--plain::before {
+<<<<<<< HEAD
   content: "+";
   color: rgba(255, 255, 255, 0.5);
+=======
+  content: "";
+  color: #38bdf8;
+>>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
   flex-shrink: 0;
   margin-top: 0;
   font-size: 14px;

@@ -37,7 +37,7 @@ function TypingLines() {
             return () => window.clearTimeout(timeout)
         }
 
-        if (isDeleting && charIndex > 0) {
+        if (isDeleting && charIndex > 1) {
             const timeout = window.setTimeout(() => {
                 setCharIndex((currentIndex) => currentIndex - 1)
             }, 35) //timer for deleting each character. Adjust this value to speed up or slow down the backspacing effect.
@@ -45,10 +45,13 @@ function TypingLines() {
             return () => window.clearTimeout(timeout)
         }
 
+        // Swap to the next line before the visible text ever reaches an empty frame.
+        // This prevents the brief flash/flicker that happened between sentences.
         const timeout = window.setTimeout(() => {
-            setIsDeleting(false)
             setLineIndex((currentIndex) => (currentIndex + 1) % lines.length)
-        }, 250)
+            setCharIndex(1)
+            setIsDeleting(false)
+        }, 35)
 
         return () => window.clearTimeout(timeout)
     }, [lineIndex, charIndex, isDeleting])

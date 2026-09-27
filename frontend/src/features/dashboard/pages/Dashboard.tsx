@@ -9,7 +9,6 @@ import {
   getDashboardViewModel,
   type DashboardViewModel,
 } from "../../../services/DashboardService";
-import CoachCard from "../components/CoachCard";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -84,7 +83,6 @@ function Dashboard() {
         </div>
       </section>
 
-      <CoachCard />
 
       <div className="dashboard-overview-row">
         <section
@@ -103,7 +101,7 @@ function Dashboard() {
 
           <article className="dashboard-summary-line">
             <div><span>Current Streak</span><b aria-hidden="true">:</b><strong data-private-value="true">{streak} {streak === 1 ? "Day" : "Days"}</strong></div>
-            <p><i aria-hidden="true">←</i> {streak === 0 ? "Zero streak. Yikes. Go write code." : "On fire 🔥"}</p>
+            <p><i aria-hidden="true">←</i> {streak === 0 ? "Zero streak." : "On fire"}</p>
           </article>
         </section>
 
@@ -120,7 +118,7 @@ function Dashboard() {
               {seasonPoints} SP <span aria-hidden="true">•</span> {remainingPoints} Remaining
             </p>
             <div className="dashboard-next-rank">
-              <span aria-hidden="true">➜</span>
+              <i className="bx bx-right-arrow-alt" aria-hidden="true" />
               <RankBadge rank={nextRank} size="small" />
             </div>
           </article>
@@ -186,7 +184,7 @@ function Dashboard() {
           <div className="card-header dashboard-leaderboard-header">
             <div>
               <p className="dashboard-stat-label">Arena standings</p>
-              <h2 id="leaderboard-preview-title">Leaderboard Preview</h2>
+              <h2 id="leaderboard-preview-title">Leaderboard Snapshot</h2>
             </div>
           </div>
 
@@ -213,8 +211,8 @@ function Dashboard() {
             {leaderboardPreview.length === 0 && (
               <div className="leaderboard-empty">
                 <span className="leaderboard-empty-mark" aria-hidden="true">#</span>
-                <strong>Ghost town on the leaderboard</strong>
-                <span>Go write some code before your rivals start clowning you. Points put you on the board!</span>
+                <strong>No leaderboard activity yet</strong>
+                <span>Log verified activity to earn points and appear in the current standings.</span>
               </div>
             )}
           </div>

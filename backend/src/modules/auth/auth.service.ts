@@ -874,10 +874,10 @@ export const authService = {
         provider: identity.provider,
         acceptLegal: input.acceptLegal === true,
         migrationUserId,
-        // Social-provider recovery behavior stays unchanged. Password identities
-        // must never create a DevArena account through sync-firebase because
-        // signup has to pass the DevArena email OTP first.
-        allowOrphanRecovery: identity.provider !== "password" && input.acceptLegal !== true,
+        // Missing DevArena accounts must never be created during login/restore.
+        // Social signup explicitly sends acceptLegal=true and is the only social
+        // flow allowed to create the Neon user record.
+        allowOrphanRecovery: false,
       });
 
       // Never restore a DevArena session from a Firebase password session alone.

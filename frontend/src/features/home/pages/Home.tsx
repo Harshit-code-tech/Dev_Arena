@@ -1,13 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TypingLines from "../components/TypingLines";
 import { getPlatformPulse, type PlatformPulse } from "../../../services/PlatformService";
 import "../styles/Home.css";
 
+const MOTIVATIONS = [
+  "Talk is cheap. Show me the code. Or at least a passing test.",
+  "Your code works on your machine? Cool, we're not shipping your laptop.",
+  "There are two hard things in CS: cache invalidation, naming things, and getting you to log code.",
+  "Git commit -m 'fixed stuff' is not an architecture, bro.",
+  "If you spent as much time coding as you do tweaking your VS Code theme, you'd be #1.",
+  "Eat, sleep, leetcode, repeat. (Okay maybe take a shower too).",
+  "Rome wasn't built in a day, but at least their engineers pushed to main.",
+  "99 little bugs in the code, fix one bug, 127 little bugs in the code.",
+];
+
+const PAGE_MOTIVATION = MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)];
+
 function Home() {
   const navigate = useNavigate();
   const [pulse, setPulse] = useState<PlatformPulse | null>(null);
+  const heroRef = useRef<HTMLElement | null>(null);
+  const highlightsRef = useRef<HTMLDivElement | null>(null);
+  const pulseRef = useRef<HTMLElement | null>(null);
+  const resetFrameRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
@@ -25,6 +42,176 @@ function Home() {
     return () => {
       mounted = false;
       window.clearInterval(timer);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollingElement = document.scrollingElement;
+    const previousRootBehavior = root.style.scrollBehavior;
+    const previousBodyBehavior = body.style.scrollBehavior;
+    const previousRestoration =
+      "scrollRestoration" in window.history ? window.history.scrollRestoration : null;
+
+    root.style.scrollBehavior = "auto";
+    body.style.scrollBehavior = "auto";
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const resetToFirstSection = () => {
+      window.scrollTo(0, 0);
+      scrollingElement?.scrollTo(0, 0);
+    };
+
+    // Always enter the public landing route at section 1. Repeating the reset
+    // for two frames prevents late layout/restoration work from reopening the
+    // page at an old section before the user has interacted with it.
+    const handlePageShow = () => resetToFirstSection();
+    window.addEventListener("pageshow", handlePageShow);
+
+    resetToFirstSection();
+    const firstFrame = window.requestAnimationFrame(() => {
+      resetToFirstSection();
+      const secondFrame = window.requestAnimationFrame(() => {
+        resetToFirstSection();
+        root.style.scrollBehavior = previousRootBehavior;
+        body.style.scrollBehavior = previousBodyBehavior;
+      });
+      resetFrameRef.current = secondFrame;
+    });
+    resetFrameRef.current = firstFrame;
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      window.cancelAnimationFrame(resetFrameRef.current);
+      root.style.scrollBehavior = previousRootBehavior;
+      body.style.scrollBehavior = previousBodyBehavior;
+      if (previousRestoration !== null && "scrollRestoration" in window.history) {
+        window.history.scrollRestoration = previousRestoration;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.add("landing-paging-active");
+    document.body.classList.add("landing-paging-active");
+
+    let currentIndex = 0;
+    let wheelGestureActive = false;
+    let wheelQuietTimer = 0;
+    let lastWheelAt = 0;
+
+    const getSections = () =>
+      [
+        heroRef.current,
+        highlightsRef.current,
+        pulseRef.current,
+        document.querySelector<HTMLElement>(".site-footer"),
+      ].filter((section): section is HTMLElement => Boolean(section));
+
+    const sectionTop = (section: HTMLElement) =>
+      Math.max(0, Math.round(section.getBoundingClientRect().top + window.scrollY));
+
+    const goToSection = (index: number) => {
+      const sections = getSections();
+      if (sections.length === 0) return;
+
+      const nextIndex = Math.max(0, Math.min(index, sections.length - 1));
+      currentIndex = nextIndex;
+
+      window.scrollTo({
+        top: sectionTop(sections[nextIndex]),
+        left: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    };
+
+    const unlockWheelWhenGestureEnds = () => {
+      window.clearTimeout(wheelQuietTimer);
+      wheelQuietTimer = window.setTimeout(() => {
+        const quietFor = performance.now() - lastWheelAt;
+        if (quietFor < 180) {
+          unlockWheelWhenGestureEnds();
+          return;
+        }
+        wheelGestureActive = false;
+      }, 180);
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return;
+
+      // Normalize wheels that report movement in lines/pages instead of pixels.
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? window.innerHeight
+          : 1;
+      const deltaX = event.deltaX * unit;
+      const deltaY = event.deltaY * unit;
+
+      // Horizontal trackpad movement should not turn pages.
+      if (Math.abs(deltaX) > Math.abs(deltaY)) return;
+
+      // The landing page is controlled entirely here. Preventing native wheel
+      // scrolling removes the race between browser scroll-snap and JS paging.
+      event.preventDefault();
+
+      if (Math.abs(deltaY) < 4) return;
+
+      lastWheelAt = performance.now();
+      unlockWheelWhenGestureEnds();
+
+      // Trackpads emit many momentum wheel events for one physical gesture.
+      // Only the first meaningful event is allowed to change the section.
+      if (wheelGestureActive) return;
+      wheelGestureActive = true;
+
+      const direction = deltaY > 0 ? 1 : -1;
+      const sections = getSections();
+      if (sections.length === 0) return;
+
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= sections.length) return;
+
+      goToSection(nextIndex);
+    };
+
+    const syncIndexToViewport = () => {
+      if (wheelGestureActive) return;
+
+      const sections = getSections();
+      if (sections.length === 0) return;
+
+      const scrollTop = window.scrollY;
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      sections.forEach((section, index) => {
+        const distance = Math.abs(sectionTop(section) - scrollTop);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      currentIndex = nearestIndex;
+    };
+
+    // Capture the wheel before other page listeners can perform native scroll.
+    window.addEventListener("wheel", handleWheel, { passive: false, capture: true });
+    window.addEventListener("scrollend", syncIndexToViewport);
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel, { capture: true });
+      window.removeEventListener("scrollend", syncIndexToViewport);
+      window.clearTimeout(wheelQuietTimer);
+      document.documentElement.classList.remove("landing-paging-active");
+      document.body.classList.remove("landing-paging-active");
     };
   }, []);
 
@@ -88,20 +275,9 @@ function Home() {
     72: "low",
   };
 
-  const motivations = [
-    "Talk is cheap. Show me the code. Or at least a passing test.",
-    "Your code works on your machine? Cool, we're not shipping your laptop.",
-    "There are two hard things in CS: cache invalidation, naming things, and getting you to log code.",
-    "Git commit -m 'fixed stuff' is not an architecture, bro.",
-    "If you spent as much time coding as you do tweaking your VS Code theme, you'd be #1.",
-    "Eat, sleep, leetcode, repeat. (Okay maybe take a shower too).",
-    "Rome wasn't built in a day, but at least their engineers pushed to main.",
-    "99 little bugs in the code, fix one bug, 127 little bugs in the code.",
-  ];
-
   return (
     <main className="home-page">
-      <section className="hero">
+      <section ref={heroRef} className="hero landing-snap-section">
         <p className="eyebrow">Where Code Talks &amp; Excuses Die</p>
 
         <h1>
@@ -119,13 +295,13 @@ function Home() {
             type="button"
             onClick={() => navigate("/signup")}
           >
-            Enter the Arena ⚔️
+            Enter the Arena
           </button>
 
         </div>
       </section>
       <section className="cards" aria-label="DevArena highlights">
-        <div className="home-card-row">
+        <div ref={highlightsRef} className="home-card-row landing-snap-section">
           <article className="consistency-card">
             <div className="consistency-header">
               <h3>Consistency</h3>
@@ -180,7 +356,7 @@ function Home() {
 
           <article className="motivation-card">
             <blockquote className="motivation-quote">
-              “{motivations[Math.floor(Math.random() * motivations.length)]}”
+              “{PAGE_MOTIVATION}”
             </blockquote>
 
             <div className="motivation-footer">
@@ -189,7 +365,7 @@ function Home() {
           </article>
         </div>
 
-        <article className="pulse-card">
+        <article ref={pulseRef} className="pulse-card landing-snap-section">
           <div className="pulse-top">
             <p className="pulse-label">Our Developer Pulse</p>
           </div>

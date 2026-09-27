@@ -6,11 +6,11 @@ const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 const THIRTY_MIN_MS = 30 * 60 * 1000;
 
 const INACTIVITY_ROASTS = [
-    "🚨 72 hours of zero code. Did your keyboard break, or did you rage quit?",
-    "🪦 Your streak is in the ICU. 3 days without activity. Revive it before it flatlines!",
-    "👀 Hello? Anyone home? The leaderboard is moving without you, bro.",
-    "👻 3 days MIA. Even your ghost commits have given up. Time to get back in the Arena!",
-    "📉 Your Arena rank is bleeding points while your rivals celebrate. Wake up and code!",
+    "72 hours of zero code. Did your keyboard break, or did you rage quit?",
+    "Your streak is in the ICU. 3 days without activity. Revive it before it flatlines!",
+    "Hello? Anyone home? The leaderboard is moving without you, bro.",
+    "3 days MIA. Even your ghost commits have given up. Time to get back in the Arena!",
+    "Your Arena rank is bleeding points while your rivals celebrate. Wake up and code!",
 ];
 
 function pickInactivityRoast(): string {
@@ -129,9 +129,9 @@ async function runWeeklySummaryCheck() {
                 if (points === 0) {
                     summaryMessage = "Zero points this week. Absolutely criminal. Monday is reset day — wake up and choose violence.";
                 } else if (days >= 6) {
-                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Absolute menace! You're making your rivals sweat. 🔥`;
+                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Absolute menace! You're making your rivals sweat.`;
                 } else if (days >= 4) {
-                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Solid grind. Keep this momentum into next week! ⚡`;
+                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Solid grind. Keep this momentum into next week!`;
                 } else {
                     summaryMessage = `Weekly recap: ${points} pts across ${days} active ${days === 1 ? "day" : "days"}. Squeaked by this week. Monday is your redemption arc.`;
                 }
@@ -275,7 +275,7 @@ async function runChallengeDeadlineReminder() {
                 data: toNotify.map((u) => ({
                     userId: u.id,
                     type: "challenge" as const,
-                    message: `⏰ "${comp.title}" closes in ${hoursLeft}h! Submit your solution or watch the W slip away.`,
+                    message: `"${comp.title}" closes in ${hoursLeft}h! Submit your solution or watch the W slip away.`,
                     link: "/challenges",
                     entityType: "challenge_deadline",
                     entityId: comp.id,
@@ -333,7 +333,7 @@ async function runTournamentLiveReminder() {
                 data: toNotify.map((r) => ({
                     userId: r.userId,
                     type: "challenge" as const,
-                    message: `🚀 "${t.title}" is now LIVE! Open the arena, submit your solution, and claim your place on the board.`,
+                    message: `"${t.title}" is now LIVE! Open the arena, submit your solution, and claim your place on the board.`,
                     link: "/tournaments",
                     entityType: "tournament_live",
                     entityId: t.id,

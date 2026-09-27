@@ -18,9 +18,8 @@ export type FirebaseUserUpsertInput = {
     provider: "password" | "google" | "github";
     acceptLegal?: boolean;
     migrationUserId?: string;
-    /** When true, a missing DB user is silently created with onboardingRequired: true.
-     *  Used during login to recover orphaned Firebase identities whose DB record was
-     *  never fully created during a previous failed signup attempt. */
+    /** Legacy escape hatch for explicitly approved recovery flows.
+     *  Normal login/restore paths keep this false so authentication cannot create accounts. */
     allowOrphanRecovery?: boolean;
 };
 

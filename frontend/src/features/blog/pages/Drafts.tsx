@@ -50,7 +50,7 @@ function Drafts() {
                     <button
                         type="button"
                         className="drafts-back-btn dev-back-button"
-                        onClick={() => navigate("/blog")}
+                        onClick={() => navigate("/player-hub?section=community")}
                     >
                         <span aria-hidden="true">←</span><span>Back</span>
                     </button>
