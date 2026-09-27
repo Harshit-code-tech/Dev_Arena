@@ -578,11 +578,7 @@ export default function Admin() {
           <p>{c.weekStart?.slice(0, 10)}{c.opensAt ? ` · opens ${formatDate(c.opensAt)}` : ""}{c.closesAt ? ` · closes ${formatDate(c.closesAt)}` : ""}</p>
           <div className="admin-review-actions">
             <button type="button" className="admin-underline-action" onClick={() => { setSelectedCompetitionId(c.id); setTaskForm((f) => ({ ...f, competitionId: c.status === "Draft" ? c.id : f.competitionId })); void AdminApi.listCompetitionTasks(c.id).then(setCompetitionTasks).catch(() => setCompetitionTasks([])); }}>Select (load tasks)</button>
-<<<<<<< HEAD
             {c.status === "Draft" && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.activateCompetition(c.id), `"${c.title}" activated. Now open for submissions.`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Activate</button>}
-=======
-            {c.status === "Draft" && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.activateCompetition(c.id), `"${c.title}" activated — now open for submissions.`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Activate</button>}
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
             {(c.status === "Active" || c.status === "Evaluating") && <button type="button" className="admin-underline-action" onClick={() => void run(() => AdminApi.aggregateResults(c.id), `Results aggregated for "${c.title}".`).then(() => AdminApi.challengeCompetitions().then(setCompetitions))}>Aggregate results</button>}
           </div>
         </article>)}
@@ -605,22 +601,14 @@ export default function Admin() {
               description: generated.description ?? f.description,
               difficulty: generated.difficulty ?? aiGenerateDifficulty,
             }));
-<<<<<<< HEAD
             setMessage(`AI generated "${generated.title}". Review and save it in the Add Task form. ${generated.sampleTestCases?.length ?? 0} sample test case(s) included. Add them manually below.`);
-=======
-            setMessage(`AI generated "${generated.title}" — review and save it in the Add Task form. ${generated.sampleTestCases?.length ?? 0} sample test cases included (add them manually below).`);
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
           } catch (err) {
             setMessage(err instanceof Error ? err.message : "AI generation failed.");
           } finally {
             setAiGenerating(false);
           }
         }}>
-<<<<<<< HEAD
           <header><p>Gemini Flash Latest</p><h2>Generate task</h2><span className="admin-panel-note">Enter a topic and difficulty. Gemini will write a complete challenge and pre-fill the Add Task form for review before saving.</span></header>
-=======
-          <header><p>Gemini Flash Latest</p><h2>Generate task</h2><span className="admin-panel-note">Enter a topic and difficulty — Gemini will write a complete challenge. Results pre-fill the Add Task form for review before saving.</span></header>
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
           <label className="wide"><span>Topic</span><input required value={aiGenerateTopic} onChange={(e) => setAiGenerateTopic(e.target.value)} placeholder="e.g. Binary search trees, Dynamic programming, Graph BFS" /></label>
           <label><span>Difficulty</span>
             <select value={aiGenerateDifficulty} onChange={(e) => setAiGenerateDifficulty(e.target.value)} style={{ width: "100%", padding: "10px 12px", background: "#0a0a0a", border: "1px solid #3a3a3f", color: "#fff" }}>
@@ -631,11 +619,7 @@ export default function Admin() {
         </form>
 
         {/* ── Create competition ── */}
-<<<<<<< HEAD
         <form className="admin-panel admin-form" onSubmit={(e) => { e.preventDefault(); void run(() => AdminApi.createCompetition({ ...competitionForm, opensAt: competitionForm.opensAt || null, closesAt: competitionForm.closesAt || null }), "Competition created. Add tasks to it using Step 2.").then(() => { setCompetitionForm({ title: "", weekStart: "", opensAt: "", closesAt: "" }); void AdminApi.challengeCompetitions().then(setCompetitions); }); }}>
-=======
-        <form className="admin-panel admin-form" onSubmit={(e) => { e.preventDefault(); void run(() => AdminApi.createCompetition({ ...competitionForm, opensAt: competitionForm.opensAt || null, closesAt: competitionForm.closesAt || null }), "Competition created — now add tasks to it using Step 2.").then(() => { setCompetitionForm({ title: "", weekStart: "", opensAt: "", closesAt: "" }); void AdminApi.challengeCompetitions().then(setCompetitions); }); }}>
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
           <header><p>Step 1 · Create competition</p><h2>New week</h2><span className="admin-panel-note">Creates a Draft competition container. Add tasks next.</span></header>
           <label><span>Title</span><input required value={competitionForm.title} onChange={(e) => setCompetitionForm((f) => ({ ...f, title: e.target.value }))} placeholder="Week 42 - November Challenge" /></label>
           <DateField label="Week start" required value={competitionForm.weekStart} onChange={(v) => setCompetitionForm((f) => ({ ...f, weekStart: v }))} />
@@ -653,11 +637,7 @@ export default function Admin() {
           if (!isDraft) { setMessage("Tasks can only be added to Draft competitions. This competition is already active or completed."); return; }
           void run(
             () => AdminApi.createTask({ ...taskForm, competitionId: resolvedCompetitionId }),
-<<<<<<< HEAD
             "Task created. Add at least one test case to it in Step 3 below.",
-=======
-            "Task created — now add at least one test case to it in Step 3 below.",
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
           ).then(() => {
             setTaskForm((f) => ({ ...f, title: "", description: "" }));
             void AdminApi.challengeCompetitions().then(setCompetitions);
@@ -695,11 +675,7 @@ export default function Admin() {
       <form className="admin-panel admin-form" onSubmit={(e) => {
         e.preventDefault();
         if (!testCaseForm.taskId) { setMessage("Select a task first."); return; }
-<<<<<<< HEAD
         void run(() => AdminApi.createTestCase(testCaseForm), "Test case added. The task remains selected so you can add more.").then(() => {
-=======
-        void run(() => AdminApi.createTestCase(testCaseForm), "Test case added. Keeping the same task selected so you can add more.").then(() => {
->>>>>>> 5cf04a1 (feat: enhance feedback submission button text and improve typing animation logic)
           // Keep taskId to allow adding multiple test cases to the same task rapidly
           setTestCaseForm((f) => ({ taskId: f.taskId, input: "", expectedOutput: "", isHidden: false, weight: 1 }));
           if (selectedCompetitionId) void AdminApi.listCompetitionTasks(selectedCompetitionId).then(setCompetitionTasks).catch(() => setCompetitionTasks([]));
