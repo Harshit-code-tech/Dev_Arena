@@ -39,7 +39,7 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false); // Must be explicitly opted in — GDPR/CCPA requires active consent
+  const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(() => getPendingAuthOtp("signup"));

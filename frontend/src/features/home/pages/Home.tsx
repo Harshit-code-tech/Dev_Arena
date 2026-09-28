@@ -6,14 +6,14 @@ import { getPlatformPulse, type PlatformPulse } from "../../../services/Platform
 import "../styles/Home.css";
 
 const MOTIVATIONS = [
-  "Talk is cheap. Show me the code. Or at least a passing test.",
-  "Your code works on your machine? Cool, we're not shipping your laptop.",
-  "There are two hard things in CS: cache invalidation, naming things, and getting you to log code.",
-  "Git commit -m 'fixed stuff' is not an architecture, bro.",
-  "If you spent as much time coding as you do tweaking your VS Code theme, you'd be #1.",
-  "Eat, sleep, leetcode, repeat. (Okay maybe take a shower too).",
-  "Rome wasn't built in a day, but at least their engineers pushed to main.",
-  "99 little bugs in the code, fix one bug, 127 little bugs in the code.",
+  "Consistent practice turns difficult problems into familiar patterns.",
+  "Build for real environments, test carefully, and keep improving the details.",
+  "Strong developers improve through deliberate practice, clear thinking, and regular reflection.",
+  "Clear commits and thoughtful architecture make good work easier to maintain.",
+  "Protect focused development time and let steady progress compound.",
+  "Balance practice, projects, and rest so you can improve sustainably.",
+  "Large projects are built one meaningful milestone at a time.",
+  "Debugging is part of engineering: isolate the issue, learn from it, and move forward.",
 ];
 
 const PAGE_MOTIVATION = MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)];
@@ -278,15 +278,15 @@ function Home() {
   return (
     <main className="home-page">
       <section ref={heroRef} className="hero landing-snap-section">
-        <p className="eyebrow">Where Code Talks &amp; Excuses Die</p>
+        <p className="eyebrow">Build · Practice · Improve</p>
 
         <h1>
           <TypingLines />
         </h1>
 
         <p className="hero-copy">
-          DevArena is where competitive developers build real projects, grind DSA,
-          roast their friends' streaks, and settle who's actually shipping code.
+          DevArena is where developers build real projects, practice DSA,
+          track meaningful progress, and grow alongside a focused technical community.
         </p>
 
         <div className="hero-actions">
@@ -295,7 +295,7 @@ function Home() {
             type="button"
             onClick={() => navigate("/signup")}
           >
-            Enter the Arena
+            Start Building
           </button>
 
         </div>

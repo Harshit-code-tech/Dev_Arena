@@ -12,13 +12,23 @@ import {
 } from "../../../services/BlogService";
 
 const SUGGESTED_TAGS = [
-    "War Story",
-    "Hot Take",
+    "Engineering Story",
+    "Perspective",
     "Tutorial",
-    "Bug Rant",
+    "Debugging",
     "Architecture",
     "Post-Mortem",
 ];
+
+const LEGACY_TAG_ALIASES: Record<string, string> = {
+    "War Story": "Engineering Story",
+    "Hot Take": "Perspective",
+    "Bug Rant": "Debugging",
+};
+
+function normalizeBlogTag(tag: string) {
+    return LEGACY_TAG_ALIASES[tag] ?? tag;
+}
 
 function NewBlog() {
     const navigate = useNavigate();
@@ -44,8 +54,9 @@ function NewBlog() {
                 .then((post) => {
                     if (!post) return;
                     const tagMatch = post.title.match(/^\[(.*?)\]\s*(.*)$/);
-                    if (tagMatch && SUGGESTED_TAGS.includes(tagMatch[1])) {
-                        setSelectedTag(tagMatch[1]);
+                    const normalizedTag = tagMatch ? normalizeBlogTag(tagMatch[1]) : null;
+                    if (tagMatch && normalizedTag && SUGGESTED_TAGS.includes(normalizedTag)) {
+                        setSelectedTag(normalizedTag);
                         setTitle(tagMatch[2]);
                     } else {
                         setTitle(post.title);
@@ -61,8 +72,9 @@ function NewBlog() {
                 .then((draft) => {
                     if (!draft) return;
                     const tagMatch = draft.title.match(/^\[(.*?)\]\s*(.*)$/);
-                    if (tagMatch && SUGGESTED_TAGS.includes(tagMatch[1])) {
-                        setSelectedTag(tagMatch[1]);
+                    const normalizedTag = tagMatch ? normalizeBlogTag(tagMatch[1]) : null;
+                    if (tagMatch && normalizedTag && SUGGESTED_TAGS.includes(normalizedTag)) {
+                        setSelectedTag(normalizedTag);
                         setTitle(tagMatch[2]);
                     } else {
                         setTitle(draft.title || "");
@@ -121,7 +133,7 @@ function NewBlog() {
                 toast.success("Post updated successfully!");
             } else {
                 await publishBlogPost(draftId, payload);
-                toast.success("Dispatch published to the arena!");
+                toast.success("Post published successfully.");
             }
             navigate("/player-hub?section=community");
         } catch (error) {
@@ -148,7 +160,7 @@ function NewBlog() {
                         }}
                     >
                         <i className="bx bx-left-arrow-alt" aria-hidden="true" />
-                        <span>Arena Dispatches</span>
+                        <span>Developer Dispatches</span>
                     </button>
                     {postId ? (
                         <span className="editor-draft-badge">Editing Published Post</span>
@@ -160,11 +172,11 @@ function NewBlog() {
                 <header className="blog-top">
                     <div>
                         <span className="blog-eyebrow">POST EDITOR</span>
-                        <h1>{isEditingPost ? "Edit your post" : "Cook up a post"}</h1>
+                        <h1>{isEditingPost ? "Edit your post" : "Write a post"}</h1>
                         <p className="editor-lead">
                             {isEditingPost
                                 ? "Refine your thoughts, fix typos, or update your technical breakdown."
-                                : "Drop your wisdom, rant about a bug, or write a tutorial that future you will copy-paste."}
+                                : "Share a technical lesson, project experience, tutorial, or thoughtful engineering perspective."}
                         </p>
                     </div>
                 </header>
@@ -175,7 +187,7 @@ function NewBlog() {
                         <input
                             id="post-title"
                             type="text"
-                            placeholder="Something catchy (e.g. 'Why my code works on my machine')"
+                            placeholder="A clear, specific title for your post"
                             value={title}
                             onChange={(event) => setTitle(event.target.value)}
                             maxLength={160}
@@ -207,7 +219,7 @@ function NewBlog() {
                         </div>
                         <textarea
                             id="post-content"
-                            placeholder="Write your story, technical breakdown, or hot take here. Plain text and markdown friendly..."
+                            placeholder="Write your technical story, breakdown, tutorial, or perspective here. Plain text and Markdown are supported..."
                             value={content}
                             onChange={(event) => setContent(event.target.value)}
                         />
@@ -244,8 +256,8 @@ function NewBlog() {
                         >
                             <i className={`bx ${isEditingPost ? "bx-check-circle" : "bx-paper-plane"}`} aria-hidden="true" />
                             {isPublishing
-                                ? (isEditingPost ? "Saving..." : "Shipping...")
-                                : (isEditingPost ? "Save Changes" : "Ship to the World")}
+                                ? (isEditingPost ? "Saving..." : "Publishing...")
+                                : (isEditingPost ? "Save Changes" : "Publish Post")}
                         </button>
                     </div>
                 </form>

@@ -39,7 +39,7 @@ export default function Leaderboard() {
         const response = await getLeaderboard(10);
         if (mounted) setData(response);
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not load the arena.");
+        toast.error(error instanceof Error ? error.message : "Could not load the leaderboard.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -69,9 +69,9 @@ export default function Leaderboard() {
     <main className="leaderboard-page animated-page">
       <header className="leaderboard-hero page-reveal">
         <div>
-          <p>The Wall of Fame &amp; Shame / Live Ranking</p>
+          <p>Developer Standings / Live Ranking</p>
           <h1>Leaderboard</h1>
-          <span>Where your code either speaks for itself or gets completely exposed. Top 10 tryhards below.</span>
+          <span>Compare verified progress across the current season and see the developers leading through consistent work.</span>
         </div>
         <strong>{data.totalDevelopers.toLocaleString("en-IN")} Competitors</strong>
       </header>
@@ -87,8 +87,8 @@ export default function Leaderboard() {
         </div>
 
         <div className="leaderboard-self-metrics">
-          <article><span>Position</span><strong>#{currentUser.position || "—"}</strong><small>Top {scorePercentile}% of arena</small></article>
-          <article><span>Competition Score</span><strong data-private-value="true">{currentUser.competitionScore}</strong><small>{currentUser.activeDays} active days</small></article>
+          <article><span>Position</span><strong>#{currentUser.position || "—"}</strong><small>Top {scorePercentile}% of developers</small></article>
+          <article><span>Season Score</span><strong data-private-value="true">{currentUser.seasonPoints}</strong><small>{currentUser.activeDays} active days</small></article>
           <article><span>Season Points</span><strong data-private-value="true">{currentUser.seasonPoints}</strong><small>Current season</small></article>
           <article className="leaderboard-self-rank"><span>Developer Rank</span><RankBadge rank={currentUser.rank} size="large" /></article>
         </div>
@@ -96,7 +96,7 @@ export default function Leaderboard() {
 
       <section className="leaderboard-top-ten page-reveal" aria-labelledby="top-ten-title">
         <div className="leaderboard-section-heading">
-          <div><p>Tryhard Zone</p><h2 id="top-ten-title">Top 10 Performers</h2></div>
+          <div><p>Season Leaders</p><h2 id="top-ten-title">Top 10 Performers</h2></div>
           <span>Score · Season · Activity · Rank</span>
         </div>
 
@@ -110,7 +110,7 @@ export default function Leaderboard() {
               <div className="leaderboard-user-cell"><ArenaAvatar entry={entry} /><div><strong>{entry.name}</strong><span>@{entry.username}</span></div></div>
               <RankBadge rank={entry.rank} size="small" />
               <span>{entry.activeDays} days</span>
-              <b data-private-value="true">{entry.competitionScore}</b>
+              <b data-private-value="true">{entry.seasonPoints}</b>
             </article>
           ))}
         </div>

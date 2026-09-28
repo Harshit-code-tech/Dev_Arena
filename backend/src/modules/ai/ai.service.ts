@@ -7,13 +7,11 @@ import type { RivalRoastResponse, GeneratedTask, GenerateChallengeInput } from "
 // Static fallback pool — used when both AI providers are unavailable.
 
 const RIVAL_ROAST_FALLBACKS = [
-    "Someone just slid past you on the leaderboard. Ouch. Your reign was fun while it lasted.",
-    "A rival just overtook you. The leaderboard has a new boss. You're not it.",
-    "You just got passed. The gap is growing. Do something about it.",
-    "Another day, another rival eating your lunch. Devastating.",
-    "Position lost. They didn't even break a sweat. Embarrassing.",
-    "The scoreboard just updated and you moved in the wrong direction. Classic.",
-    "Your rival sent their regards. Via the leaderboard. By lapping you.",
+    "A developer moved ahead of you in the weekly standings. Review the gap and focus on the next meaningful activity.",
+    "Your leaderboard position changed this week. Consistent verified work is the clearest path to moving back up.",
+    "The standings have shifted. Use the comparison as a signal for your next focused practice or project session.",
+    "A nearby developer has moved ahead. Keep your attention on steady progress rather than a single ranking change.",
+    "Your position moved down in the latest update. Continue building points through useful, repeatable development work.",
 ];
 
 function pickRandom<T>(arr: T[]): T {
@@ -78,14 +76,14 @@ export const aiService = {
         }
 
         const prompt =
-            `You are a mischievous, witty AI sports commentator for a competitive coding arena called DevArena.\n\n` +
+            `You are a concise, constructive developer-performance coach for a platform called DevArena.\n\n` +
             `${rivalName} (rank #${rival?.rank ?? "?"}, ${rivalScore} pts this week) ` +
             `just OVERTOOK ${user?.name ?? "the player"} (rank #${user?.rank ?? "?"}, ${yourScore} pts this week) ` +
             `on the weekly leaderboard.\n\n` +
-            `Write a single savage, funny roast (1–2 sentences, under 180 characters) ` +
-            `delivered TO the person who just got overtaken. ` +
-            `Reference their rank drop and the rival's name. Be mischievous, not mean. No hashtags. ` +
-            `Output ONLY the roast text.`;
+            `Write a single constructive performance note (1–2 sentences, under 180 characters) ` +
+            `for the developer whose position just changed. ` +
+            `Reference the rank movement and the other developer's name when useful. Be calm, specific, and encouraging. No sarcasm or insults. No hashtags. ` +
+            `Output ONLY the message text.`;
 
         const text = await callAI(prompt, {
             maxTokens: 120,

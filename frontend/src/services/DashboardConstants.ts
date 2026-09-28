@@ -12,6 +12,6 @@ export const WEEKLY_STREAK_BONUS_POINTS = 50;
 
 export const SEASON_STREAK_BONUS_POINTS = 150;
 
-export const SEASON_LENGTH_DAYS = 14;
+export const SEASON_LENGTH_DAYS = 60;
 
 export const HEATMAP_PAST_WEEKS = 52;

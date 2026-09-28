@@ -79,9 +79,9 @@ function Blog() {
                 <header className="blog-header">
                     <div className="blog-header-copy">
                         <span className="blog-eyebrow">DevArena</span>
-                        <h1>Dispatches from<br />the arena</h1>
+                        <h1>Developer<br />dispatches</h1>
                         <p className="blog-subtitle">
-                            Dev war stories, platform changelogs, and opinions that will probably start a flame war.
+                            Technical write-ups, platform updates, engineering lessons, and perspectives from the DevArena community.
                         </p>
                     </div>
                     {user && (
@@ -141,8 +141,8 @@ function Blog() {
                     ) : posts.length === 0 ? (
                         <div className="blog-empty">
                             <i className="bx bx-message-square-dots blog-empty-icon" aria-hidden="true" />
-                            <h3>No posts yet. Be the first to talk trash</h3>
-                            <p>Got hot takes, post-mortems, or dark patterns you want to warn people about? The floor's yours.</p>
+                            <h3>No posts published yet</h3>
+                            <p>Share a technical insight, project retrospective, tutorial, architecture note, or engineering lesson with the community.</p>
                         </div>
                     ) : (
                         <div className="blog-feed">

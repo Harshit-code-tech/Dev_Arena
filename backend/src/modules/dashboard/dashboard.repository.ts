@@ -4,7 +4,7 @@ import type { DashboardUpdateData } from "./dashboard.types";
 
 const dashboardUserInclude = {
     scoreEvents: {
-        select: { id: true, label: true, occurredAt: true },
+        select: { id: true, label: true, points: true, occurredAt: true },
         orderBy: { occurredAt: "desc" },
     },
 } satisfies Prisma.UserInclude;

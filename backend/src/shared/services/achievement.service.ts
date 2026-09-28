@@ -2,15 +2,15 @@ import type { Prisma } from "@prisma/client";
 import { getWeekStart, getWeekEnd } from "../utils/tracking";
 
 const ACHIEVEMENT_MESSAGES: Record<string, string> = {
-    "Baby Steps": "Achievement unlocked: Baby Steps! 10 DSA problems solved. Look at you crawling before sprinting into Google.",
-    "Half Century": "Achievement unlocked: Half Century! 50 DSA problems down. Your brain is officially 30% dynamic programming.",
-    "First Chapter": "Achievement unlocked: First Chapter! First fullstack log created. You actually touched real code today, we're proud.",
-    "Learning Machine": "Achievement unlocked: Learning Machine! 5 fullstack logs deep. Tutorial hell has officially lost a victim.",
-    "Builder Mode: ON": "Achievement unlocked: Builder Mode: ON! First project created. Now please actually finish it.",
-    "Checkpoint Reached": "Achievement unlocked: Checkpoint Reached! First milestone crushed. One brick down, castle pending.",
-    "Ship It!": "Achievement unlocked: Ship It! You completed a whole project! Does it have unit tests? Don't answer that.",
-    "Showing Up": "Achievement unlocked: Showing Up! 3 active days this week. You beat the Sunday-night guilt.",
-    "Lock In": "Achievement unlocked: Lock In! 5 active days this week. Absolute monster work ethic. Drink some water.",
+    "Baby Steps": "Achievement unlocked: Baby Steps! You have solved 10 DSA problems and established a strong foundation for continued practice.",
+    "Half Century": "Achievement unlocked: Half Century! You have solved 50 DSA problems. Keep strengthening pattern recognition and problem-solving depth.",
+    "First Chapter": "Achievement unlocked: First Chapter! Your first fullstack learning or implementation entry is now recorded.",
+    "Learning Machine": "Achievement unlocked: Learning Machine! Five fullstack entries show consistent progress from learning into implementation.",
+    "Builder Mode: ON": "Achievement unlocked: Builder Mode: ON! Your first project is now tracked. Keep moving it forward through clear milestones and work sessions.",
+    "Checkpoint Reached": "Achievement unlocked: Checkpoint Reached! You completed your first project milestone and created measurable project progress.",
+    "Ship It!": "Achievement unlocked: Ship It! You completed a tracked project. Review the outcome, document what you learned, and carry it into the next build.",
+    "Showing Up": "Achievement unlocked: Showing Up! You recorded meaningful development activity on three days this week.",
+    "Lock In": "Achievement unlocked: Lock In! Five active days this week reflect strong development consistency.",
 };
 
 /**
@@ -92,7 +92,7 @@ export async function checkAndUnlock(
             });
 
             const unlockMessage = ACHIEVEMENT_MESSAGES[achievement.title]
-                ?? `Achievement unlocked: ${achievement.title}! Go flex this on your rivals immediately.`;
+                ?? `Achievement unlocked: ${achievement.title}! Keep building on this progress.`;
 
             await tx.notification.create({
                 data: {

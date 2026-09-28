@@ -1,5 +1,6 @@
 import {
   browserLocalPersistence,
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
   deleteUser,
   setPersistence,
@@ -122,9 +123,9 @@ export async function requestEmailLogin(input: {
 }): Promise<AuthOtpPendingResult | EmailLoginDirectResult> {
   const email = input.email.trim().toLowerCase();
 
-  // Local Firebase persistence is intentional: an OTP challenge must survive a
-  // browser/window close. DevArena's own token expiry still follows `remember`.
-  await setPersistence(auth, browserLocalPersistence);
+  // Match Firebase persistence to DevArena's Remember me setting. A non-remembered
+  // session survives reloads in this tab but disappears when the tab/window closes.
+  await setPersistence(auth, input.remember === true ? browserLocalPersistence : browserSessionPersistence);
 
   try {
     const credential = await signInWithEmailAndPassword(auth, email, input.password);

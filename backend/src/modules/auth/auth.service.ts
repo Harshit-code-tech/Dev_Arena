@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import type { AuthOtpPurpose } from "@prisma/client";
 import { prisma } from "../../database/prisma";
 import { sendAuthOtpEmail } from "../../shared/utils/email";
+import { getCurrentSeasonWindow } from "../../shared/config/season";
 import { authRepository, createPendingUsername, PENDING_USERNAME_PREFIX } from "./auth.repository";
 import {
   AUTH_OTP_MAX_ATTEMPTS,
@@ -440,6 +441,7 @@ export const authService = {
         }
 
         const pendingUsername = await nextPendingUsername();
+        const season = getCurrentSeasonWindow();
         const user = await prisma.$transaction(async (tx) => {
           const claimed = await tx.authOtpChallenge.updateMany({
             where: { id: challenge.id, consumedAt: null },
@@ -463,6 +465,8 @@ export const authService = {
               termsAcceptedAt: new Date(),
               termsVersion: "2026-08-02",
               privacyVersion: "2026-08-02",
+              seasonStartDate: season.start,
+              seasonNumber: season.seasonNumber,
             },
           });
         });

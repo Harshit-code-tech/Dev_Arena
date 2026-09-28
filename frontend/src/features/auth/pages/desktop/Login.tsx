@@ -33,11 +33,11 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number } | null>(() => getPendingAuthOtp("login"));
+  const [otpPending, setOtpPending] = useState<{ tempToken: string; email: string; resendAfterSeconds: number; remember?: boolean } | null>(() => getPendingAuthOtp("login"));
   const [transitionOrigin, setTransitionOrigin] = useState<AuthTransitionOrigin | null>(null);
   const signInButtonRef = useRef<HTMLButtonElement>(null);
   const githubButtonRef = useRef<HTMLButtonElement>(null);
@@ -56,11 +56,11 @@ function Login() {
     pendingLoginOrigin.current = origin;
     try {
       setLoading(true);
-      const { token, requiresUsername, requiresOnboarding } = await signInWithSocialProvider(provider);
+      const { token, requiresUsername, requiresOnboarding } = await signInWithSocialProvider(provider, { remember });
 
       if (!token) throw new Error("Login failed");
       clearPendingAuthOtp("login");
-      await loginWithToken(token);
+      await loginWithToken(token, remember);
       const needsSetup = requiresUsername || requiresOnboarding;
       transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
 
@@ -93,7 +93,7 @@ function Login() {
       if (!result.requiresOtp) {
         // 15-day grace period: backend skipped OTP, returned session directly
         clearPendingAuthOtp("login");
-        await loginWithToken(result.token);
+        await loginWithToken(result.token, remember);
         const needsSetup = result.user?.requiresUsername || result.user?.requiresOnboarding;
         transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
         toast.success(needsSetup ? "Complete your DevArena account setup." : "Welcome back!");
@@ -106,6 +106,7 @@ function Login() {
         tempToken: result.tempToken,
         email: result.email,
         resendAfterSeconds: result.resendAfterSeconds ?? 60,
+        remember,
       };
       setOtpPending(challenge);
       storePendingAuthOtp("login", challenge);
@@ -127,7 +128,7 @@ function Login() {
       toast.error("Verification succeeded but no session was returned. Try logging in again.");
       return;
     }
-    await loginWithToken(result.token);
+    await loginWithToken(result.token, otpPending?.remember ?? remember);
     const needsSetup = result.user?.requiresUsername || result.user?.requiresOnboarding;
     transitionDestination.current = needsSetup ? "/choose-username" : "/dashboard";
     toast.success(needsSetup ? "Complete your DevArena account setup." : "Welcome back!");
@@ -157,8 +158,9 @@ function Login() {
                   resendAfterSeconds={otpPending.resendAfterSeconds}
                   onVerified={handleOtpVerified}
                   onChallengeUpdated={(challenge) => {
-                    setOtpPending(challenge);
-                    storePendingAuthOtp("login", challenge);
+                    const nextChallenge = { ...challenge, remember: otpPending.remember ?? remember };
+                    setOtpPending(nextChallenge);
+                    storePendingAuthOtp("login", nextChallenge);
                   }}
                   onBack={() => {
                     clearPendingAuthOtp("login");

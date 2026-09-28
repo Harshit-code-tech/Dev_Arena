@@ -443,3 +443,20 @@
 }
 .repository-tech-eligibility.eligible { border-left-color: rgba(255,255,255,.85); color: rgba(255,255,255,.78); }
 .repository-tech-eligibility i { margin-top: 1px; font-size: 13px; }
+
+
+.project-score {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.project-score > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.project-score .tracking-info-tip {
+  margin-top: 2px;
+}

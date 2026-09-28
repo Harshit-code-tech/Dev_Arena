@@ -75,7 +75,7 @@ async function syncFirebaseUserWithBackend(
     );
   }
 
-  if (data.token) storeAuthToken(data.token);
+  if (data.token) storeAuthToken(data.token, options.remember !== false);
 
   return {
     token: data.token as string | undefined,

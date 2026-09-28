@@ -305,9 +305,9 @@ export default function DSA() {
         <section className="tracking-summary-grid dsa-summary-grid--problems page-reveal" aria-label="DSA weekly summary">
           <Summary label="Solved this week" value={dsaData.summary.weeklySolved} note="Target 8–12" />
           <Summary label="Points this week" value={dsaData.summary.weeklyPoints} note="Daily diminishing-return tiers" />
-          <Summary label="Easy" value={dsaData.summary.breakdown.Easy} note="1 / 0.5 / 0.2 daily tiers" />
-          <Summary label="Medium" value={dsaData.summary.breakdown.Medium} note="4 / 3 / 2 daily tiers" />
-          <Summary label="Hard" value={dsaData.summary.breakdown.Hard} note="10 points each" />
+          <Summary label="Easy" value={dsaData.summary.breakdown.Easy} note="1 / 0.5 / 0.2 / 0 daily tiers" info="Easy scoring per day: problems 1–3 = 1 point each; 4–7 = 0.5 each; 8–10 = 0.2 each; 11+ = 0." />
+          <Summary label="Medium" value={dsaData.summary.breakdown.Medium} note="3 / 2 / 1 / 0 daily tiers" info="Medium scoring per day: problems 1–5 = 3 points each; 6–10 = 2 each; 11–15 = 1 each; 16+ = 0." />
+          <Summary label="Hard" value={dsaData.summary.breakdown.Hard} note="5 points each" info="Hard scoring: every Hard problem gives 5 points." />
         </section>
       ) : (
         <section className="tracking-summary-grid dsa-summary-grid--practice page-reveal" aria-label="Practice weekly summary">
@@ -331,7 +331,7 @@ export default function DSA() {
             <Field label="Problem name"><input required placeholder=" " value={dsaForm.problemName} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, problemName: event.target.value }); }} /></Field>
             <Field label="Problem URL"><input required type="url" placeholder=" " value={dsaForm.problemUrl} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, problemUrl: event.target.value }); }} /></Field>
             <Field label="Solution or code URL (optional)"><input type="url" placeholder=" " value={dsaForm.solutionUrl} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, solutionUrl: event.target.value }); }} /></Field>
-            <Field label="Difficulty" raised><AnimatedSelect value={dsaForm.difficulty} onChange={(difficulty) => { setFormError(""); setDsaForm({ ...dsaForm, difficulty }); }} options={[{ value: "Easy", label: "Easy", description: "Daily tiers: 1 / 0.5 / 0.2" }, { value: "Medium", label: "Medium", description: "Daily tiers: 4 / 3 / 2" }, { value: "Hard", label: "Hard", description: "10 points" }]} /></Field>
+            <Field label="Difficulty" raised><AnimatedSelect value={dsaForm.difficulty} onChange={(difficulty) => { setFormError(""); setDsaForm({ ...dsaForm, difficulty }); }} options={[{ value: "Easy", label: "Easy", description: "Daily tiers: 1 / 0.5 / 0.2 / 0" }, { value: "Medium", label: "Medium", description: "Daily tiers: 3 / 2 / 1 / 0" }, { value: "Hard", label: "Hard", description: "5 points each" }]} /></Field>
             <Field label="Time taken (minutes)"><input required min="1" max="720" type="number" placeholder=" " value={dsaForm.timeTaken} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, timeTaken: event.target.value }); }} /></Field>
             <Field label="Time complexity"><input placeholder=" " value={dsaForm.timeComplexity} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, timeComplexity: event.target.value }); }} /></Field>
             <Field label="Space complexity"><input placeholder=" " value={dsaForm.spaceComplexity} onChange={(event) => { setFormError(""); setDsaForm({ ...dsaForm, spaceComplexity: event.target.value }); }} /></Field>
@@ -388,7 +388,7 @@ export default function DSA() {
           {activeTotal === 0 && (
             <div className="tracking-empty">
               <strong>No entries yet.</strong>
-              <span>LeetCode isn't gonna solve itself. Go grind a problem before your friends leave you in Bronze.</span>
+              <span>Start with one problem today. Consistent problem solving builds stronger algorithmic thinking over time.</span>
             </div>
           )}
         </div>
@@ -411,8 +411,22 @@ export default function DSA() {
   );
 }
 
-function Summary({ label, value, note }: { label: string; value: string | number; note: string }) {
-  return <article className="tracking-summary"><p>{label}</p><strong>{value}</strong><span>{note}</span></article>;
+function Summary({ label, value, note, info }: { label: string; value: string | number; note: string; info?: string }) {
+  return (
+    <article className="tracking-summary">
+      <div className="tracking-summary-label"><p>{label}</p>{info && <InfoTip text={info} />}</div>
+      <strong>{value}</strong><span>{note}</span>
+    </article>
+  );
+}
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="tracking-info-tip">
+      <button type="button" aria-label={text}>i</button>
+      <span role="tooltip">{text}</span>
+    </span>
+  );
 }
 
 function Field({ label, wide = false, raised = false, children }: { label: string; wide?: boolean; raised?: boolean; children: ReactElement<{ id?: string }> }) {

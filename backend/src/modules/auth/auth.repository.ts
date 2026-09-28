@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { Prisma, User } from "@prisma/client";
 import { prisma } from "../../database/prisma";
+import { getCurrentSeasonWindow } from "../../shared/config/season";
 
 export const PENDING_USERNAME_PREFIX = "__pending_";
 
@@ -91,6 +92,7 @@ export const authRepository: AuthRepository = {
 
     async upsertFirebaseUser(input: FirebaseUserUpsertInput): Promise<User> {
         const normalizedEmail = input.email.trim().toLowerCase();
+        const season = getCurrentSeasonWindow();
         const existingByUid = await prisma.user.findUnique({ where: { firebaseUid: input.firebaseUid } });
         const existingByEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
@@ -151,6 +153,8 @@ export const authRepository: AuthRepository = {
                     termsAcceptedAt: new Date(),
                     termsVersion: "2026-08-02",
                     privacyVersion: "2026-08-02",
+                    seasonStartDate: season.start,
+                    seasonNumber: season.seasonNumber,
                 },
             });
         } catch (err: unknown) {

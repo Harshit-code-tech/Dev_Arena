@@ -157,7 +157,7 @@ async function relationshipState(userId: string, otherId: string) {
 }
 
 async function createFriendRequest(senderId: string, receiverId: string) {
-  if (senderId === receiverId) throw httpError("You cannot send a player request to yourself. We know you love yourself, but find real rivals!");
+  if (senderId === receiverId) throw httpError("You cannot send a player request to your own account.");
   const block = await prisma.playerBlock.findFirst({
     where: {
       OR: [
@@ -333,7 +333,7 @@ export const friendService = {
 
     const sender = await prisma.user.findUnique({ where: { id: userId }, select: PERSON_SELECT });
     if (!sender) throw httpError("User not found.", 404);
-    if (sender.email === email) throw httpError("You can't invite yourself, bro. Go touch grass and recruit actual friends.");
+    if (sender.email === email) throw httpError("You cannot send an invitation to your own email address.");
 
     const registered = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (registered) {

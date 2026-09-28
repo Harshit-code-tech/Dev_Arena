@@ -66,7 +66,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
             <span className="sidebar-logo-primary">Dev</span>
             <span className="sidebar-logo-secondary">Arena</span>
           </NavLink>
-          <p className="sidebar-logo-caption">Where devs compete &amp; excuses die</p>
+          <p className="sidebar-logo-caption">Build consistently. Improve deliberately.</p>
 
           <nav className="sidebar-links">
             {visibleLinks.map((link) => (
@@ -87,13 +87,12 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
 
         <div className="sidebar-footer">
           <div className="sidebar-mission" aria-label="How DevArena works">
-            <span>The Daily Ritual</span>
-            <strong>Code · Run · Flex · Repeat</strong>
-            <p>Fake commits won't save you. Ship real code or get left behind.</p>
+            <span>Development Rhythm</span>
+            <strong>Build · Test · Learn · Repeat</strong>
+            <p>Make progress through meaningful code, deliberate practice, and completed work.</p>
           </div>
         </div>
       </aside>
     </>
   );
 }
-

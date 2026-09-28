@@ -231,7 +231,7 @@ export default function Projects() {
       const payload = { ...sessionForm, timeSpent: Number(sessionForm.timeSpent) };
       if (editingLogId) await trackingApi.updateProjectLog(selectedProject.id, editingLogId, payload);
       else await trackingApi.addProjectLog(selectedProject.id, payload);
-      toast.success(editingLogId ? "Work session updated." : "Work session logged for 3 points.");
+      toast.success(editingLogId ? "Work session updated." : "Work session logged. Project score recalculated (1 point per session, max 10).");
       setPanelMode(null);
       setSelectedProjectId(null);
       setEditingLogId(null);
@@ -422,7 +422,7 @@ export default function Projects() {
     }));
     const sessions = freshProjectsData.projects.flatMap((project) => project.logs.map((log) => ({
       title: `${project.title}: ${log.description}`,
-      details: [`${log.timeSpent} minutes - 3 points`, `Date and time: ${displayActivityDateTime(log.createdAt)}`, log.proofLink],
+      details: [`${log.timeSpent} minutes - 1 project point (up to 10 sessions)`, `Date and time: ${displayActivityDateTime(log.createdAt)}`, log.proofLink],
     })));
     const milestones = freshProjectsData.projects.flatMap((project) => project.milestones.map((milestone) => ({
       title: `${project.title}: ${milestone.title}`,
@@ -565,7 +565,7 @@ export default function Projects() {
             <ProjectSummary label="Active projects" value={projectsData.summary.activeProjects} note="At least one recommended" />
             <ProjectSummary label="Completed" value={projectsData.summary.completedProjects} note="Evidence-based completion value" />
             <ProjectSummary label="Work sessions" value={projectsData.summary.totalSessions} note="Capped sustained-work evidence" />
-            <ProjectSummary label="Project points" value={projectsData.summary.projectPoints} note="GitHub size + contribution + activity" />
+            <ProjectSummary label="Project points" value={projectsData.summary.projectPoints} note="GitHub size + contribution + activity" info="Verified repository: 3 or 5 points. Code size: up to 15. GitHub contribution: up to 10. Work sessions: 1 point each, max 10. Milestones: Minor 2, Major 5, Release 8, max 24. Project completion: up to 15." />
           </section>
 
           <section className="project-board page-reveal">
@@ -599,7 +599,7 @@ export default function Projects() {
                           </div>
                         )}
                       </div>
-                      <div className="project-score"><strong>{project.metrics.score}</strong><span>points</span></div>
+                      <div className="project-score"><div><strong>{project.metrics.score}</strong><span>points</span></div><InfoTip text="Verified repository: 3 or 5 points. Code size: up to 15. GitHub contribution: up to 10. Work sessions: 1 point each, max 10. Milestones: Minor 2, Major 5, Release 8, max 24. Project completion: up to 15." /></div>
                     </header>
 
                     <div className="project-metrics">
@@ -626,7 +626,7 @@ export default function Projects() {
                       <div className="project-details">
                         <div>
                           <h4>Milestones</h4>
-                          {recentMilestones.length === 0 && <p className="project-empty-copy">No milestones yet. Rome wasn't built in a day, but at least they laid bricks.</p>}
+                          {recentMilestones.length === 0 && <p className="project-empty-copy">No milestones yet. Define the next meaningful checkpoint and use it to guide project progress.</p>}
                           <div className="project-detail-scroll">
                             {recentMilestones.map((milestone) => (
                               <div className="project-detail-row" key={milestone.id}>
@@ -638,7 +638,7 @@ export default function Projects() {
                         </div>
                         <div>
                           <h4>Work Sessions</h4>
-                          {recentSessions.length === 0 && <p className="project-empty-copy">Zero work logged. Procrastination is undefeated, but you can change that.</p>}
+                          {recentSessions.length === 0 && <p className="project-empty-copy">No work sessions logged yet. Add a focused session when you make meaningful progress on this project.</p>}
                           <div className="project-detail-scroll">
                             {recentSessions.map((log) => (
                               <div className="project-detail-row" key={log.id}>
@@ -659,7 +659,7 @@ export default function Projects() {
               {projectsData.projects.length === 0 && (
                 <div className="tracking-empty">
                   <strong>No projects yet.</strong>
-                  <span>What are you even building, imaginary startups in your head? Create a repo and start committing!</span>
+                  <span>No projects yet. Create a project, connect your repository, and start building a trackable portfolio of work.</span>
                 </div>
               )}
             </div>
@@ -700,7 +700,7 @@ export default function Projects() {
               {fullstackData.logs.length === 0 && (
                 <div className="tracking-empty">
                   <strong>No fullstack entries yet.</strong>
-                  <span>Stop watching 40-hour tutorials at 2x speed without typing a single line of code. Build something!</span>
+                  <span>No fullstack entries yet. Apply what you learn through practical implementation and record the work you complete.</span>
                 </div>
               )}
             </div>
@@ -739,8 +739,22 @@ function Submit({ saving, label }: { saving: boolean; label: string }) {
   return <button className="tracking-submit" disabled={saving} type="submit">{saving ? <span className="tracking-loader" aria-label="Saving"><i /><i /><i /></span> : label}</button>;
 }
 
-function ProjectSummary({ label, value, note }: { label: string; value: string | number; note: string }) {
-  return <article className="tracking-summary"><p>{label}</p><strong>{value}</strong><span>{note}</span></article>;
+function ProjectSummary({ label, value, note, info }: { label: string; value: string | number; note: string; info?: string }) {
+  return (
+    <article className="tracking-summary">
+      <div className="tracking-summary-label"><p>{label}</p>{info && <InfoTip text={info} />}</div>
+      <strong>{value}</strong><span>{note}</span>
+    </article>
+  );
+}
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="tracking-info-tip">
+      <button type="button" aria-label={text}>i</button>
+      <span role="tooltip">{text}</span>
+    </span>
+  );
 }
 
 function Metric({ value, label }: { value: ReactNode; label: string }) {

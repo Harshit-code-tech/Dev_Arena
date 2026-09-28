@@ -1,6 +1,7 @@
 import type { Prisma, ScoreCategory } from "@prisma/client";
 import { formatDateKey, getWeekStart } from "../utils/tracking";
 import { checkAndUnlock } from "./achievement.service";
+import { getCurrentSeasonWindow } from "../config/season";
 
 const RANKS = [
     { name: "Unranked", points: 0 },
@@ -65,10 +66,11 @@ export async function rebuildUserScoreState(
 ) {
     const user = await tx.user.findUnique({
         where: { id: userId },
-        select: { seasonStartDate: true },
+        select: { id: true, seasonNumber: true },
     });
 
     if (!user) return;
+    const season = getCurrentSeasonWindow();
 
     const [events, challengeResults] = await Promise.all([
         tx.scoreEvent.findMany({
@@ -84,17 +86,17 @@ export async function rebuildUserScoreState(
     const challengeTotal = challengeResults.reduce((sum, result) => sum + result.score, 0);
     const eventTotal = events.reduce((sum, event) => sum + event.points, 0);
     const seasonEventPoints = events
-        .filter((event) => event.occurredAt >= user.seasonStartDate)
+        .filter((event) => event.occurredAt >= season.start && event.occurredAt < season.end)
         .reduce((sum, event) => sum + event.points, 0);
     const seasonChallengePoints = challengeResults
-        .filter((result) => result.weekStart >= user.seasonStartDate)
+        .filter((result) => result.weekStart >= season.start && result.weekStart < season.end)
         .reduce((sum, result) => sum + result.score, 0);
 
-    const seasonPoints = Math.max(seasonEventPoints + seasonChallengePoints, 0);
-    const arenaScore = Math.max(eventTotal + challengeTotal, 0);
+    const seasonPoints = roundTwo(Math.max(seasonEventPoints + seasonChallengePoints, 0));
+    const arenaScore = roundTwo(Math.max(eventTotal + challengeTotal, 0));
     const seasonDates = new Set(
         events
-            .filter((event) => event.occurredAt >= user.seasonStartDate)
+            .filter((event) => event.occurredAt >= season.start && event.occurredAt < season.end)
             .map((event) => formatDateKey(event.occurredAt)),
     );
     const allDates = new Set(events.map((event) => formatDateKey(event.occurredAt)));
@@ -109,6 +111,9 @@ export async function rebuildUserScoreState(
             rank,
             seasonPoints,
             streak,
+            seasonStartDate: season.start,
+            seasonNumber: season.seasonNumber,
+            ...(user.seasonNumber !== season.seasonNumber ? { seasonBonusClaimed: false } : {}),
         },
     });
 
@@ -214,16 +219,21 @@ async function rebuildWeeklyScores(
             practicePoints: week.practicePoints,
             generalPoints: week.generalPoints,
             challengePoints: week.challengePoints,
-            totalScore:
+            totalScore: roundTwo(
                 week.dsaPoints +
                 week.fullstackPoints +
                 week.projectPoints +
                 week.practicePoints +
                 week.generalPoints +
-                week.challengePoints,
+                week.challengePoints
+            ),
             activeDays: week.activeDates.size,
         })),
     });
+}
+
+function roundTwo(value: number) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 function rankForPoints(points: number) {
