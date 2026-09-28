@@ -47,7 +47,7 @@ export function optionalUrl(value: unknown, label = "Proof link") {
         }
         return url.toString();
     } catch {
-        throw new TrackingError(`${label} must be a valid http or https URL. That link doesn't look real, bro.`);
+        throw new TrackingError(`${label} must be a valid http or https URL. Please check the URL and try again.`);
     }
 }
 

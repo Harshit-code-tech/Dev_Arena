@@ -162,7 +162,7 @@ function Detail({ detail, reload }: { detail: TournamentDetail; reload: () => Pr
 
         <article className="tournament-panel page-reveal" style={{ "--reveal-order": 2 } as CSSProperties}>
           <p className="tournament-eyebrow">Registration</p>
-          <h2>{detail.registration ? "You are registered" : "Enter the arena"}</h2>
+          <h2>{detail.registration ? "You are registered" : "Register for tournament"}</h2>
           {detail.registration ? (
             <div className="tournament-registration-summary">
               <strong>{detail.registration.participationMode}</strong>
@@ -285,19 +285,19 @@ export default function Tournaments() {
 
   return <main className="tournaments-page">
     <header className="tournaments-hero page-reveal">
-      <p>Competitive developer arena</p>
+      <p>Developer competitions</p>
       <h1>Tournaments</h1>
       <span>Compete solo in DSA or build alone and in Tech Stack-matched teams with verified GitHub evidence.</span>
       <dl><div><dt>Visible now</dt><dd>{counts.total}</dd></div><div><dt>DSA</dt><dd>{counts.dsa}</dd></div><div><dt>Project</dt><dd>{counts.project}</dd></div></dl>
     </header>
     <nav className="tournament-tabs" aria-label="Tournament filters">{tabs.map((item) => <button type="button" key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
     {error && <div className="tournament-message" role="alert">{error}</div>}
-    {loading ? <section className="tournament-loading">Loading tournament arena…</section> : tab === "Leaderboard" ? (
-      globalLeaderboard.length === 0 ? <section className="tournament-empty"><p>No champions crowned yet.</p><span>Nobody has put their ego on the line. Submit your build and claim the throne!</span></section> :
+    {loading ? <section className="tournament-loading">Loading tournaments…</section> : tab === "Leaderboard" ? (
+      globalLeaderboard.length === 0 ? <section className="tournament-empty"><p>No tournament standings yet.</p><span>Standings will appear once eligible submissions are scored. Keep building and submit your best work.</span></section> :
       <section className="tournament-global-leaderboards">{globalLeaderboard.map((group) => <article className="tournament-panel" key={group.id}>
         <header><div><p>{group.type} / {group.effectiveStatus.replaceAll("_", " ")}</p><h2>{group.title}</h2></div><button type="button" className="tournament-underline-action" onClick={() => navigate(`/tournaments/${group.id}`)}>Open tournament</button></header>
         {group.rows.length === 0 ? <p>No scored submissions yet.</p> : <div className="tournament-leaderboard-list">{group.rows.map((row) => { const team = row.team || row.submission?.team; const user = row.user || row.submission?.user || undefined; return <article key={`${group.id}-${row.rank}-${user?.id || team?.id}`} className={row.isCurrentUser ? "current" : ""}><strong>#{row.rank}</strong><div><h3>{team?.name || `@${user?.username || "participant"}`}</h3><span>{user?.rank || row.participationMode || (group.leaderboardFrozen ? "Frozen standing" : "Tournament participant")}</span></div><b>{row.score.toFixed(2)} pts</b>{row.arenaPointsAwarded ? <small>+{row.arenaPointsAwarded} Arena</small> : null}</article>; })}</div>}
       </article>)}</section>
-    ) : items.length === 0 ? <section className="tournament-empty"><p>Nothing in this bracket yet.</p><span>Tournaments are brewing. Go practice before you enter the danger zone.</span></section> : <section className="tournament-card-grid">{items.map((item) => <TournamentCard key={item.id} tournament={item} open={() => navigate(`/tournaments/${item.id}`)} />)}</section>}
+    ) : items.length === 0 ? <section className="tournament-empty"><p>No tournaments in this view yet.</p><span>New tournaments will appear here when available. Continue practicing and building while you wait.</span></section> : <section className="tournament-card-grid">{items.map((item) => <TournamentCard key={item.id} tournament={item} open={() => navigate(`/tournaments/${item.id}`)} />)}</section>}
   </main>;
 }

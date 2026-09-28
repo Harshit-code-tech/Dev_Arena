@@ -56,7 +56,7 @@ export const dsaService = {
 
         const pointsById = calculateDsaPoints(logs);
         const weeklyIds = new Set(weeklyLogs.map((log) => log.id));
-        const weeklyPoints = logs.reduce((sum, log) => sum + (weeklyIds.has(log.id) ? pointsById.get(log.id) || 0 : 0), 0);
+        const weeklyPoints = Math.round((logs.reduce((sum, log) => sum + (weeklyIds.has(log.id) ? pointsById.get(log.id) || 0 : 0), 0) + Number.EPSILON) * 100) / 100;
         const breakdown = weeklyLogs.reduce(
             (result, log) => ({ ...result, [log.difficulty]: result[log.difficulty] + 1 }),
             { Easy: 0, Medium: 0, Hard: 0 },

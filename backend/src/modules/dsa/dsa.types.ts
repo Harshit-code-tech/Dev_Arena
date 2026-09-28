@@ -14,6 +14,6 @@ export type DsaLogInput = {
 
 export const DSA_BASE_POINTS: Record<Difficulty, number> = {
     Easy: 1,
-    Medium: 4,
-    Hard: 10,
+    Medium: 3,
+    Hard: 5,
 };

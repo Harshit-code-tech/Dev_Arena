@@ -3,10 +3,10 @@ import type { MilestoneSize } from "@prisma/client";
 import { rebuildUserScoreState } from "../../shared/services/scoring.service";
 import { MILESTONE_POINTS } from "./project.types";
 
-export const PROJECT_SCORE_VERSION = "project-evidence-v3";
+export const PROJECT_SCORE_VERSION = "project-evidence-v4";
 
 function roundScore(value: number) {
-  return Math.round(value * 10) / 10;
+  return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -120,7 +120,7 @@ export async function rebuildProjectScoreEvents(
       sourceId: project.id,
       label: `Verified repository evidence: ${project.title}`,
       points: roundScore(breakdown.verified + breakdown.codeSize + breakdown.contribution),
-      occurredAt: project.githubVerifiedAt || project.startDate,
+      occurredAt: project.startDate,
     },
     {
       userId,

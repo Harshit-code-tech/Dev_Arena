@@ -5,16 +5,16 @@ const INACTIVITY_HOURS = 72;
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 const THIRTY_MIN_MS = 30 * 60 * 1000;
 
-const INACTIVITY_ROASTS = [
-    "72 hours of zero code. Did your keyboard break, or did you rage quit?",
-    "Your streak is in the ICU. 3 days without activity. Revive it before it flatlines!",
-    "Hello? Anyone home? The leaderboard is moving without you, bro.",
-    "3 days MIA. Even your ghost commits have given up. Time to get back in the Arena!",
-    "Your Arena rank is bleeding points while your rivals celebrate. Wake up and code!",
+const INACTIVITY_REMINDERS = [
+    "It has been a few days since your last recorded activity. A short focused session today can restart your momentum.",
+    "Your recent activity has paused. Choose one achievable coding task and use it to begin a new consistency streak.",
+    "Ready to continue? Solve one problem, update a project, or record a learning session to move forward.",
+    "A small session is enough to get started again. Pick the next concrete development task and make progress today.",
+    "Your DevArena activity has been quiet for a few days. Return with one meaningful task and build from there.",
 ];
 
-function pickInactivityRoast(): string {
-    return INACTIVITY_ROASTS[Math.floor(Math.random() * INACTIVITY_ROASTS.length)];
+function pickInactivityReminder(): string {
+    return INACTIVITY_REMINDERS[Math.floor(Math.random() * INACTIVITY_REMINDERS.length)];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ async function runInactivityCheck() {
             data: toNotify.map((u) => ({
                 userId: u.id,
                 type: "reminder" as const,
-                message: pickInactivityRoast(),
+                message: pickInactivityReminder(),
                 link: "/dashboard",
                 entityType: "inactivity_reminder",
                 entityId: u.id,
@@ -127,13 +127,13 @@ async function runWeeklySummaryCheck() {
 
                 let summaryMessage: string;
                 if (points === 0) {
-                    summaryMessage = "Zero points this week. Absolutely criminal. Monday is reset day — wake up and choose violence.";
+                    summaryMessage = "Weekly recap: no points were recorded this week. Start the new week with one clear, achievable development goal.";
                 } else if (days >= 6) {
-                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Absolute menace! You're making your rivals sweat.`;
+                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Excellent consistency—keep the quality high next week.`;
                 } else if (days >= 4) {
-                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Solid grind. Keep this momentum into next week!`;
+                    summaryMessage = `Weekly recap: ${points} pts across ${days} active days. Strong progress—carry this steady rhythm into next week.`;
                 } else {
-                    summaryMessage = `Weekly recap: ${points} pts across ${days} active ${days === 1 ? "day" : "days"}. Squeaked by this week. Monday is your redemption arc.`;
+                    summaryMessage = `Weekly recap: ${points} pts across ${days} active ${days === 1 ? "day" : "days"}. Use the new week to build a more consistent development rhythm.`;
                 }
 
                 return {

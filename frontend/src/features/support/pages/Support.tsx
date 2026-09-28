@@ -11,32 +11,32 @@ const faqs: FaqItem[] = [
   {
     question: "How do I update my profile information?",
     answer:
-      "Head to your profile from the account menu, polish up your bio, and hit save. Just don't claim you're a 10x engineer with 20 years of Rust experience if you just learned console.log.",
+      "Open your profile from the account menu, update the information you want to share, and save your changes.",
   },
   {
     question: "How is my activity streak calculated?",
     answer:
-      "Show up every single day and log real code or problem solving. Miss a day? Your streak resets to zero. No exceptions, no mercy, no backdating to save face.",
+      "Your streak reflects consecutive days with eligible recorded activity. If a day has no qualifying activity, the streak restarts from your next active day.",
   },
   {
     question: "How can I improve the security of my account?",
     answer:
-      "Use a real password, don't use 'password123', and never ever share your OTP verification code with anyone — not even if they claim they're Linus Torvalds.",
+      "Use a strong, unique password and never share verification codes or account credentials with anyone.",
   },
   {
     question: "Why is recent activity not appearing on my dashboard?",
     answer:
-      "First, hit refresh and check your internet connection before accusing our database of theft. If you actually logged real work and it vanished, scream at us through the contact form.",
+      "Refresh the page and confirm your internet connection first. If verified activity is still missing, contact support with the activity type and approximate time it was recorded.",
   },
   {
     question: "How do I report inappropriate community activity?",
     answer:
-      "Use the report button on the offending player's profile or post. We tolerate friendly trash talk and healthy rivalries, but real toxicity gets booted out of the Arena real fast.",
+      "Use the report button on the relevant player profile or community post. Reports are reviewed for harassment, abuse, spam, and other violations of the community rules.",
   },
   {
     question: "What should I include when reporting a bug?",
     answer:
-      "Don't just say 'it's broken'. Tell us what page you were on, what you clicked, what exploded, and what browser you're using. Help us help you!",
+      "Include the page, the action you took, what you expected, what actually happened, and the browser or device you were using. Clear reproduction steps help us investigate faster.",
   },
 ];
 
@@ -56,7 +56,7 @@ function Support() {
 
     if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
       setFormStatus("error");
-      setStatusMessage("Fill in every field first! We can't read your mind (yet).");
+      setStatusMessage("Please complete every required field before submitting your message.");
       return;
     }
 
@@ -81,10 +81,10 @@ function Support() {
       setSubject("");
       setMessage("");
       setFormStatus("success");
-      setStatusMessage("Message launched into our inbox! We'll look into it before you can say 'it worked on my machine'.");
+      setStatusMessage("Message received. Our support team will review it and follow up as soon as possible.");
     } catch (error: unknown) {
       setFormStatus("error");
-      setStatusMessage(error instanceof Error ? error.message : "Something exploded on our end. Try again in a second!");
+      setStatusMessage(error instanceof Error ? error.message : "Something went wrong while sending your message. Please try again.");
     }
   };
 
@@ -92,17 +92,17 @@ function Support() {
     <main className="support-page">
       <div className="support-wrap">
         <header className="support-header">
-          <h1>Stuck? Broken code? Skill issue? We got you.</h1>
+          <h1>Need help with DevArena?</h1>
           <p>
-            Browse the FAQs below or contact the DevArena crew directly.
+            Browse common questions below or contact the DevArena support team directly.
           </p>
         </header>
 
         <div className="support-content-grid">
           <section className="support-faq-panel" aria-labelledby="faq-heading">
             <div className="support-panel-heading">
-              <span className="eyebrow">Frequently asked (and occasionally dumb) questions</span>
-              <h2 id="faq-heading">Answers to your existential questions</h2>
+              <span className="eyebrow">Frequently asked questions</span>
+              <h2 id="faq-heading">Practical answers and guidance</h2>
             </div>
 
             <div className="faq-list">
@@ -145,11 +145,11 @@ function Support() {
 
           <form className="contact-box" onSubmit={handleSubmit}>
             <div>
-              <span className="eyebrow">Direct Line</span>
-              <h2>Roast us, complain, or report bugs</h2>
-              <p>Our crew usually responds within 24 hours (or whenever we finish debugging).</p>
+              <span className="eyebrow">Contact support</span>
+              <h2>Report an issue or share feedback</h2>
+              <p>Our support team aims to respond within 24 hours.</p>
               <p>
-                Drop your bug, feature request, or rant below.
+                Send a bug report, feature request, account question, or other product feedback.
               </p>
             </div>
 
@@ -191,7 +191,7 @@ function Support() {
               <span>How can we help?</span>
               <textarea
                 maxLength={1000}
-                placeholder="Tell us what broke, who hurt you, or what feature we need to build..."
+                placeholder="Describe the issue, question, or feature request with any useful context..."
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 disabled={formStatus === "loading" || formStatus === "success"}
@@ -209,7 +209,7 @@ function Support() {
                   disabled={formStatus === "loading"}
                   aria-busy={formStatus === "loading"}
                 >
-                  {formStatus === "loading" ? "Firing message…" : "Launch message"}
+                  {formStatus === "loading" ? "Sending…" : "Send message"}
                 </button>
               )}
               {statusMessage && (

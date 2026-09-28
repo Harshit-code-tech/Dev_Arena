@@ -443,9 +443,9 @@ export default function Challenges() {
       <main className="challenges-page animated-page">
         <header className="challenges-hero page-reveal">
           <div>
-            <p>Gladiator Arena / Speed &amp; Brains</p>
+            <p>Competitive Programming / Algorithms &amp; Efficiency</p>
             <h1>Challenges</h1>
-            <span>Where algorithms fight, memory limits destroy dreams, and only the fastest survive.</span>
+            <span>Solve standardized programming tasks and improve correctness, efficiency, and problem-solving speed.</span>
           </div>
         </header>
 
@@ -470,9 +470,9 @@ export default function Challenges() {
         {tab === "competition" ? (
           <section className="challenges-empty page-reveal">
             <span className="challenges-empty-icon" aria-hidden="true"><i className="bx bx-target-lock" /></span>
-            <h2>The Arena is Quiet... Too Quiet.</h2>
+            <h2>No Active Challenge</h2>
             <p>
-              No live wars this week. Sharpen your algorithms, hydrate, and prep your fingers for the next bloodbath. Check back soon!
+              There is no active challenge right now. Use the time to practice core algorithms and prepare for the next competition.
             </p>
           </section>
         ) : (
@@ -489,7 +489,7 @@ export default function Challenges() {
     <main className="challenges-page animated-page">
       <header className="challenges-hero page-reveal">
         <div>
-          <p>Gladiator Arena / Speed &amp; Brains</p>
+          <p>Competitive Programming / Algorithms &amp; Efficiency</p>
           <h1>{competition.title}</h1>
           <span>Compete with objective, standardized tasks. Your rank is determined by correctness, efficiency, and speed.</span>
         </div>

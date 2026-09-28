@@ -4,7 +4,7 @@ import { getWeekStart, getWeekEnd } from "../../shared/utils/tracking";
 
 // ── Types ────────────────────────────────────────────────────────
 
-type CoachTone = "roast" | "motivational" | "strong";
+type CoachTone = "focus" | "motivational" | "strong";
 
 interface CoachFeedback {
     message: string;
@@ -16,49 +16,37 @@ interface CoachFeedback {
 // ── Static fallback pools ────────────────────────────────────────
 // Kept as a safety net when no AI keys are configured or both providers fail.
 
-const ROAST_MESSAGES = [
-    "3 days or fewer? Even your keyboard is disappointed. It was really looking forward to being used.",
-    "Your Arena score called. It's doing fine without you, but it misses you. Sort of.",
-    "Low activity detected. Don't worry — the algorithms are very good at waiting. They've been practicing.",
-    "At this pace, even the 'Unranked' badge is starting to feel like an achievement.",
-    "The leaderboard updated this week. You were not exactly a major plot point.",
-    "Three active days. Three! Your keyboard has more keys than that — use some of them.",
-    "The Arena is still here. Your DSA problems are still unsolved. Your heatmap has opinions.",
-    "The code isn't going to solve itself. Unfortunately, neither is your Arena score.",
-    "Your weekly activity looks suspiciously like a weekend-only subscription.",
-    "The leaderboard hasn't forgotten you. It just hasn't had much reason to mention you.",
-    "Did you take an unscheduled sabbatical, or are you just admiring your VS Code wallpaper?",
-    "Your git graph is looking like a desert. Not a single green cactus in sight.",
-    "Zero bugs found this week! Mainly because you didn't write any code, genius.",
-    "Bro, even your console.log is getting lonely. Open the editor.",
-    "If excuses gave Arena points, you'd be ranked #1 globally right now.",
-    "Procrastination is winning 3-0 against you. Stage a comeback already, bro.",
-    "Are you coding or just staring intensely at Stack Overflow hoping for telepathy?",
-    "Your streak is currently hanging on by a thread and a prayer. Fix it.",
+const FOCUS_MESSAGES = [
+    "Momentum can restart with one focused session. Choose a problem or task you can complete today.",
+    "A quieter week is a good point to reset. Pick one meaningful development goal and make visible progress on it.",
+    "Consistency grows from small, repeatable sessions. Start with the next concrete task in front of you.",
+    "Your activity is lighter this week. A short DSA session or project update is enough to move forward.",
+    "Use today to rebuild momentum: solve one problem, complete one task, or document one meaningful learning step.",
+    "Progress does not need to be dramatic. One deliberate coding session can put the week back on track.",
+    "Your dashboard is ready for the next update. Choose a focused task and turn it into recorded progress.",
+    "A consistent development habit starts with showing up. Make the next session small, specific, and achievable.",
 ];
 
 const MOTIVATIONAL_MESSAGES = [
-    "4+ active days? Okay, you're cooking. Don't burn the kitchen now.",
-    "Look at you actually following through. Your rivals are quietly stressing.",
-    "Solid week. The gap between you and the top 10 is shrinking. Keep stomping.",
-    "Consistency detected. Reluctant respect granted from the AI Coach.",
-    "You showed up when you could've binged Netflix. Respect. Keep stacking wins.",
-    "4+ days in the Arena. That's not beginner's luck, that's dangerous momentum.",
-    "Streak looking healthy, code compiling cleanly, score going up. Life is good.",
-    "You're locking in. Keep this up and your future self owes you a coffee.",
-    "Another week, another set of problems crushed. That's how we move the needle.",
-    "Not bad at all. You're actually making this coding thing look like a habit.",
+    "You are building a solid week. Keep the rhythm steady and protect time for the next focused session.",
+    "Your consistency is moving in the right direction. Keep combining practice with meaningful project work.",
+    "Good progress this week. Continue with the same deliberate pace and keep documenting what you complete.",
+    "You have built useful momentum. One more focused day can make this a strong week of development.",
+    "Your recent activity shows consistency. Keep prioritizing work that strengthens both skills and portfolio evidence.",
+    "Steady practice is becoming a habit. Keep the next task specific and measurable.",
+    "You are following through consistently. Maintain the pace without sacrificing quality or learning depth.",
+    "The week is progressing well. Keep solving, building, and reflecting on what each session teaches you.",
 ];
 
 const STRONG_MESSAGES = [
-    "6+ days active?! Are you running on caffeine, spite, or sheer willpower? You're a menace.",
-    "Six days in the Arena this week. At this rate, the server might overheat from your commits.",
-    "Touch grass? Absolutely not. You're dominating the leaderboard and nobody can stop you.",
-    "6 active days. Even the AI Coach is taking notes from you at this point.",
-    "Demon mode activated. Your friends don't stand a chance this season.",
-    "Almost a clean 7/7 week. Finish strong — make them remember who runs this Arena.",
-    "Unstoppable. The compiler fears you. The leaderboard respects you.",
-    "You're not just participating in the Arena anymore — you're setting the pace.",
+    "Excellent consistency this week. Keep the quality high and use the momentum to complete meaningful work.",
+    "You are maintaining a strong development rhythm. Protect that consistency and keep the next goal deliberate.",
+    "A highly active week is taking shape. Focus on depth as well as volume so the work continues to compound.",
+    "Your consistency is setting a strong pace. Keep balancing problem solving, project work, and sustainable focus.",
+    "You are close to a complete week of activity. Finish with one meaningful session rather than chasing volume alone.",
+    "Strong week. Keep converting consistent effort into better code, clearer thinking, and stronger project evidence.",
+    "Your activity level is excellent. Maintain the standard by choosing work that challenges and improves you.",
+    "You are setting a consistent pace. Keep building deliberately and let the results accumulate over time.",
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -68,30 +56,27 @@ function pickRandom<T>(array: T[]): T {
 }
 
 function toneFor(activeDays: number): CoachTone {
-    if (activeDays <= 3) return "roast";
+    if (activeDays <= 3) return "focus";
     if (activeDays <= 5) return "motivational";
     return "strong";
 }
 
 function toneInstruction(tone: CoachTone): string {
     switch (tone) {
-        case "roast":
+        case "focus":
             return (
-                "You are a witty, mischievous AI coach who ROASTS the player. " +
-                "Be sarcastic, funny, and humiliating — but never genuinely mean or cruel. " +
-                "Reference their actual lazy stats to make the burn sting. Troll them hard."
+                "You are a supportive developer coach helping a player rebuild momentum. " +
+                "Be calm, specific, and encouraging. Use their real activity data to suggest a practical next step without judgment."
             );
         case "motivational":
             return (
-                "You are an AI coach giving reluctant, backhanded encouragement. " +
-                "Acknowledge their solid effort but keep the tone slightly snarky and competitive. " +
-                "Make them feel good but also slightly scared of slipping."
+                "You are a developer coach reinforcing a solid week of consistent work. " +
+                "Acknowledge progress, stay practical, and encourage the player to maintain a sustainable development rhythm."
             );
         case "strong":
             return (
-                "You are an AI coach in awe of this player's insane grind. " +
-                "Hype them up dramatically — they are carrying the entire leaderboard. " +
-                "Be over the top. Express genuine terror at their dedication."
+                "You are a developer coach recognizing an excellent week of consistent activity. " +
+                "Encourage the player to maintain quality, depth, and sustainable focus while continuing to improve."
             );
     }
 }
@@ -177,7 +162,7 @@ async function buildGeminiMessage(
         `Rules:\n` +
         `- Write EXACTLY ONE punchy, specific line (max 2 sentences, max 220 characters total).\n` +
         `- Reference their actual stats — make it feel personal.\n` +
-        `- Be creative and mischievous. No generic coding advice. No hashtags.\n` +
+        `- Be specific, constructive, and developer-focused. Avoid sarcasm, insults, hype, or generic advice. No hashtags.\n` +
         `- Output ONLY the message text. No quotes, no labels, no extra formatting.`
     );
 }
@@ -255,8 +240,8 @@ export const coachService = {
 
         // ── Fallback — static pool (cache this too to avoid repeated DB hits) ─
         const pool =
-            tone === "roast"
-                ? ROAST_MESSAGES
+            tone === "focus"
+                ? FOCUS_MESSAGES
                 : tone === "motivational"
                   ? MOTIVATIONAL_MESSAGES
                   : STRONG_MESSAGES;

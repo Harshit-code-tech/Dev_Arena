@@ -685,7 +685,7 @@ export const challengeService = {
 
         try {
             const prompt =
-                `You are a mischievous but helpful coding coach for a competitive programming platform called DevArena.\n\n` +
+                `You are a concise, supportive coding coach for a competitive programming platform called DevArena.\n\n` +
                 `The user is stuck on this problem:\n` +
                 `Title: ${task.title}\n` +
                 `Description: ${task.description}\n` +
@@ -696,7 +696,7 @@ export const challengeService = {
                 `- Give ONE progressive algorithmic hint. Max 2 sentences.\n` +
                 `- Do NOT give the solution, code, or the exact algorithm name outright.\n` +
                 `- Point them toward the right approach without spoiling it.\n` +
-                `- Be slightly taunting and mischievous — this is a competitive arena.\n` +
+                `- Keep the tone constructive, technical, and encouraging. Do not mock or pressure the developer.\n` +
                 `- Output ONLY the hint text. No labels, no quotes, no extra formatting.`;
 
             const text = await callAI(prompt, { maxTokens: 160, temperature: 0.88 });

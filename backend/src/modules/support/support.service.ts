@@ -69,22 +69,22 @@ export const supportService = {
         const message = String(input.message || "").trim();
 
         // ── Input validation ──────────────────────────────────────────────
-        if (name.length < 2) throw supportError("Name must be at least 2 characters. Even 'Al' or 'Ed' works!");
-        if (name.length > 100) throw supportError("Whoa, that name is longer than a Java class name. Keep it under 100 characters.");
-        if (!EMAIL_PATTERN.test(email)) throw supportError("Give us a real email so we don't send replies into the void.");
+        if (name.length < 2) throw supportError("Name must be at least 2 characters.");
+        if (name.length > 100) throw supportError("Name must be under 100 characters.");
+        if (!EMAIL_PATTERN.test(email)) throw supportError("Enter a valid email address so the support team can reply.");
         if (subject.length < 3) throw supportError("Add a subject (at least 3 characters) so we know what you're asking about.");
-        if (subject.length > 150) throw supportError("Subject too long — keep it under 150 characters.");
-        if (message.length < 10) throw supportError("Message too short! Give us at least 10 characters to explain what broke.");
-        if (message.length > 1000) throw supportError("Whoa, essay writer! Keep it under 1000 characters.");
+        if (subject.length > 150) throw supportError("Subject must be under 150 characters.");
+        if (message.length < 10) throw supportError("Please provide at least 10 characters so the support team has enough context to help.");
+        if (message.length > 1000) throw supportError("Message must be under 1000 characters.");
 
         // ── Spam & disposable email checks ───────────────────────────────
         if (isDisposableEmail(email)) {
-            throw supportError("Disposable / temporary email addresses are not accepted. Use a real email so we can reply.");
+            throw supportError("Disposable or temporary email addresses are not accepted. Use an address where the support team can reply.");
         }
 
         if (!checkEmailRateLimit(email)) {
             throw supportError(
-                `You've sent ${MAX_PER_EMAIL} messages in the last 6 hours from this email address. Give us a chance to respond!`,
+                `You have reached the support message limit for this email address. Please try again after the 6-hour window.`,
                 429,
             );
         }

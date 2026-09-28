@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import "../styles/TypingLines.css";
 
 const lines = [
-    "Stop procrastinating.",
+    "Build with purpose.",
     "Ship real code.",
-    "Compete with your friends.",
-    "Git commit or it didn't happen.",
-    "Solve problems, stack points.",
-    "No excuses. Just builds.",
+    "Grow alongside other developers.",
+    "Turn ideas into working software.",
+    "Solve problems. Track progress.",
+    "Practice consistently. Build confidently.",
 ]
 
 function TypingLines() {

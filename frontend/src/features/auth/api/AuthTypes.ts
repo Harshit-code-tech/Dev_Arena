@@ -137,7 +137,7 @@ export type AppUser = FirebaseUser | BackendAuthUser;
 export interface AuthContextValue {
   user: AppUser | null;
   loading: boolean;
-  loginWithToken: (token: string) => Promise<void>;
+  loginWithToken: (token: string, remember?: boolean) => Promise<void>;
   refreshUser: () => Promise<void>;
   logout: () => void;
 }

@@ -8,6 +8,7 @@ export type StoredAuthOtpChallenge = {
   tempToken: string;
   email: string;
   resendAfterSeconds: number;
+  remember?: boolean;
 };
 
 type StoredAuthOtpPayload = {
@@ -15,6 +16,7 @@ type StoredAuthOtpPayload = {
   email: string;
   resendAvailableAt: number;
   expiresAt: number;
+  remember?: boolean;
 };
 
 function otpStorageKey(purpose: AuthOtpPurpose) {
@@ -31,6 +33,7 @@ export function storePendingAuthOtp(
     email: challenge.email,
     resendAvailableAt: now + Math.max(0, challenge.resendAfterSeconds) * 1000,
     expiresAt: now + OTP_SESSION_MAX_AGE_MS,
+    remember: challenge.remember,
   };
   localStorage.setItem(otpStorageKey(purpose), JSON.stringify(payload));
 }
@@ -62,6 +65,7 @@ export function getPendingAuthOtp(purpose: AuthOtpPurpose): StoredAuthOtpChallen
       tempToken: payload.tempToken,
       email: payload.email,
       resendAfterSeconds: Math.max(0, Math.ceil((resendAvailableAt - Date.now()) / 1000)),
+      remember: payload.remember,
     };
   } catch {
     localStorage.removeItem(key);

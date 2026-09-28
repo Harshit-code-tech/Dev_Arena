@@ -36,8 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithToken = async (token: string) => {
-    storeAuthToken(token);
+  const loginWithToken = async (token: string, remember = true) => {
+    storeAuthToken(token, remember);
     await fetchUserFromBackend(token);
   };
 

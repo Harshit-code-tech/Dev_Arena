@@ -47,7 +47,10 @@ function Dashboard() {
 
     return () => {
       isMounted = false;
-      window.removeEventListener("devarena:activity-updated", handleActivityUpdate);
+      window.removeEventListener(
+        "devarena:activity-updated",
+        handleActivityUpdate,
+      );
     };
   }, [user]);
 
@@ -74,15 +77,18 @@ function Dashboard() {
     <main className="dashboard">
       <section className="dashboard-hero">
         <div>
-          <p className="dashboard-label">The Developer Arena · Where Code Talks &amp; Excuses Die</p>
+          <p className="dashboard-label">
+            The Developer Arena · Build · Practice · Improve
+          </p>
           <h1 className="dashboard-welcome-title">
             <span className="dashboard-welcome-copy">Welcome back,</span>
             <span className="dashboard-welcome-name">{userName}</span>
           </h1>
-          <p className="dashboard-subtitle">Touch code, stack points, humiliate your friends.</p>
+          <p className="dashboard-subtitle">
+            Track meaningful work, build consistency, and measure your progress.
+          </p>
         </div>
       </section>
-
 
       <div className="dashboard-overview-row">
         <section
@@ -90,18 +96,40 @@ function Dashboard() {
           aria-label="Developer overview"
         >
           <article className="dashboard-summary-line">
-            <div><span>Arena Score</span><b aria-hidden="true">:</b><strong data-private-value="true">{arenaScore}</strong></div>
-            <p><i aria-hidden="true">←</i> Weighted activity points</p>
+            <div>
+              <span>Arena Score</span>
+              <b aria-hidden="true">:</b>
+              <strong data-private-value="true">{arenaScore}</strong>
+            </div>
+            <p>
+              <i aria-hidden="true">←</i> Weighted activity points
+            </p>
           </article>
 
           <article className="dashboard-summary-line">
-            <div><span>Season Points</span><b aria-hidden="true">:</b><strong data-private-value="true">{seasonPoints}</strong></div>
-            <p><i aria-hidden="true">←</i> {activeDays} Active {activeDays === 1 ? "Day" : "Days"}</p>
+            <div>
+              <span>Season Points</span>
+              <b aria-hidden="true">:</b>
+              <strong data-private-value="true">{seasonPoints}</strong>
+            </div>
+            <p>
+              <i aria-hidden="true">←</i> {activeDays} Active{" "}
+              {activeDays === 1 ? "Day" : "Days"}
+            </p>
           </article>
 
           <article className="dashboard-summary-line">
-            <div><span>Current Streak</span><b aria-hidden="true">:</b><strong data-private-value="true">{streak} {streak === 1 ? "Day" : "Days"}</strong></div>
-            <p><i aria-hidden="true">←</i> {streak === 0 ? "Zero streak." : "On fire"}</p>
+            <div>
+              <span>Current Streak</span>
+              <b aria-hidden="true">:</b>
+              <strong data-private-value="true">
+                {streak} {streak === 1 ? "Day" : "Days"}
+              </strong>
+            </div>
+            <p>
+              <i aria-hidden="true">←</i>{" "}
+              {streak === 0 ? "Start your streak today" : "Consistency in progress"}
+            </p>
           </article>
         </section>
 
@@ -115,7 +143,8 @@ function Dashboard() {
               <RankBadge rank={rank} size="large" />
             </h2>
             <p className="dashboard-rank-copy" data-private-value="true">
-              {seasonPoints} SP <span aria-hidden="true">•</span> {remainingPoints} Remaining
+              {seasonPoints} SP <span aria-hidden="true">•</span>{" "}
+              {remainingPoints} Remaining
             </p>
             <div className="dashboard-next-rank">
               <i className="bx bx-right-arrow-alt" aria-hidden="true" />
@@ -126,7 +155,9 @@ function Dashboard() {
           <article className="dashboard-season-panel">
             <p className="dashboard-stat-label">Season Status</p>
             <h2>Season #{seasonNumber}</h2>
-            <p className="dashboard-season-copy">Ends in {daysRemaining} Days</p>
+            <p className="dashboard-season-copy">
+              Ends in {daysRemaining} Days
+            </p>
           </article>
         </section>
       </div>
@@ -153,7 +184,10 @@ function Dashboard() {
               ))}
             </div>
 
-            <div className="heatmap-dashboard-inside" aria-label="Developer contribution heatmap">
+            <div
+              className="heatmap-dashboard-inside"
+              aria-label="Developer contribution heatmap"
+            >
               {heatmap.map((cell) => (
                 <button
                   type="button"
@@ -180,7 +214,10 @@ function Dashboard() {
           </div>
         </div>
 
-        <aside className="dashboard-leaderboard-pane" aria-labelledby="leaderboard-preview-title">
+        <aside
+          className="dashboard-leaderboard-pane"
+          aria-labelledby="leaderboard-preview-title"
+        >
           <div className="card-header dashboard-leaderboard-header">
             <div>
               <p className="dashboard-stat-label">Arena standings</p>
@@ -203,16 +240,23 @@ function Dashboard() {
                 key={entry.id}
               >
                 <span>#{entry.position}</span>
-                <span>{entry.isCurrentUser ? `${entry.name} · You` : entry.name}</span>
-                <span data-private-value="true">{entry.competitionScore}</span>
+                <span>
+                  {entry.isCurrentUser ? `${entry.name} · You` : entry.name}
+                </span>
+                <span data-private-value="true">{entry.seasonPoints}</span>
               </div>
             ))}
 
             {leaderboardPreview.length === 0 && (
               <div className="leaderboard-empty">
-                <span className="leaderboard-empty-mark" aria-hidden="true">#</span>
+                <span className="leaderboard-empty-mark" aria-hidden="true">
+                  #
+                </span>
                 <strong>No leaderboard activity yet</strong>
-                <span>Log verified activity to earn points and appear in the current standings.</span>
+                <span>
+                  Log verified activity to earn points and appear in the current
+                  standings.
+                </span>
               </div>
             )}
           </div>

@@ -155,7 +155,7 @@ export const projectService = {
         const projects = await prisma.project.findMany({
             where: { userId },
             include: projectInclude,
-            orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+            orderBy: [{ createdAt: "desc" }],
         });
 
         const enriched = projects.map(withProgress);
@@ -166,7 +166,7 @@ export const projectService = {
                 activeProjects: projects.filter((project) => project.status === ProjectStatus.In_Progress).length,
                 completedProjects: projects.filter((project) => project.status === ProjectStatus.Completed).length,
                 totalSessions: projects.reduce((sum, project) => sum + project.logs.length, 0),
-                projectPoints: enriched.reduce((sum, project) => sum + project.metrics.score, 0),
+                projectPoints: Math.round((enriched.reduce((sum, project) => sum + project.metrics.score, 0) + Number.EPSILON) * 100) / 100,
             },
         };
     },

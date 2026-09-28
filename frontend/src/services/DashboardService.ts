@@ -5,7 +5,7 @@ import {
 } from "../features/dashboard/utils/RankSystem";
 import { getStoredAuthToken } from "../features/auth/api/AuthStorageService";
 import {
-  getNearbyLeaderboard,
+  getLeaderboard,
   type LeaderboardEntry,
 } from "./LeaderboardService";
 import { HEATMAP_PAST_WEEKS, SEASON_LENGTH_DAYS } from "./DashboardConstants";
@@ -45,11 +45,6 @@ type BackendDashboardResponse = {
   logs: BackendDashboardLog[];
 };
 
-type DashboardUpdatePayload = {
-  resetSeason?: boolean;
-  seasonBonusClaimed?: boolean;
-  weeklyBonusClaimed?: boolean;
-};
 
 export type DashboardLog = {
   createdAt: Date;
@@ -82,13 +77,12 @@ export type DashboardViewModel = {
 
 export async function getDashboardViewModel(): Promise<DashboardViewModel> {
   const token = getRequiredDashboardAuthToken();
-  const [response, nearby] = await Promise.all([
+  const [response, leaderboard] = await Promise.all([
     fetchDashboardData(token),
-    getNearbyLeaderboard().catch(() => ({ currentPosition: 0, entries: [] })),
+    getLeaderboard(3).catch(() => ({ totalDevelopers: 0, currentUser: null, topPerformers: [] })),
   ]);
-  const viewModel = buildDashboardViewModel(response, nearby.entries);
+  const viewModel = buildDashboardViewModel(response, leaderboard.topPerformers);
 
-  syncExpiredSeasonIfNeeded(token, response.stats, viewModel);
   return viewModel;
 }
 
@@ -103,21 +97,6 @@ async function fetchDashboardData(
   return response.json();
 }
 
-async function updateDashboardStats(
-  token: string,
-  payload: DashboardUpdatePayload,
-) {
-  const response = await fetch("/api/dashboard/me", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) throw new Error("Failed to update dashboard");
-}
 
 function buildDashboardViewModel(
   response: BackendDashboardResponse,
@@ -170,8 +149,9 @@ function calculateDaysRemaining(
   if (!seasonStartDate) return SEASON_LENGTH_DAYS;
   const start = new Date(seasonStartDate);
   if (Number.isNaN(start.getTime())) return SEASON_LENGTH_DAYS;
-  const elapsed = Math.floor((Date.now() - start.getTime()) / MS_PER_DAY);
-  return Math.max(SEASON_LENGTH_DAYS - elapsed, 0);
+  const end = start.getTime() + SEASON_LENGTH_DAYS * MS_PER_DAY;
+  const remaining = Math.ceil((end - Date.now()) / MS_PER_DAY);
+  return Math.min(SEASON_LENGTH_DAYS, Math.max(remaining, 0));
 }
 
 function buildHeatmap(logs: DashboardLog[]) {
@@ -191,20 +171,9 @@ function findMostActiveDate(logs: DashboardLog[]) {
   );
 }
 
-function syncExpiredSeasonIfNeeded(
-  token: string,
-  stats: BackendDashboardStats,
-  viewModel: DashboardViewModel,
-) {
-  if (viewModel.daysRemaining > 0 || !stats.seasonStartDate) return;
-
-  void updateDashboardStats(token, {
-    resetSeason: true,
-    seasonBonusClaimed: false,
-    weeklyBonusClaimed: false,
-  }).catch(console.error);
-}
 
 function normalizeNumber(value: number | null | undefined, fallback: number) {
-  return typeof value === "number" ? value : fallback;
+  return typeof value === "number"
+    ? Math.round((value + Number.EPSILON) * 100) / 100
+    : fallback;
 }
