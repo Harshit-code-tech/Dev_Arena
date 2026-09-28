@@ -449,6 +449,8 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  position: relative;
+  z-index: 5;
 }
 
 .project-score > div {
@@ -459,4 +461,23 @@
 
 .project-score .tracking-info-tip {
   margin-top: 2px;
+}
+
+/* Project cards live inside a vertically scrollable list. The shared tooltip
+   normally opens upward, which lets the first card's copy get clipped by that
+   scroll viewport. Open project-card score tooltips downward and right-aligned
+   so the complete explanation is visible from its first line. */
+.project-score .tracking-info-tip > span[role="tooltip"] {
+  z-index: 200;
+  top: calc(100% + 9px);
+  right: 0;
+  bottom: auto;
+  left: auto;
+  width: min(360px, 72vw);
+  transform: translateY(-4px);
+}
+
+.project-score .tracking-info-tip:hover > span[role="tooltip"],
+.project-score .tracking-info-tip:focus-within > span[role="tooltip"] {
+  transform: translateY(0);
 }

@@ -564,7 +564,7 @@ html body #root .app-layout .route-stage > main.dashboard > * {
 
 .dashboard-summary-line strong {
   color: #fff;
-  font-size: clamp(24px, 2vw, 33px);
+  font-size: 25px;
   line-height: 1;
   letter-spacing: -.025em;
   text-transform: uppercase;

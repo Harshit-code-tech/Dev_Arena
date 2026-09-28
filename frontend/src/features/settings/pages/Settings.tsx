@@ -43,7 +43,6 @@ const preferenceGroups: Array<{
     title: "User preferences",
     items: [
       { key: "activityReminders", title: "Activity reminders", copy: "Keep gentle nudges visible when your weekly developer activity slows down." },
-      { key: "privacyMode", title: "Privacy mode", copy: "Hide scores and activity totals when sharing your screen." },
       { key: "compactWorkspace", title: "Compact workspace", copy: "Prefer denser cards, tighter lists, and reduced spacing across tracking pages." },
     ],
   },

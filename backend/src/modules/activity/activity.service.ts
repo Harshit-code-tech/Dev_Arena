@@ -31,7 +31,7 @@ export const activityService = {
   async getDay(userId: string, dateKey: string, timezoneOffsetMinutes: number): Promise<DayActivityResponse> {
     const { start, end } = dayBounds(dateKey, timezoneOffsetMinutes);
 
-    const [scoreEvents, dsa, practice, fullstack, projectWork, milestones, completedProjects, challenges] = await Promise.all([
+    const [scoreEvents, dsa, practice, fullstack, projectWork, milestones, projects, challenges] = await Promise.all([
       prisma.scoreEvent.findMany({
         where: { userId, occurredAt: between(start, end) },
         orderBy: { occurredAt: "desc" },
@@ -62,8 +62,11 @@ export const activityService = {
         orderBy: { completionAwardedAt: "desc" },
       }),
       prisma.project.findMany({
-        where: { userId, completionAwardedAt: between(start, end) },
-        orderBy: { completionAwardedAt: "desc" },
+        // The daily archive is an insertion history: a project belongs to the
+        // day it was added to DevArena, regardless of when it is completed or
+        // later refreshed from GitHub.
+        where: { userId, createdAt: between(start, end) },
+        orderBy: { createdAt: "desc" },
       }),
       prisma.challengeResult.findMany({
         where: { userId, weekStart: between(start, end) },
@@ -147,14 +150,15 @@ export const activityService = {
         })),
       },
       {
-        key: "projectCompletions",
-        title: "Project Completions",
-        items: completedProjects.map((item) => ({
+        key: "projects",
+        title: "Projects",
+        items: projects.map((item) => ({
           id: item.id,
           title: item.title,
           description: item.description,
-          metadata: [item.domain, "Project completed"],
-          occurredAt: item.completionAwardedAt || item.updatedAt,
+          metadata: [item.domain, "Project added"],
+          occurredAt: item.createdAt,
+          link: item.githubRepositoryUrl,
         })),
       },
       {

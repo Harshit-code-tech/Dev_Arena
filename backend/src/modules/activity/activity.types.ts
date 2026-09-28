@@ -16,7 +16,7 @@ export type DayActivitySection = {
     | "fullstack"
     | "projectWork"
     | "milestones"
-    | "projectCompletions"
+    | "projects"
     | "challenges";
   title: string;
   items: DayActivityItem[];
