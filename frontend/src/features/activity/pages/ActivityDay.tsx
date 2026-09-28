@@ -62,7 +62,9 @@ export default function ActivityDay() {
       subtitle: `${activity.totalActivities} activities, ${activity.totalPoints} points, ${activity.sections.filter((section) => section.items.length > 0).length} active categories.`,
       sections: activity.sections.map((section) => ({
         title: section.title,
-        rows: section.items.slice(0, 10).map((item) => ({
+        // Project insertion history must be complete in the day export. Other
+        // evidence groups keep their existing compact latest-ten behaviour.
+        rows: (section.key === "projects" ? section.items : section.items.slice(0, 10)).map((item) => ({
           title: item.title,
           details: [item.description, ...item.metadata, section.key === "challenges" ? `Week: ${new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.occurredAt))}` : `Time: ${displayActivityDateTime(item.occurredAt)}`, item.link],
         })),
@@ -118,7 +120,7 @@ export default function ActivityDay() {
           <section className="activity-day-section page-reveal" style={{ "--reveal-order": index + 2 } as CSSProperties} key={section.key}>
             <header>
               <div><p>{String(index + 1).padStart(2, "0")} / Evidence group</p><h2>{section.title}</h2></div>
-              <span>Latest {Math.min(section.items.length, 10)} / {section.items.length}</span>
+              <span>{section.key === "projects" ? `All ${section.items.length}` : `Latest ${Math.min(section.items.length, 10)} / ${section.items.length}`}</span>
             </header>
 
             {section.items.length === 0 ? (
@@ -128,7 +130,7 @@ export default function ActivityDay() {
               </div>
             ) : (
               <div className="activity-day-list">
-                {section.items.slice(0, 10).map((item) => (
+                {(section.key === "projects" ? section.items : section.items.slice(0, 10)).map((item) => (
                   <article key={item.id}>
                     <div className="activity-day-item-copy">
                       <h3>{item.title}</h3>

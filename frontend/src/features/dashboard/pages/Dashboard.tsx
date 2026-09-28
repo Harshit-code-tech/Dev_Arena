@@ -102,7 +102,7 @@ function Dashboard() {
               <strong data-private-value="true">{arenaScore}</strong>
             </div>
             <p>
-              <i aria-hidden="true">←</i> Weighted activity points
+              <i aria-hidden="true">←</i> Activity points
             </p>
           </article>
 
@@ -128,7 +128,7 @@ function Dashboard() {
             </div>
             <p>
               <i aria-hidden="true">←</i>{" "}
-              {streak === 0 ? "Start your streak today" : "Consistency in progress"}
+              {streak === 0 ? "Start today" : "In progress"}
             </p>
           </article>
         </section>

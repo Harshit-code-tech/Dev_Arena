@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../config/Firebase";
 import {
   clearStoredAuthToken,
   getStoredAuthToken,
@@ -10,8 +8,7 @@ import {
   getCurrentBackendUser,
   signOutFirebaseUser,
 } from "../api/AuthSessionService";
-import { syncFirebaseUser } from "../api/FirebaseUserSyncService";
-import type { AppUser, AuthContextValue, FirebaseAuthProvider } from "../api/AuthTypes";
+import type { AppUser, AuthContextValue } from "../api/AuthTypes";
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
@@ -32,6 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch user from backend:", error);
       clearStoredAuthToken();
+      // Keep Firebase and DevArena auth in the same state when a stored DevArena
+      // token is invalid/expired. This prevents a stale Firebase identity from
+      // silently restoring a session on a later page load.
+      void signOutFirebaseUser().catch(() => undefined);
       setUser(null);
     }
   };
@@ -43,12 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     const token = getStoredAuthToken();
-    if (token) await fetchUserFromBackend(token);
+    if (token) {
+      await fetchUserFromBackend(token);
+    } else {
+      setUser(null);
+    }
   };
 
   const logout = () => {
     clearStoredAuthToken();
-    signOutFirebaseUser();
+    void signOutFirebaseUser().catch(() => undefined);
     setUser(null);
   };
 
@@ -57,43 +62,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("devarena:profile-updated", handleProfileUpdate);
 
     const token = getStoredAuthToken();
-    let unsubscribe: (() => void) | undefined;
 
+    // A DevArena token is deliberately the only thing that restores an app
+    // session. Firebase may still have an identity while an OTP/signup flow is
+    // in progress, but it must never create a new DevArena session by itself.
+    // This is what makes Remember me=false truly tab/session scoped.
     if (token) {
-      fetchUserFromBackend(token).finally(() => setLoading(false));
+      void fetchUserFromBackend(token).finally(() => setLoading(false));
     } else {
-      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        if (!currentUser) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        void (async () => {
-          try {
-            const tokenResult = await currentUser.getIdTokenResult();
-            const providerId = tokenResult.signInProvider;
-            const provider: FirebaseAuthProvider = providerId === "google.com"
-              ? "google"
-              : providerId === "github.com"
-                ? "github"
-                : "password";
-            const synced = await syncFirebaseUser(currentUser, provider, false, { remember: true });
-            if (!synced.token) throw new Error("DevArena session could not be restored.");
-            await loginWithToken(synced.token);
-          } catch (error) {
-            console.warn("Firebase session exists but DevArena session could not be restored:", error);
-            setUser(null);
-          } finally {
-            setLoading(false);
-          }
-        })();
-      });
+      setUser(null);
+      setLoading(false);
     }
 
     return () => {
       window.removeEventListener("devarena:profile-updated", handleProfileUpdate);
-      unsubscribe?.();
     };
   }, []);
 
